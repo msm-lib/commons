@@ -1,0 +1,16 @@
+<configuration>
+
+    <logger name="org.hibernate" level="WARN"/>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+    <encoder>
+      <pattern>
+          %d{dd-MM-yyyy HH:mm:ss.SSS} %magenta([%thread]) [%highlight(%-5level)] %yellow(%logger{40}.%M\(%class{0}.java:%line\)) - %msg%throwable%n
+      </pattern>
+    </encoder>
+    </appender>
+
+    <root level="DEBUG">
+    <appender-ref ref="STDOUT"/>
+    </root>
+</configuration>
