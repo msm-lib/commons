@@ -49,7 +49,7 @@ dependencies {
     testCompileOnly("org.projectlombok:lombok:$lombokVersion")
     testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
-    implementation("org.slf4j:slf4j-simple:1.7.36")
+//    implementation("org.slf4j:slf4j-simple:1.7.36")
 //	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     implementation("org.apache.commons:commons-collections4:4.5.0")
 }
