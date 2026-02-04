@@ -259,6 +259,10 @@ public final class Utils {
             return new String(newCodePoints, 0, outOffset);
         }
 
+        public String toCamelCaseUnderscore(String str) {
+            return toCamelCase(str, false, '_');
+        }
+
         private StringUtils() {
         }
     }
