@@ -6,8 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import com.querydsl.core.util.ArrayUtils;
-
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
