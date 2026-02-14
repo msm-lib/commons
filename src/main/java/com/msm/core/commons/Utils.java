@@ -1,4 +1,4 @@
-package com.msm.commons;
+package com.msm.core.commons;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -6,7 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.apache.commons.lang3.ArrayUtils;
+import com.querydsl.core.util.ArrayUtils;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
@@ -33,6 +33,21 @@ public final class Utils {
     public static final NumberUtils NUMBER = new NumberUtils();
     public static final DateUtils DATES = new DateUtils();
     public static final CollectionUtils CL = new CollectionUtils();
+
+    public static <T> T convertObject(Object object, Class<T> clazz) {
+        if (Objects.isNull(object)) {
+            return null;
+        }
+
+        return MAPPER.convertValue(object,clazz);
+    }
+
+    public static <T> T toObject(Map<String, Object> attributeMap, Class<T> clazz) {
+        if (Objects.isNull(attributeMap)) {
+            return null;
+        }
+        return MAPPER.convertValue(attributeMap, clazz);
+    }
 
     public static <K, V> Map<K, V> toMap(Object object) throws JsonProcessingException {
         if (Objects.isNull(object)) {
@@ -118,7 +133,7 @@ public final class Utils {
         }
 
         public String replace(final String input, final String replacement, final String target) {
-            if(isBlank(input)) {
+            if (isBlank(input)) {
                 return input;
             }
 
@@ -173,15 +188,6 @@ public final class Utils {
             return MessageFormat.format(message, msgArgs);
         }
 
-        /**
-         * Get free text for input value
-         * If input is blank then return null
-         * If input not blank then return the input value
-         * @see #isBlank
-         * @see <a href="https://msm-software.atlassian.net/wiki/spaces/MKP/pages/217022496/Validation+d+li+u#2.1.-Free-text---Chu%E1%BB%97i-k%C3%BD-t%E1%BB%B1-ng%E1%BA%AFn">Document free text</a>
-         * @param input the value of free text
-         * @return Value free text
-         */
         public String freeText(final String input) {
             Pattern pattern = Pattern.compile("\\s+");
             return Utils.STR.isBlank(input) ? null : pattern.matcher(input.trim().toLowerCase()).replaceAll(" ");
@@ -219,7 +225,7 @@ public final class Utils {
         private Set<Integer> toDelimiterSet(final char[] delimiters) {
             final Set<Integer> delimiterHashSet = new HashSet<>();
             delimiterHashSet.add(Character.codePointAt(new char[]{' '}, 0));
-            if (ArrayUtils.isEmpty(delimiters)) {
+            if (Utils.CL.isEmpty(delimiters)) {
                 return delimiterHashSet;
             }
 
@@ -230,7 +236,7 @@ public final class Utils {
         }
 
         public String toCamelCase(String str, final boolean capitalizeFirstLetter, final char... delimiters) {
-            if (org.apache.commons.lang3.StringUtils.isEmpty(str)) {
+            if (isEmpty(str)) {
                 return str;
             }
             str = str.toLowerCase();
@@ -239,7 +245,7 @@ public final class Utils {
             int outOffset = 0;
             final Set<Integer> delimiterSet = toDelimiterSet(delimiters);
             boolean capitalizeNext = capitalizeFirstLetter;
-            for (int index = 0; index < strLen;) {
+            for (int index = 0; index < strLen; ) {
                 final int codePoint = str.codePointAt(index);
 
                 if (delimiterSet.contains(codePoint)) {
@@ -270,6 +276,7 @@ public final class Utils {
     public static final class NumberUtils {
         private static final String DEFAULT_FORMAT_PATTERN = "#,###";
         private static final DecimalFormatSymbols DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols(Locale.getDefault());
+
         public String format(BigDecimal input, String pattern) {
             DECIMAL_FORMAT_SYMBOLS.setDecimalSeparator(',');  // Not needed in this case since we don't want decimals
             DECIMAL_FORMAT_SYMBOLS.setGroupingSeparator('.');
@@ -284,7 +291,8 @@ public final class Utils {
             return format(input, DEFAULT_FORMAT_PATTERN);
         }
 
-        private NumberUtils() {}
+        private NumberUtils() {
+        }
     }
 
     public static final class CollectionUtils {
@@ -312,7 +320,7 @@ public final class Utils {
 
         @SafeVarargs
         public final <T> Set<T> newHashSet(final T... elements) {
-            if(Objects.isNull(elements)) {
+            if (Objects.isNull(elements)) {
                 return Collections.emptySet();
             }
             Set<T> returnSet = new HashSet<>(elements.length);
@@ -331,7 +339,9 @@ public final class Utils {
         public boolean isNotEmpty(Collection<?> input) {
             return !isEmpty(input);
         }
-
+        public boolean isEmpty(char[] array) {
+            return array == null || array.length == 0;
+        }
         public <K, V> boolean isEmpty(Map<K, V> input) {
             return Objects.isNull(input) || input.isEmpty();
         }
@@ -345,7 +355,8 @@ public final class Utils {
             return isEmpty(input) ? defaultSupplier.get() : input;
         }
 
-        private CollectionUtils() {}
+        private CollectionUtils() {
+        }
     }
 
     public static final class DateUtils {
@@ -365,7 +376,8 @@ public final class Utils {
             return (diffTime <= 0);
         }
 
-        private DateUtils() {}
+        private DateUtils() {
+        }
     }
 
     private Utils() {
