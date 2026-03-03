@@ -1,6 +1,6 @@
 package com.msm.core.filter.domain;
 
-import com.msm.core.filter.domain.pageable.Pagination;
+import com.msm.core.filter.domain.pageable.PageRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -17,13 +17,13 @@ public class PagedResponse<T> {
     private List<T> records;
 
     private Map<String, Object> aggregate;
-    private Pagination pagination;
+    private PageRequest pageRequest;
 
     public static <T> PagedResponse<T> of(List<T> records, long totalElements, int currentPage, int pageSize) {
         return PagedResponse
                 .<T>builder()
                 .records(records)
-                .pagination(Pagination.of(totalElements, currentPage, pageSize))
+                .pageRequest(PageRequest.of(totalElements, currentPage, pageSize))
                 .build();
     }
 }

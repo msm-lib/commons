@@ -3,7 +3,7 @@ package com.msm.core.filter;
 import com.msm.core.commons.Utils;
 import com.msm.core.filter.domain.JoinKey;
 import com.msm.core.filter.domain.ReferenceJoinMetadata;
-import com.msm.core.filter.domain.pageable.Pagination;
+import com.msm.core.filter.domain.pageable.PageRequest;
 import com.msm.core.filter.join.ReferenceJoinCache;
 import com.msm.core.filter.join.ReferenceJoinMetadataRegistry;
 import com.msm.core.filter.join.ReferenceJoinResolver;
@@ -25,19 +25,19 @@ public class JPAQueryBuilder<T> {
     private Predicate predicate;
     private ReferenceJoinResolver joinResolver;
     private List<Expression<?>> selectExpr;
-    private Pagination pagination;
+    private PageRequest pageRequest;
 
-    public JPAQueryBuilder(JPAQueryFactory queryFactory, PathBuilder<?> root, Predicate predicate, ReferenceJoinResolver joinResolver, List<Expression<?>> selectExpr, Pagination pagination) {
+    public JPAQueryBuilder(JPAQueryFactory queryFactory, PathBuilder<?> root, Predicate predicate, ReferenceJoinResolver joinResolver, List<Expression<?>> selectExpr, PageRequest pageRequest) {
         this.queryFactory = queryFactory;
         this.root = root;
         this.predicate = predicate;
         this.joinResolver = joinResolver;
         this.selectExpr = selectExpr;
-        this.pagination = pagination;
+        this.pageRequest = pageRequest;
     }
 
-    public static <T> JPAQueryBuilder<T> create(JPAQueryFactory queryFactory, PathBuilder<?> root, Predicate predicate, ReferenceJoinResolver joinResolver, List<Expression<?>> selectExpr, Pagination pagination) {
-        return new JPAQueryBuilder<>(queryFactory, root, predicate, joinResolver, selectExpr, pagination);
+    public static <T> JPAQueryBuilder<T> create(JPAQueryFactory queryFactory, PathBuilder<?> root, Predicate predicate, ReferenceJoinResolver joinResolver, List<Expression<?>> selectExpr, PageRequest pageRequest) {
+        return new JPAQueryBuilder<>(queryFactory, root, predicate, joinResolver, selectExpr, pageRequest);
     }
 
     public JPAQuery<T> selectQuery() {
@@ -49,15 +49,15 @@ public class JPAQueryBuilder<T> {
             query.where(predicate);
         }
 
-        List<OrderSpecifier<?>> orderSpecifiers = SortBuilder.build(pagination.getSorts(), root, joinResolver);
+        List<OrderSpecifier<?>> orderSpecifiers = SortBuilder.build(pageRequest.getSorts(), root, joinResolver);
 
         if (!orderSpecifiers.isEmpty()) {
             query.orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]));
         }
 
-        if (Objects.nonNull(pagination)) {
-            query.offset(pagination.getPage());
-            query.limit(pagination.getSize());
+        if (Objects.nonNull(pageRequest)) {
+            query.offset(pageRequest.getPage());
+            query.limit(pageRequest.getSize());
         }
 
         return query;

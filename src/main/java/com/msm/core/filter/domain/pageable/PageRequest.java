@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @Builder
-public class Pagination {
+public class PageRequest {
     private int page;
     private int size;
     private long totalElements;
@@ -28,9 +28,9 @@ public class Pagination {
 //               .build();
 //   }
 
-    public static Pagination of(long totalElements, int currentPage, int pageSize) {
+    public static PageRequest of(long totalElements, int currentPage, int pageSize) {
        int totalPage = totalElements < pageSize ? 1 : (int) Math.ceil((double) totalElements / pageSize);
-        return Pagination
+        return PageRequest
                 .builder()
                 .page(currentPage)
                 .size(pageSize)

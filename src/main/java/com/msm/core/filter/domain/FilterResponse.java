@@ -1,6 +1,6 @@
 package com.msm.core.filter.domain;
 
-import com.msm.core.filter.domain.pageable.Pagination;
+import com.msm.core.filter.domain.pageable.PageRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,5 +15,5 @@ import java.util.Map;
 public class FilterResponse<T> {
     private List<T> records;
     private Map<String, Object> aggregate;
-    private Pagination pageable;
+    private PageRequest pageable;
 }

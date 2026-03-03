@@ -40,7 +40,7 @@ public class AdvancedFilterService {
         BooleanExpression predicate = predicateFactory.create(objectFilter.getFilterGroup(), root, joinResolver);
         Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilter.getReturnAttributes(), root, joinResolver);
 
-        JPAQueryBuilder<Tuple> queryBuilder = JPAQueryBuilder.create(queryFactory, root, predicate, joinResolver, selectExpr.values().stream().toList(), objectFilter.getPagination());
+        JPAQueryBuilder<Tuple> queryBuilder = JPAQueryBuilder.create(queryFactory, root, predicate, joinResolver, selectExpr.values().stream().toList(), objectFilter.getPageRequest());
         JPAQuery<Tuple> dataQuery0 = queryBuilder.selectQuery();
         List<Tuple> tuples = dataQuery0.fetch();
 
@@ -49,16 +49,16 @@ public class AdvancedFilterService {
             aggregateResult = executeAggregate(tEntityPathBase, objectFilter.getAggregate(), root, predicate);
         }
 
-        if(Objects.nonNull(objectFilter.getPagination())) {
+        if(Objects.nonNull(objectFilter.getPageRequest())) {
             long total = queryBuilder.count();
-            int totalPages = (int) Math.ceil((double) total / objectFilter.getPagination().getSize());
-            objectFilter.getPagination().setTotalPages(totalPages);
+            int totalPages = (int) Math.ceil((double) total / objectFilter.getPageRequest().getSize());
+            objectFilter.getPageRequest().setTotalPages(totalPages);
         }
 
         return PagedResponse.<T>builder()
                 .records((List<T>) ResultMapper.map(tuples, selectExpr))
                 .aggregate(aggregateResult)
-                .pagination(objectFilter.getPagination())
+                .pageRequest(objectFilter.getPageRequest())
                 .build();
     }
 

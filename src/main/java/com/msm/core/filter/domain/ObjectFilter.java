@@ -1,6 +1,6 @@
 package com.msm.core.filter.domain;
 
-import com.msm.core.filter.domain.pageable.Pagination;
+import com.msm.core.filter.domain.pageable.PageRequest;
 import lombok.*;
 
 import java.util.List;
@@ -15,7 +15,7 @@ public class ObjectFilter {
     private List<String> returnAttributes;
     private FilterGroup filterGroup;
     private List<AggregateRequest> aggregate;
-    private Pagination pagination;
+    private PageRequest pageRequest;
 
     @Data
     public static class ObjectInfo {
