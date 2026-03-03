@@ -21,10 +21,10 @@ import java.util.*;
 public class AdvancedFilterService {
 
     protected final JPAQueryFactory queryFactory;
-    private final PredicateFactory predicateFactory;
-    private final ReferenceJoinResolver joinResolver;
-    private final EntityClassRegistry entityClassRegistry;
-    protected AdvancedFilterService(JPAQueryFactory queryFactory,
+    protected final PredicateFactory predicateFactory;
+    protected final ReferenceJoinResolver joinResolver;
+    protected final EntityClassRegistry entityClassRegistry;
+    public AdvancedFilterService(JPAQueryFactory queryFactory,
                                     PredicateFactory predicateFactory,
                                     EntityClassRegistry entityClassRegistry) {
         this.queryFactory = queryFactory;
