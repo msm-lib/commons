@@ -41,17 +41,21 @@ dependencies {
 
 
     //apache common lang
-	implementation("org.apache.commons:commons-lang3:3.18.0")
+//	implementation("org.apache.commons:commons-lang3:3.18.0")
 
     //lombok
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
     testCompileOnly("org.projectlombok:lombok:$lombokVersion")
     testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
-
-//    implementation("org.slf4j:slf4j-simple:1.7.36")
-//	annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0")
     implementation("org.apache.commons:commons-collections4:4.5.0")
+    implementation("com.querydsl:querydsl-core:5.1.0")
+    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
+    annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
+//    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    implementation("org.hibernate.validator:hibernate-validator:8.0.2.Final")
+    implementation("org.hibernate.orm:hibernate-core:6.6.22.Final")
 }
 
 tasks.withType<Test> {
