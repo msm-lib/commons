@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
@@ -237,7 +238,7 @@ public final class Utils {
             if (isEmpty(str)) {
                 return str;
             }
-            str = str.toLowerCase();
+//            str = str.toLowerCase();
             final int strLen = str.length();
             final int[] newCodePoints = new int[strLen];
             int outOffset = 0;
@@ -351,6 +352,14 @@ public final class Utils {
         public <K, V> Map<K, V> defaultIfEmpty(final Map<K, V> input, final Supplier<Map<K, V>> defaultSupplier) {
             Objects.requireNonNull(defaultSupplier);
             return isEmpty(input) ? defaultSupplier.get() : input;
+        }
+
+        public <O, K, V> Map<K, V> toMap(List<O> input, Function<O, K> keyMapper, Function<O, V> valueMapper) {
+            Map<K, V> map = new HashMap<>();
+            input.forEach(o -> {
+                map.put(keyMapper.apply(o), valueMapper.apply(o));
+            });
+            return map;
         }
 
         private CollectionUtils() {
