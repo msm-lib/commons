@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -19,6 +18,7 @@ import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked"})
 public final class ObjectUtils {
+    private final ObjectPropertyUtils PROPS = new ObjectPropertyUtils();
     private static final ObjectMapper MAPPER = new ObjectMapper()
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
@@ -131,6 +131,14 @@ public final class ObjectUtils {
             return getSupplier(defaultSupplier);
         }
         return value;
+    }
+
+    public Object getProperty(Object root, String path) {
+        return PROPS.getProperty(root, path);
+    }
+
+    public void setProperty(Object root, String path, Object value) {
+        PROPS.setProperty(root, path, value);
     }
 
     ObjectUtils() {}
