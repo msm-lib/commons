@@ -1,6 +1,5 @@
 package com.msm.core.filter;
 
-
 import com.msm.core.filter.domain.AggregateRequest;
 import com.msm.core.filter.domain.AggregateType;
 import com.msm.core.filter.domain.ObjectFilter;

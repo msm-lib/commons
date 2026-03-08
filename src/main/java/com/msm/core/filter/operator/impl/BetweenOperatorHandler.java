@@ -19,8 +19,8 @@ public class BetweenOperatorHandler extends AbstractComparableHandler {
     @Override
     protected BooleanExpression doCompare(ComparableExpression exp, Object value, FilterCondition c) {
 
-        DateRange range = Utils.convertObject(value, DateRange.class);
-        String timeZone = Utils.defaultIfNull(range.getTimezone(), () -> "UTC");
+        DateRange range = Utils.O.convertObject(value, DateRange.class);
+        String timeZone = Utils.O.defaultIfNull(range.getTimezone(), () -> "UTC");
         ZoneId zone = ZoneId.of(timeZone);
         LocalDateTime from = LocalDateTime.parse(range.getFrom());
         LocalDateTime to = LocalDateTime.parse(range.getTo());

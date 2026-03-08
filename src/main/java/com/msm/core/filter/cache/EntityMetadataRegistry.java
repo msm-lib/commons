@@ -1,6 +1,6 @@
 package com.msm.core.filter.cache;
 
-import com.msm.core.filter.DataTypeUtils;
+import com.msm.core.commons.Utils;
 import com.msm.core.filter.domain.FieldMetadata;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -35,7 +35,7 @@ public final class EntityMetadataRegistry {
             map.put(fullPath, new FieldMetadata(
                     fullPath,
                     fieldType,
-                    Comparable.class.isAssignableFrom(DataTypeUtils.normalize(fieldType)),
+                    Comparable.class.isAssignableFrom(Utils.O.normalize(fieldType)),
                     Objects.equals(fieldType, String.class),
                     fieldType.isEnum(),
                     jsonType)

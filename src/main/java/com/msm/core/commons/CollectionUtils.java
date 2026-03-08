@@ -1,0 +1,76 @@
+package com.msm.core.commons;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+public final class CollectionUtils {
+
+    public static <T> Collection<T> emptyCollection() {
+        return Collections.emptyList();
+    }
+
+    public <T> Collection<T> defaultIfEmpty(final Collection<T> input, final Supplier<Collection<T>> defaultSupplier) {
+        Objects.requireNonNull(defaultSupplier);
+        return isEmpty(input) ? defaultSupplier.get() : input;
+    }
+
+    public <T> Collection<T> emptyIfNull(final Collection<T> input) {
+        return Objects.isNull(input) ? emptyCollection() : input;
+    }
+
+    public <T> List<T> emptyIfNull(final List<T> input) {
+        return Objects.isNull(input) ? Collections.emptyList() : input;
+    }
+
+    public <T> Set<T> emptyIfNull(final Set<T> input) {
+        return Objects.isNull(input) ? Collections.emptySet() : input;
+    }
+
+    @SafeVarargs
+    public final <T> Set<T> newHashSet(final T... elements) {
+        if (Objects.isNull(elements)) {
+            return Collections.emptySet();
+        }
+        Set<T> returnSet = new HashSet<>(elements.length);
+        Collections.addAll(returnSet, elements);
+        return returnSet;
+    }
+
+    public <T> boolean isEmpty(Collection<T> input) {
+        return Objects.isNull(input) || input.isEmpty();
+    }
+
+    public <T> int size(Collection<T> input) {
+        return Objects.isNull(input) ? 0 : input.size();
+    }
+
+    public boolean isNotEmpty(Collection<?> input) {
+        return !isEmpty(input);
+    }
+    public boolean isEmpty(char[] array) {
+        return array == null || array.length == 0;
+    }
+    public <K, V> boolean isEmpty(Map<K, V> input) {
+        return Objects.isNull(input) || input.isEmpty();
+    }
+
+    public <K, V> boolean isNotEmpty(Map<K, V> input) {
+        return !isEmpty(input);
+    }
+
+    public <K, V> Map<K, V> defaultIfEmpty(final Map<K, V> input, final Supplier<Map<K, V>> defaultSupplier) {
+        Objects.requireNonNull(defaultSupplier);
+        return isEmpty(input) ? defaultSupplier.get() : input;
+    }
+
+    public <O, K, V> Map<K, V> toMap(List<O> input, Function<O, K> keyMapper, Function<O, V> valueMapper) {
+        Map<K, V> map = new HashMap<>();
+        input.forEach(o -> {
+            map.put(keyMapper.apply(o), valueMapper.apply(o));
+        });
+        return map;
+    }
+
+    CollectionUtils() {}
+}

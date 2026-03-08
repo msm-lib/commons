@@ -73,7 +73,7 @@ public class JPAQueryBuilder<T> {
             countQuery.where(predicate);
         }
 
-        return Utils.defaultIfNull(countQuery.fetchOne(), () -> 0L);
+        return Utils.O.defaultIfNull(countQuery.fetchOne(), () -> 0L);
     }
 
     public void applyJoin(JPAQuery<?> query, PathBuilder<?> root) {

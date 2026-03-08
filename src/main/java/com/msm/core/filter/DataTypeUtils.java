@@ -31,7 +31,7 @@ public final class DataTypeUtils {
     );
 
     public static Class<?> normalize(Class<?> type) {
-        return type.isPrimitive() ? DataTypeUtils.PRIMITIVE_WRAPPERS.get(type) : type;
+        return type.isPrimitive() ? PRIMITIVE_WRAPPERS.get(type) : type;
     }
 
     public static Function<String, ?> getCastFunction(Class<?> targetType) {
