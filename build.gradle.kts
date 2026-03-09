@@ -1,5 +1,6 @@
 plugins {
     id("java-library")
+    id("maven-publish")
 }
 
 group = "com.msm"
@@ -9,6 +10,8 @@ java {
 	toolchain {
 		languageVersion = JavaLanguageVersion.of(21)
 	}
+    withSourcesJar()
+    withJavadocJar()
 }
 
 configurations {
@@ -61,5 +64,16 @@ dependencies {
 }
 
 tasks.withType<Test> {
-	useJUnitPlatform()
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            groupId = project.group.toString()
+            artifactId = "commons"
+            version = project.version.toString()
+        }
+    }
 }
