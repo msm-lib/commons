@@ -4,8 +4,8 @@ import java.util.Map;
 
 
 public class DynamicRecordServiceImpl extends AbstractDynamicRecordService{
-    protected DynamicRecordServiceImpl(HookEngine hookEngine) {
-        super(hookEngine);
+    protected DynamicRecordServiceImpl(DefaultHookEngine defaultHookEngine) {
+        super(defaultHookEngine);
     }
 
     @Override

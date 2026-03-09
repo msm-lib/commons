@@ -7,12 +7,11 @@ import jakarta.persistence.metamodel.Metamodel;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class EntityClassRegistry {
+public class EntityClassFactory {
 
     private final Map<String, Class<?>> entityMap = new ConcurrentHashMap<>();
 
-
-    public EntityClassRegistry(EntityManager em) {
+    public EntityClassFactory(EntityManager em) {
         Metamodel metamodel = em.getMetamodel();
 
         for (EntityType<?> entity : metamodel.getEntities()) {

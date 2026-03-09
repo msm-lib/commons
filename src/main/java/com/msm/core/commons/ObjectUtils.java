@@ -85,7 +85,7 @@ public final class ObjectUtils {
         return MAPPER.convertValue(attributeMap, clazz);
     }
 
-    public <K, V> Map<K, V> toMap(Object object) throws JsonProcessingException {
+    public <K, V> Map<K, V> toMap(Object object) {
         if (Objects.isNull(object)) {
             return null;
         }

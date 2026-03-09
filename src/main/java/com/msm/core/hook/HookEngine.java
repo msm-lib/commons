@@ -1,23 +1,5 @@
 package com.msm.core.hook;
 
-import lombok.RequiredArgsConstructor;
-import java.util.List;
-
-@RequiredArgsConstructor
-public final class HookEngine {
-
-    private final AsyncExecutor asyncExecutor;
-
-    public void execute(String objectName, HookContext ctx) throws Exception {
-        List<HookObjectMetadata> hooks = ObjectServiceFactory.getGroup(objectName).values().stream().map(object -> (HookObjectMetadata) object).toList();
-        List<HookHandler> handlers = hooks.stream().map(hook -> ObjectServiceFactory.get(hook.definition().handlerName(), HookHandler.class)).toList();
-
-        if (HookPhase.AFTER_COMMIT_EVENT.equals(ctx.getPhase())) {
-            asyncExecutor.executeAsync(handlers, ctx.forAfterCommit());
-        } else {
-            for (HookHandler h : handlers) {
-                h.execute(ctx);
-            }
-        }
-    }
+public interface HookEngine {
+    void execute(String objectName, HookContext ctx) throws Exception;
 }

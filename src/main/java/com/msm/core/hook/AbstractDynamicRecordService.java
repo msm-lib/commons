@@ -1,17 +1,15 @@
 package com.msm.core.hook;
 
 import com.msm.core.commons.Utils;
+import lombok.RequiredArgsConstructor;
 
 import java.util.Map;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public abstract class AbstractDynamicRecordService implements DynamicRecordService {
 
     private final HookEngine hookEngine;
-
-    protected AbstractDynamicRecordService(HookEngine hookEngine) {
-        this.hookEngine = hookEngine;
-    }
 
     @Override
     public <T> T save(String objectName, Map<String, Object> payload) {

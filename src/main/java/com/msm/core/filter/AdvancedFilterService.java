@@ -22,18 +22,19 @@ public class AdvancedFilterService {
     protected final JPAQueryFactory queryFactory;
     protected final PredicateFactory predicateFactory;
     protected final ReferenceJoinResolver joinResolver;
-    protected final EntityClassRegistry entityClassRegistry;
+    protected final EntityClassFactory entityClassFactory;
+
     public AdvancedFilterService(JPAQueryFactory queryFactory,
-                                    PredicateFactory predicateFactory,
-                                    EntityClassRegistry entityClassRegistry) {
+                                 PredicateFactory predicateFactory,
+                                 EntityClassFactory entityClassFactory) {
         this.queryFactory = queryFactory;
         this.predicateFactory = predicateFactory;
-        this.entityClassRegistry = entityClassRegistry;
+        this.entityClassFactory = entityClassFactory;
         joinResolver = new ReferenceJoinResolver();
     }
 
     public <T> PagedResponse<T> filter(ObjectFilter objectFilter) {
-        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassRegistry.resolve(objectFilter.getObjectFilter().getName()));
+        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassFactory.resolve(objectFilter.getObjectFilter().getName()));
 
         PathBuilder<T> root = new PathBuilder<>(tEntityPathBase.getType(), tEntityPathBase.getMetadata());
         BooleanExpression predicate = predicateFactory.create(objectFilter.getFilterGroup(), root, joinResolver);
