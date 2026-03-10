@@ -158,5 +158,22 @@ public final class StringUtils {
         return toCamelCase(str, false, '_');
     }
 
+    public String camelCaseToUnderscore(String input) {
+        if (isEmpty(input)) {
+            return input;
+        }
+        StringBuilder result = new StringBuilder();
+
+        for (char c : input.toCharArray()) {
+            if (Character.isUpperCase(c)) {
+                result.append("_").append(Character.toLowerCase(c));
+            } else {
+                result.append(c);
+            }
+        }
+
+        return result.toString();
+    }
+
     StringUtils() {}
 }
