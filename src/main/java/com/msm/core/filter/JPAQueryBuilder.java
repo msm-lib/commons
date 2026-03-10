@@ -49,13 +49,11 @@ public class JPAQueryBuilder<T> {
             query.where(predicate);
         }
 
-        List<OrderSpecifier<?>> orderSpecifiers = SortBuilder.build(pageRequest.getSorts(), root, joinResolver);
-
-        if (!orderSpecifiers.isEmpty()) {
-            query.orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]));
-        }
-
-        if (Objects.nonNull(pageRequest)) {
+        if(Objects.nonNull(pageRequest)){
+            List<OrderSpecifier<?>> orderSpecifiers = SortBuilder.build(pageRequest.getSorts(), root, joinResolver);
+            if (!orderSpecifiers.isEmpty()) {
+                query.orderBy(orderSpecifiers.toArray(new OrderSpecifier[0]));
+            }
             query.offset(pageRequest.getOffset());
             query.limit(pageRequest.getSize());
         }
