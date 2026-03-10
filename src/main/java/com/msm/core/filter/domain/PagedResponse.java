@@ -39,4 +39,11 @@ public class PagedResponse<T> {
 //                .pageRequest(PageRequest.of(totalElements, currentPage, pageSize))
                 .build();
     }
+
+    public static <T> PagedResponse<T> of(List<T> records) {
+        return PagedResponse
+                .<T>builder()
+                .records(records)
+                .build();
+    }
 }

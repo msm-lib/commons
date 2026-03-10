@@ -48,14 +48,16 @@ public class AdvancedFilterService {
         if (objectFilter.getAggregate() != null && !objectFilter.getAggregate().isEmpty()) {
             aggregateResult = executeAggregate(tEntityPathBase, objectFilter.getAggregate(), root, predicate);
         }
-        Long total = null;
+
         if(Objects.nonNull(objectFilter.getPageRequest())) {
-            total = queryBuilder.count();
+            long total = queryBuilder.count();
 //            int totalPages = (int) Math.ceil((double) total / objectFilter.getPageRequest().getSize());
 //            objectFilter.getPageRequest().setTotalPages(totalPages);
+            return PagedResponse.of((List<T>) ResultMapper.map(tuples, selectExpr), total, objectFilter.getPageRequest().getPage(), objectFilter.getPageRequest().getSize());
+
         }
 
-        return PagedResponse.of((List<T>) ResultMapper.map(tuples, selectExpr), total, objectFilter.getPageRequest().getPage(), objectFilter.getPageRequest().getSize());
+        return PagedResponse.of((List<T>) ResultMapper.map(tuples, selectExpr));
 
 //        return PagedResponse.<T>builder()
 //                .records((List<T>) ResultMapper.map(tuples, selectExpr))
