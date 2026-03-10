@@ -16,10 +16,10 @@ public final class OrderSpecifierFactory {
 
         Expression<?> exp = ExpressionFactory.toSortable(path, sort);
         if (exp instanceof ComparableExpressionBase<?> cmp) {
-            return sort.getSortDirection() == SortDirection.ASC ? cmp.asc() : cmp.desc();
+            return sort.getDirection() == SortDirection.ASC ? cmp.asc() : cmp.desc();
         }
         if (exp instanceof StringExpression str) {
-            return sort.getSortDirection() == SortDirection.ASC ? str.asc() : str.desc();
+            return sort.getDirection() == SortDirection.ASC ? str.asc() : str.desc();
         }
 
         throw new IllegalStateException("Unreachable");

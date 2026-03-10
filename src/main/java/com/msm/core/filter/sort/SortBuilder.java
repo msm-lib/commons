@@ -36,7 +36,7 @@ public final class SortBuilder {
 
                 String[] parts = s.getAttribute().split("\\.");
                 List<String> jsonPath = Arrays.asList(parts).subList(1, parts.length);
-                result.add(JsonOrderSpecifierFactory.build(root, parts[0], jsonPath, s.getSortDirection()));
+                result.add(JsonOrderSpecifierFactory.build(root, parts[0], jsonPath, s.getDirection()));
                 continue;
             }
 

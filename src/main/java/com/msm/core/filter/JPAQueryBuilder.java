@@ -56,7 +56,7 @@ public class JPAQueryBuilder<T> {
         }
 
         if (Objects.nonNull(pageRequest)) {
-            query.offset(pageRequest.getPage());
+            query.offset(pageRequest.getOffset());
             query.limit(pageRequest.getSize());
         }
 
