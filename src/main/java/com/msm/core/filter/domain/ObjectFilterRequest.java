@@ -11,24 +11,15 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ObjectFilter {
+public class ObjectFilterRequest {
     @JsonIgnore
     private ObjectInfo objectInfo;
     private List<String> returnFields;
-    private Search search;
+    private SearchRequest search;
     private FilterGroup filters;
     @JsonIgnore
     private List<AggregateRequest> aggregate;
     private PageRequest pageRequest;
-
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    public static class Search {
-        private String value;
-        private List<String> fields;
-    }
 
     @Data
     @NoArgsConstructor

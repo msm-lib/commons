@@ -2,8 +2,8 @@ package com.msm.core.filter;
 
 import com.msm.core.filter.domain.AggregateRequest;
 import com.msm.core.filter.domain.AggregateType;
-import com.msm.core.filter.domain.ObjectFilter;
-import com.msm.core.filter.domain.PagedResponse;
+import com.msm.core.filter.domain.ObjectFilterRequest;
+import com.msm.core.filter.domain.PageResponse;
 import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -33,14 +33,14 @@ public class AdvancedFilterService {
         joinResolver = new ReferenceJoinResolver();
     }
 
-    public <T> PagedResponse<T> filter(ObjectFilter objectFilter) {
-        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassFactory.resolve(objectFilter.getObjectInfo().getName()));
+    public <T> PageResponse<T> filter(ObjectFilterRequest objectFilterRequest) {
+        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassFactory.resolve(objectFilterRequest.getObjectInfo().getName()));
 
         PathBuilder<T> root = new PathBuilder<>(tEntityPathBase.getType(), tEntityPathBase.getMetadata());
-        BooleanExpression predicate = predicateFactory.create(objectFilter.getFilters(), root, joinResolver);
-        Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilter.getReturnFields(), root, joinResolver);
+        BooleanExpression predicate = predicateFactory.create(objectFilterRequest.getFilters(), root, joinResolver);
+        Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilterRequest.getReturnFields(), root, joinResolver);
 
-        JPAQueryBuilder<Tuple> queryBuilder = JPAQueryBuilder.create(queryFactory, root, predicate, joinResolver, selectExpr.values().stream().toList(), objectFilter.getPageRequest());
+        JPAQueryBuilder<Tuple> queryBuilder = JPAQueryBuilder.create(queryFactory, root, predicate, joinResolver, selectExpr.values().stream().toList(), objectFilterRequest.getPageRequest());
         JPAQuery<Tuple> dataQuery0 = queryBuilder.selectQuery();
         List<Tuple> tuples = dataQuery0.fetch();
 
@@ -50,12 +50,12 @@ public class AdvancedFilterService {
 //            aggregateResult = executeAggregate(tEntityPathBase, objectFilter.getAggregate(), root, predicate);
 //        }
 
-        if(Objects.nonNull(objectFilter.getPageRequest())) {
+        if(Objects.nonNull(objectFilterRequest.getPageRequest())) {
             long total = queryBuilder.count();
-            return PagedResponse.of((List<T>) ResultMapper.map(tuples, selectExpr), total, objectFilter.getPageRequest().getPage(), objectFilter.getPageRequest().getSize());
+            return PageResponse.of((List<T>) ResultMapper.map(tuples, selectExpr), total, objectFilterRequest.getPageRequest().getPage(), objectFilterRequest.getPageRequest().getSize());
         }
 
-        return PagedResponse.of((List<T>) ResultMapper.map(tuples, selectExpr));
+        return PageResponse.of((List<T>) ResultMapper.map(tuples, selectExpr));
     }
 
     private Map<String, Object> executeAggregate(EntityPathBase<?> tEntityPathBase, List<AggregateRequest> aggregates, PathBuilder<?> root, BooleanExpression predicate) {
