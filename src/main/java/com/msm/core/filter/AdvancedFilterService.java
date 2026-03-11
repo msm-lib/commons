@@ -34,11 +34,11 @@ public class AdvancedFilterService {
     }
 
     public <T> PagedResponse<T> filter(ObjectFilter objectFilter) {
-        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassFactory.resolve(objectFilter.getObjectFilter().getName()));
+        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassFactory.resolve(objectFilter.getObjectInfo().getName()));
 
         PathBuilder<T> root = new PathBuilder<>(tEntityPathBase.getType(), tEntityPathBase.getMetadata());
-        BooleanExpression predicate = predicateFactory.create(objectFilter.getFilterGroup(), root, joinResolver);
-        Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilter.getReturnAttributes(), root, joinResolver);
+        BooleanExpression predicate = predicateFactory.create(objectFilter.getFilters(), root, joinResolver);
+        Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilter.getReturnFields(), root, joinResolver);
 
         JPAQueryBuilder<Tuple> queryBuilder = JPAQueryBuilder.create(queryFactory, root, predicate, joinResolver, selectExpr.values().stream().toList(), objectFilter.getPageRequest());
         JPAQuery<Tuple> dataQuery0 = queryBuilder.selectQuery();
