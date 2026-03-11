@@ -10,7 +10,7 @@ import java.util.Objects;
 public class PaginationUtils {
 
     public static PageRequest fromRequest(Integer page, Integer size, List<String> sortParams) {
-        PageRequest pageRequest = new PageRequest(page == null ? 0 : page, size == null ? 20 : size);
+        PageRequest pageRequest = PageRequest.of(page == null ? 0 : page, size == null ? 20 : size);
         if (Objects.nonNull(sortParams)) {
             for (String param : sortParams) {
                 String[] parts = param.split(",");

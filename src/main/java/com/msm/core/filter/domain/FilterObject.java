@@ -4,14 +4,10 @@ package com.msm.core.filter.domain;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,
-        include = JsonTypeInfo.As.PROPERTY,
-        property = "type"
+@JsonTypeInfo(use = JsonTypeInfo.Id.DEDUCTION)
+@JsonSubTypes(
+        {@JsonSubTypes.Type(FilterGroup.class),
+        @JsonSubTypes.Type(FilterCondition.class)}
 )
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = FilterGroup.class, name = "GROUP"),
-        @JsonSubTypes.Type(value = FilterCondition.class, name = "CONDITION")
-})
 public sealed interface FilterObject permits FilterGroup, FilterCondition{
 }

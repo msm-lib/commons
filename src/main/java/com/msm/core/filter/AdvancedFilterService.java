@@ -44,54 +44,26 @@ public class AdvancedFilterService {
         JPAQuery<Tuple> dataQuery0 = queryBuilder.selectQuery();
         List<Tuple> tuples = dataQuery0.fetch();
 
-        Map<String, Object> aggregateResult = null;
-        if (objectFilter.getAggregate() != null && !objectFilter.getAggregate().isEmpty()) {
-            aggregateResult = executeAggregate(tEntityPathBase, objectFilter.getAggregate(), root, predicate);
-        }
+        //Curent version not support query aggregate
+//        Map<String, Object> aggregateResult = null;
+//        if (objectFilter.getAggregate() != null && !objectFilter.getAggregate().isEmpty()) {
+//            aggregateResult = executeAggregate(tEntityPathBase, objectFilter.getAggregate(), root, predicate);
+//        }
 
         if(Objects.nonNull(objectFilter.getPageRequest())) {
             long total = queryBuilder.count();
-//            int totalPages = (int) Math.ceil((double) total / objectFilter.getPageRequest().getSize());
-//            objectFilter.getPageRequest().setTotalPages(totalPages);
             return PagedResponse.of((List<T>) ResultMapper.map(tuples, selectExpr), total, objectFilter.getPageRequest().getPage(), objectFilter.getPageRequest().getSize());
-
         }
 
         return PagedResponse.of((List<T>) ResultMapper.map(tuples, selectExpr));
-
-//        return PagedResponse.<T>builder()
-//                .records((List<T>) ResultMapper.map(tuples, selectExpr))
-//                .aggregate(aggregateResult)
-//                .pageRequest(objectFilter.getPageRequest())
-//                .build();
     }
 
-//    public <T> List<T> filter(ObjectFilter objectFilter) {
-//        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassRegistry.resolve(objectFilter.getObjectFilter().getName()));
-//
-//        PathBuilder<T> root = new PathBuilder<>(tEntityPathBase.getType(), tEntityPathBase.getMetadata());
-//        BooleanExpression predicate = predicateFactory.create(objectFilter.getFilterGroup(), root, joinResolver);
-//        Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilter.getReturnAttributes(), root, joinResolver);
-//
-//        JPAQueryBuilder<Tuple> queryBuilder = JPAQueryBuilder.create(queryFactory, root, predicate, joinResolver, selectExpr.values().stream().toList(), objectFilter.getPagination());
-//        JPAQuery<Tuple> dataQuery0 = queryBuilder.selectQuery();
-//        List<Tuple> tuples = dataQuery0.fetch();
-//
-//        return (List<T>) ResultMapper.map(tuples, selectExpr);
-//    }
-
-    private Map<String, Object> executeAggregate(
-            EntityPathBase<?> tEntityPathBase,
-            List<AggregateRequest> aggregates,
-            PathBuilder<?> root,
-            BooleanExpression predicate
-    ) {
+    private Map<String, Object> executeAggregate(EntityPathBase<?> tEntityPathBase, List<AggregateRequest> aggregates, PathBuilder<?> root, BooleanExpression predicate) {
         Map<String, Object> result = new LinkedHashMap<>();
         List<Expression<?>> expressions = new ArrayList<>();
 
         for (AggregateRequest a : aggregates) {
             validateAggregate(a);
-
             Expression<?> exp = switch (a.getType()) {
                 case COUNT -> root.get(a.getField()).count();
                 case SUM -> root.getNumber(a.getField(), BigDecimal.class).sum();
@@ -108,12 +80,7 @@ public class AdvancedFilterService {
 
         for (int i = 0; i < aggregates.size(); i++) {
             AggregateRequest a = aggregates.get(i);
-
-            String key = Optional.ofNullable(a.getAlias())
-                    .orElse(a.getType().name().toLowerCase()
-                                    + "_" + a.getField()
-                    );
-
+            String key = Optional.ofNullable(a.getAlias()).orElse(a.getType().name().toLowerCase() + "_" + a.getField());
             result.put(key, tuple.get(i, Object.class));
         }
 
@@ -121,12 +88,8 @@ public class AdvancedFilterService {
     }
 
     private void validateAggregate(AggregateRequest req) {
-
-        if (req.getType() == AggregateType.SUM &&
-                !isNumericField(req.getField())) {
-            throw new IllegalArgumentException(
-                    "SUM is only allowed for numeric fields: " + req.getField()
-            );
+        if (req.getType() == AggregateType.SUM && !isNumericField(req.getField())) {
+            throw new IllegalArgumentException("SUM is only allowed for numeric fields: " + req.getField());
         }
     }
 
