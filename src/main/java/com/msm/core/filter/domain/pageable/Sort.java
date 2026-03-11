@@ -1,14 +1,15 @@
 package com.msm.core.filter.domain.pageable;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Sort {
     private String attribute;
     private SortDirection direction;
-
-    public Sort(String attribute, SortDirection direction) {
-        this.attribute = attribute;
-        this.direction = direction;
-    }
 }

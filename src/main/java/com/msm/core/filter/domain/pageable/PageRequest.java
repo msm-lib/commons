@@ -2,41 +2,33 @@ package com.msm.core.filter.domain.pageable;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-@Getter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class PageRequest {
-    private final int page;
-    private final int size;
+    private int page;
+    private int size;
     private List<Sort> sorts;
-
-    private PageRequest(int page, int size) {
-        this.page = page;
-        this.size = size;
-    }
-    private PageRequest(int page, int size, List<Sort> sorts) {
-        this.page = page;
-        this.size = size;
-        this.sorts = sorts;
-    }
 
     public static PageRequest of(int page, int size, List<Sort> sorts) {
         return new PageRequest(page, size, sorts);
     }
 
     public static PageRequest of(int page, int size) {
-        return new PageRequest(page, size);
+        return of(page, size, null);
     }
 
     @JsonIgnore
     public int getOffset() {
         return page * size;
     }
-
     @JsonIgnore
     public int getLimit() {
         return size;

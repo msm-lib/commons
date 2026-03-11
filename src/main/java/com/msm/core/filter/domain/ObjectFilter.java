@@ -13,12 +13,22 @@ import java.util.List;
 @Builder
 public class ObjectFilter {
     @JsonIgnore
-    private ObjectInfo objectFilter;
-    private List<String> returnAttributes;
-    private FilterGroup filterGroup;
+    private ObjectInfo objectInfo;
+    private List<String> returnFields;
+    private Search search;
+    private FilterGroup filters;
     @JsonIgnore
     private List<AggregateRequest> aggregate;
     private PageRequest pageRequest;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class Search {
+        private String value;
+        private List<String> fields;
+    }
 
     @Data
     @NoArgsConstructor
