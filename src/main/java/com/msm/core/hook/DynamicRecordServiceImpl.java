@@ -3,7 +3,7 @@ package com.msm.core.hook;
 import java.util.Map;
 
 
-public class DynamicRecordServiceImpl extends AbstractDynamicRecordService{
+public class DynamicRecordServiceImpl extends AbstractDynamicRecordService {
     protected DynamicRecordServiceImpl(DefaultHookEngine defaultHookEngine) {
         super(defaultHookEngine);
     }
