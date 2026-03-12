@@ -1,12 +1,12 @@
 package com.msm.core.hook;
 
+import com.msm.core.commons.Utils;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
-
-import static com.msm.core.hook.Constant.GENERIC_OBJECT_HOOK_NAME;
 
 @SuppressWarnings("unchecked")
 public final class ObjectServiceFactory {
@@ -42,9 +42,9 @@ public final class ObjectServiceFactory {
         return clazz.cast(service);
     }
 
-    public static <T> List<T> getGroup(String groupName) {
-        Object service = INSTANCES.get(groupName);
-        service = Objects.isNull(service) ? INSTANCES.get(GENERIC_OBJECT_HOOK_NAME) : service;
+    public static <T> List<T> getGroup(String groupName, String phase) {
+        Object service = INSTANCES.get(Utils.STR.format(Constant.OBJECT_HOOK_KEY, groupName, phase));
+        service = Objects.isNull(service) ? INSTANCES.get(Utils.STR.format(Constant.OBJECT_HOOK_KEY, Constant.GENERIC_OBJECT_HOOK_NAME, phase)) : service;
         if (Objects.isNull(service)) {
             throw new IllegalStateException("Service type mismatch for: " + groupName);
         }
