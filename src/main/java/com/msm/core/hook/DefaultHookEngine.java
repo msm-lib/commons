@@ -1,5 +1,6 @@
 package com.msm.core.hook;
 
+import com.msm.core.commons.Utils;
 import lombok.RequiredArgsConstructor;
 import java.util.List;
 
@@ -9,7 +10,7 @@ public final class DefaultHookEngine implements HookEngine {
     private final AsyncExecutor asyncExecutor;
 
     public void execute(String objectName, HookContext ctx) throws Exception {
-        List<ObjectHookMetadata> hooks = ObjectServiceFactory.getGroup(objectName);
+        List<ObjectHookMetadata> hooks = ObjectServiceFactory.getGroup(Utils.STR.format(Constant.OBJECT_HOOK_KEY, objectName, ctx.getPhase()));
         List<HookHandler> handlers = hooks.stream().map(hook -> ObjectServiceFactory.get(hook.definition().handlerName(), HookHandler.class)).toList();
 
         if (HookPhase.AFTER_COMMIT_EVENT.equals(ctx.getPhase())) {

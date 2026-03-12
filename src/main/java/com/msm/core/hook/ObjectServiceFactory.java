@@ -1,7 +1,5 @@
 package com.msm.core.hook;
 
-import com.msm.core.commons.Utils;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -21,8 +19,8 @@ public final class ObjectServiceFactory {
         INSTANCES.put(name, instance);
     }
 
-    public static <T> void registerGroup(String groupName, T instance) {
-        ((List<T>) INSTANCES.computeIfAbsent(groupName, key -> new ArrayList<>())).add(instance);
+    public static <T> void registerGroup(String groupType, T instance) {
+        ((List<T>) INSTANCES.computeIfAbsent(groupType, key -> new ArrayList<>())).add(instance);
     }
 
     public static <T> T get(String name) {
