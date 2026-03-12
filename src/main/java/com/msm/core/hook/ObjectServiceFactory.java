@@ -1,8 +1,14 @@
 package com.msm.core.hook;
 
+import com.msm.core.commons.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static com.msm.core.hook.Constant.GENERIC_OBJECT_HOOK_NAME;
 
 @SuppressWarnings("unchecked")
 public final class ObjectServiceFactory {
@@ -15,10 +21,8 @@ public final class ObjectServiceFactory {
         INSTANCES.put(name, instance);
     }
 
-    public static <T> void registerGroup(String groupName, String name, T instance) {
-        Map<String, Object> objectMap = (Map<String, Object>) INSTANCES.computeIfAbsent(groupName, key -> new ConcurrentHashMap<>());
-        objectMap.put(name, instance);
-        INSTANCES.put(name, objectMap);
+    public static <T> void registerGroup(String groupName, T instance) {
+        ((List<T>) INSTANCES.computeIfAbsent(groupName, key -> new ArrayList<>())).add(instance);
     }
 
     public static <T> T get(String name) {
@@ -40,13 +44,14 @@ public final class ObjectServiceFactory {
         return clazz.cast(service);
     }
 
-    public static <T> Map<String, T> getGroup(String groupName) {
+    public static <T> List<T> getGroup(String groupName) {
         Object service = INSTANCES.get(groupName);
+        service = Objects.isNull(service) ? INSTANCES.get(GENERIC_OBJECT_HOOK_NAME) : service;
         if (Objects.isNull(service)) {
             throw new IllegalStateException("Service type mismatch for: " + groupName);
         }
 
-        return (Map<String, T>) service;
+        return (List<T>) service;
     }
 
     public static boolean contains(String name) {
