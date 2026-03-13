@@ -16,7 +16,7 @@ public class NeOperatorHandler extends AbstractOperatorHandler {
     protected BooleanExpression doHandle(Path<?> path, Object value, FilterCondition c) {
 
         if (!(path instanceof SimpleExpression<?> exp)) {
-            throw typeError(FilterOperator.NE.name(), path, c);
+            throw typeError(FilterOperator.NOT_EQUALS.name(), path, c);
         }
 
         if (Objects.nonNull(value)) {

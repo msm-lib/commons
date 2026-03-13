@@ -11,13 +11,13 @@ public class OperatorFactory {
     private static final Map<FilterOperator, OperatorHandler> HANDLERS = new EnumMap<>(FilterOperator.class);
 
     static {
-        register(FilterOperator.EQ, new EqOperatorHandler());
-        register(FilterOperator.NE, new NeOperatorHandler());
+        register(FilterOperator.EQUALS, new EqOperatorHandler());
+        register(FilterOperator.NOT_EQUALS, new NeOperatorHandler());
         register(FilterOperator.LIKE, new LikeOperatorHandler());
-        register(FilterOperator.GT, new GtOperatorHandler());
-        register(FilterOperator.GTE, new GteOperatorHandler());
-        register(FilterOperator.LT, new LtOperatorHandler());
-        register(FilterOperator.LTE, new LteOperatorHandler());
+        register(FilterOperator.GREATER_THAN, new GtOperatorHandler());
+        register(FilterOperator.GREATER_THAN_OR_EQUAL, new GteOperatorHandler());
+        register(FilterOperator.LESS_THAN, new LtOperatorHandler());
+        register(FilterOperator.LESS_THAN_OR_EQUAL, new LteOperatorHandler());
         register(FilterOperator.IN, new InOperatorHandler());
         register(FilterOperator.BETWEEN, new BetweenOperatorHandler());
     }
