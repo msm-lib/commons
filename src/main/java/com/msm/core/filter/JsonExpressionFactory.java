@@ -16,16 +16,11 @@ public final class JsonExpressionFactory {
             EntityPathBase<?> root,
             String jsonField,
             List<String> path) {
+
         List<Expression<?>> args = new ArrayList<>();
 
         // jsonb column
-        args.add(
-                Expressions.path(
-                        Object.class,
-                        root,
-                        jsonField
-                )
-        );
+        args.add(Expressions.path(Object.class, root, jsonField));
 
         // json path
         for (String p : path) {
@@ -37,5 +32,4 @@ public final class JsonExpressionFactory {
                 args.toArray()
         );
     }
-
 }

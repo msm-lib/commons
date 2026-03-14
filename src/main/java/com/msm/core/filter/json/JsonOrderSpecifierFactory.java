@@ -13,7 +13,7 @@ public final class JsonOrderSpecifierFactory {
     private JsonOrderSpecifierFactory() {}
 
     public static OrderSpecifier<?> build(EntityPathBase<?> root, String jsonField, List<String> jsonPath, SortDirection dir) {
-        StringExpression text = JsonExpressionFactory.jsonText(root, jsonField, jsonPath);
+        StringExpression text = JsonbExpressions.text(root, jsonField, jsonPath);
 
         return dir == SortDirection.ASC
                 ? text.asc()

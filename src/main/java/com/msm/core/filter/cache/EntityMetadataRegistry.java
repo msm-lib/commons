@@ -72,5 +72,22 @@ public final class EntityMetadataRegistry {
                 || f.getType().getName().contains("Json")
                 || f.getType().getName().contains("PGobject");
     }
+
+    public static FieldMetadata getFieldMetadata(Class<?> clazz, List<String> parts) {
+
+        FieldMetadata fieldMetadata = get(clazz, parts.getFirst());
+        if(parts.size() == 1) {
+            return fieldMetadata;
+        }
+        Class<?> entityClass = fieldMetadata.javaType();
+        for (int i = 1; i <= parts.size() - 1; i++) {
+            FieldMetadata meta = get(entityClass, parts.get(i));
+            if(Objects.nonNull(meta)) {
+                fieldMetadata = meta;
+                entityClass = meta.javaType();
+            }
+        }
+        return fieldMetadata;
+    }
 }
 
