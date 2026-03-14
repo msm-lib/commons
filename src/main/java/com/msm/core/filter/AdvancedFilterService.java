@@ -1,9 +1,7 @@
 package com.msm.core.filter;
 
-import com.msm.core.filter.domain.AggregateRequest;
-import com.msm.core.filter.domain.AggregateType;
-import com.msm.core.filter.domain.ObjectFilterRequest;
-import com.msm.core.filter.domain.PageResponse;
+import com.msm.core.commons.Utils;
+import com.msm.core.filter.domain.*;
 import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -34,8 +32,8 @@ public class AdvancedFilterService {
     }
 
     public <T> PageResponse<T> filter(ObjectFilterRequest objectFilterRequest) {
+        resolveSearchFilter(objectFilterRequest);
         EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassFactory.resolve(objectFilterRequest.getObjectInfo().getName()));
-
         PathBuilder<T> root = new PathBuilder<>(tEntityPathBase.getType(), tEntityPathBase.getMetadata());
         BooleanExpression predicate = predicateFactory.create(objectFilterRequest.getFilters(), root, joinResolver);
         Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilterRequest.getReturnFields(), root, joinResolver);
@@ -96,5 +94,42 @@ public class AdvancedFilterService {
     private boolean isNumericField(String field) {
         // Starter library: overrideable
         return true;
+    }
+
+    private FilterGroup toFilterGroup(SearchRequest searchRequest) {
+        if(Objects.nonNull(searchRequest)) {
+            List<String> fields = searchRequest.getFields();
+            if(Utils.CL.isNotEmpty(fields) && Utils.STR.isNotBlank(searchRequest.getKeyword())) {
+                FilterGroup.FilterGroupBuilder filterGroup = FilterGroup.builder();
+                filterGroup.operator(LogicalOperator.AND);
+                List<FilterObject> filterConditionList = fields.stream().map(field -> (FilterObject)FilterCondition
+                        .builder()
+                        .field(field)
+                        .operator(FilterOperator.LIKE)
+                        .value(searchRequest.getKeyword())
+                        .build()).toList();
+
+                filterGroup.conditions(filterConditionList);
+                return filterGroup.build();
+            }
+        }
+        return  null;
+    }
+
+    private void resolveSearchFilter(ObjectFilterRequest filter) {
+        FilterGroup searchFilterGroup = toFilterGroup(filter.getSearch());
+        if(Objects.nonNull(searchFilterGroup)) {
+            FilterGroup currentFilterGroup = filter.getFilters();
+            if(Objects.isNull(currentFilterGroup)) {
+                filter.setFilters(searchFilterGroup);
+            } else {
+                List<FilterObject> filterConditionList = currentFilterGroup.getConditions();
+                if(Utils.CL.isEmpty(filterConditionList)) {
+                    filter.setFilters(searchFilterGroup);
+                } else {
+                    filterConditionList.add(searchFilterGroup);
+                }
+            }
+        }
     }
 }

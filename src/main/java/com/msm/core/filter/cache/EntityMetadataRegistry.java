@@ -8,9 +8,7 @@ import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
 import java.lang.reflect.Field;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public final class EntityMetadataRegistry {
@@ -18,6 +16,14 @@ public final class EntityMetadataRegistry {
 
     public static FieldMetadata get(Class<?> entityClass, String fieldPath) {
         return CACHE.computeIfAbsent(entityClass, EntityMetadataRegistry::scan).get(fieldPath);
+    }
+
+    public static List<FieldMetadata> getFieldMetadataList(Class<?> entityClass) {
+        return new ArrayList<>(CACHE.computeIfAbsent(entityClass, EntityMetadataRegistry::scan).values());
+    }
+
+    public static Set<String> getFieldNames(Class<?> entityClass) {
+        return CACHE.computeIfAbsent(entityClass, EntityMetadataRegistry::scan).keySet();
     }
 
     private static Map<String, FieldMetadata> scan(Class<?> entityClass) {

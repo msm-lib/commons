@@ -14,7 +14,7 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 public class PageResponse<T> {
-    private List<T> records;
+    private List<T> contents;
     private int page;
     private int size;
     private long totalElements;
@@ -24,11 +24,11 @@ public class PageResponse<T> {
     @JsonIgnore
     private Map<String, Object> aggregate;
 
-    public static <T> PageResponse<T> of(List<T> records, long totalElements, int currentPage, int pageSize) {
+    public static <T> PageResponse<T> of(List<T> contents, long totalElements, int currentPage, int pageSize) {
         int totalPages = (int) Math.ceil((double) totalElements / pageSize);
         return PageResponse
                 .<T>builder()
-                .records(records)
+                .contents(contents)
                 .page(currentPage)
                 .size(pageSize)
                 .totalElements(totalElements)
@@ -37,10 +37,10 @@ public class PageResponse<T> {
                 .build();
     }
 
-    public static <T> PageResponse<T> of(List<T> records) {
+    public static <T> PageResponse<T> of(List<T> contents) {
         return PageResponse
                 .<T>builder()
-                .records(records)
+                .contents(contents)
                 .build();
     }
 }
