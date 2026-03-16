@@ -1,5 +1,6 @@
 package com.msm.core.hook;
 
+import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
 
 import java.util.ArrayList;
@@ -43,8 +44,8 @@ public final class ObjectServiceFactory {
     }
 
     public static <T> List<T> getGroup(String groupName, String phase) {
-        Object service = INSTANCES.get(Utils.STR.format(Constant.OBJECT_HOOK_KEY, groupName, phase));
-        service = Objects.isNull(service) ? INSTANCES.get(Utils.STR.format(Constant.OBJECT_HOOK_KEY, Constant.GENERIC_OBJECT_HOOK_NAME, phase)) : service;
+        Object service = INSTANCES.get(Utils.STR.format(Constants.OBJECT_HOOK_KEY, groupName, phase));
+        service = Objects.isNull(service) ? INSTANCES.get(Utils.STR.format(Constants.OBJECT_HOOK_KEY, Constants.GENERIC_OBJECT_HOOK_NAME, phase)) : service;
         if (Objects.isNull(service)) {
             throw new IllegalStateException("Service type mismatch for: " + groupName);
         }

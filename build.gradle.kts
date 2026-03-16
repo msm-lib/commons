@@ -61,6 +61,10 @@ dependencies {
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("org.hibernate.validator:hibernate-validator:8.0.2.Final")
     implementation("org.hibernate.orm:hibernate-core:6.6.22.Final")
+
+    //jeasy rules
+    implementation("org.jeasy:easy-rules-core:4.1.0")
+    implementation("org.jeasy:easy-rules-mvel:4.1.0")
 }
 
 tasks.withType<Test> {
