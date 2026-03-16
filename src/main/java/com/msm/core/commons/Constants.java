@@ -8,7 +8,7 @@ public final class Constants {
     public static final String INVALID_DATA_TYPE = "{0} loại dữ liệu không hợp lệ";
     public static final String REQUIRE_INPUT_VALUE = "{0} bắt buộc";
     public static final String INVALID_INPUT_VALUE = "{0} giá trị không hợp lệ";
-
+    public static final String DEFAULT_TEXT_REGEX = "^[\\p{L}0-9_.(),'/$€£¥₹₽\\- \\n]*$";
 
 
     private Constants() {}
