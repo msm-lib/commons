@@ -37,7 +37,8 @@ public final class ObjectServiceFactory {
         Object service = INSTANCES.get(type);
 
         if (Objects.isNull(service) || !clazz.isInstance(service)) {
-            throw new IllegalStateException("Service type mismatch for: " + type);
+//            throw new IllegalStateException("Service type mismatch for: " + type);
+            return null;
         }
 
         return clazz.cast(service);
@@ -47,7 +48,8 @@ public final class ObjectServiceFactory {
         Object service = INSTANCES.get(Utils.STR.format(Constants.OBJECT_HOOK_KEY, groupName, phase));
         service = Objects.isNull(service) ? INSTANCES.get(Utils.STR.format(Constants.OBJECT_HOOK_KEY, Constants.GENERIC_OBJECT_HOOK_NAME, phase)) : service;
         if (Objects.isNull(service)) {
-            throw new IllegalStateException("Service type mismatch for: " + groupName);
+//            throw new IllegalStateException("Service type mismatch for: " + groupName);
+            return null;
         }
 
         return (List<T>) service;

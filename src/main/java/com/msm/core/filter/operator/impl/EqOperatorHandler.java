@@ -1,7 +1,7 @@
 package com.msm.core.filter.operator.impl;
 
 import com.msm.core.filter.EntityPathResolver;
-import com.msm.core.filter.cache.EntityMetadataRegistry;
+import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.cache.PathCache;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.FilterCondition;
@@ -26,10 +26,10 @@ public class EqOperatorHandler extends AbstractOperatorHandler {
         if (Objects.nonNull(value)) {
             Object typedValue = cast(exp.getType(), value);
             List<String> parts = PathCache.pathAsArray(c.getField());
-            FieldMetadata meta = EntityMetadataRegistry.get(path.getRoot().getType(), parts.getFirst());
+            FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), parts.getFirst());
             if (meta.jsonType()) {
                 EntityPathBase<?> tEntityPathBase = EntityPathResolver.resolve(path.getRoot().getType());
-                FieldMetadata metadata = EntityMetadataRegistry.getFieldMetadata(path.getRoot().getType(), parts);
+                FieldMetadata metadata = EntityMetadataFactory.getFieldMetadata(path.getRoot().getType(), parts);
                 Expression<?> expression0 = JsonbExpressions.json(tEntityPathBase, meta.field(), parts.subList(1, parts.size()), metadata.javaType());
                 return ((SimpleExpression) expression0).eq(typedValue);
             } else {

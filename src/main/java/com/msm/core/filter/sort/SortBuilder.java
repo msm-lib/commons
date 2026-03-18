@@ -1,6 +1,6 @@
 package com.msm.core.filter.sort;
 
-import com.msm.core.filter.cache.EntityMetadataRegistry;
+import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.cache.PathCache;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.JoinType;
@@ -59,7 +59,7 @@ public final class SortBuilder {
                 ? fieldPath.substring(0, fieldPath.indexOf('.'))
                 : fieldPath;
 
-        FieldMetadata f = EntityMetadataRegistry.get(rootEntity, rootField);
+        FieldMetadata f = EntityMetadataFactory.get(rootEntity, rootField);
         return f.jsonType();
     }
 }

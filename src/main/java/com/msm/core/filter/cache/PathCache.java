@@ -33,7 +33,7 @@ public final class PathCache {
 
         PathBuilder<?> current = root;
         String[] parts = field.split("\\.");
-        FieldMetadata fieldMetadata = EntityMetadataRegistry.get(root.getType(), parts[0]);
+        FieldMetadata fieldMetadata = EntityMetadataFactory.get(root.getType(), parts[0]);
         if(fieldMetadata.jsonType()) {
 //            Expression<?> expression = JsonFieldResolver.resolve(root, field);
 //            Expressions.as(expression, fieldMetadata.field());

@@ -28,5 +28,9 @@ public class ObjectFilterRequest {
     public static class ObjectInfo {
         private String name;
         private String code;
+
+        public static ObjectInfo of(String name) {
+            return ObjectInfo.builder().name(name).build();
+        }
     }
 }

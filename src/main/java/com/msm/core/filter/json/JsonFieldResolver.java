@@ -1,12 +1,11 @@
 package com.msm.core.filter.json;
 
-import com.msm.core.filter.cache.EntityMetadataRegistry;
+import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.cache.PathCache;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.EntityPathBase;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,7 +14,7 @@ public class JsonFieldResolver {
 
     public static Expression<?> resolve(EntityPathBase<?> root, String field) {
         List<String> parts = PathCache.pathAsArray(field);
-        FieldMetadata metadata = EntityMetadataRegistry.getFieldMetadata(root.getType(), parts);
+        FieldMetadata metadata = EntityMetadataFactory.getFieldMetadata(root.getType(), parts);
         return JsonbExpressions.json(root, parts.getFirst(), parts.subList(1, parts.size()), metadata.javaType());
     }
 

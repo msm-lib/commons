@@ -1,6 +1,6 @@
 package com.msm.core.filter.sort;
 
-import com.msm.core.filter.cache.EntityMetadataRegistry;
+import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.pageable.Sort;
 import com.querydsl.core.types.Expression;
@@ -12,7 +12,7 @@ public final class ExpressionFactory {
     private ExpressionFactory() {}
 
     public static Expression<?> toSortable(Path<?> path, Sort sort) {
-        FieldMetadata meta = EntityMetadataRegistry.get(path.getRoot().getType(), sort.getAttribute());
+        FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), sort.getAttribute());
         Class<?> type = meta.javaType();
 
         // String

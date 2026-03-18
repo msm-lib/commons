@@ -1,6 +1,6 @@
 package com.msm.core.filter.operator.impl;
 
-import com.msm.core.filter.cache.EntityMetadataRegistry;
+import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterOperator;
@@ -17,7 +17,7 @@ public class LikeOperatorHandler extends AbstractOperatorHandler {
 
     @Override
     protected void validate(Path<?> path, Object value, FilterCondition condition) {
-        FieldMetadata meta = EntityMetadataRegistry.get(path.getRoot().getType(), condition.getField());
+        FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), condition.getField());
         if (!meta.stringLike()) {
             throw typeError(FilterOperator.LIKE.name(), path, condition);
         }
@@ -25,7 +25,7 @@ public class LikeOperatorHandler extends AbstractOperatorHandler {
 
     @Override
     protected BooleanExpression doHandle(Path<?> path, Object value, FilterCondition c) {
-        FieldMetadata meta = EntityMetadataRegistry.get(path.getRoot().getType(), c.getField());
+        FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), c.getField());
         if (meta.isEnum()) {
             return handleEnum(path, value, meta);
         }

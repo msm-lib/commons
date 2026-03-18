@@ -1,7 +1,7 @@
 package com.msm.core.filter;
 
 import com.msm.core.commons.Utils;
-import com.msm.core.filter.cache.EntityMetadataRegistry;
+import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.msm.core.filter.json.JsonFieldResolver;
@@ -16,7 +16,7 @@ public final class DynamicSelectBuilder {
 
     public static List<String> getOrSelectAll(List<String> fields, PathBuilder<?> root) {
         if (Utils.CL.isEmpty(fields)) {
-            return new ArrayList<>(EntityMetadataRegistry.getFieldNames(root.getType()));
+            return new ArrayList<>(EntityMetadataFactory.getFieldNames(root.getType()));
         }
         return fields;
     }
@@ -39,7 +39,7 @@ public final class DynamicSelectBuilder {
         String[] parts = field.split("\\.");
         PathBuilder<?> current = root;
 
-        FieldMetadata fieldMetadata = EntityMetadataRegistry.get(root.getType(), parts[0]);
+        FieldMetadata fieldMetadata = EntityMetadataFactory.get(root.getType(), parts[0]);
         if(fieldMetadata.jsonType()) {
             Expression<?> expression = JsonFieldResolver.resolve(root, field);
             Expressions.as(expression, fieldMetadata.field());
