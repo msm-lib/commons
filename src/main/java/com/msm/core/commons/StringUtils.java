@@ -29,7 +29,19 @@ public final class StringUtils {
         return input.replace(replacement, target);
     }
 
+    public String lowCase(final String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.toLowerCase();
+    }
 
+    public String toUpperCase(final String input) {
+        if (input == null) {
+            return null;
+        }
+        return input.toUpperCase();
+    }
     public boolean isBlank(final String input) {
         return Objects.isNull(input) || input.isBlank();
     }
