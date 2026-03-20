@@ -1,5 +1,6 @@
 package com.msm.core.hook;
 
+import com.msm.core.commons.Handler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -37,11 +38,11 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class HookDefinition {
     /**
-     * The name of the handler that will be executed.
+     * The type of the handler that will be executed.
      * This typically corresponds to a method name, bean name,
      * or identifier used to resolve the actual logic.
      */
-    private String handlerName;
+    private HookHandler hookHandler;
 
     /**
      * The execution order of this hook.

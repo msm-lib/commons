@@ -3,8 +3,8 @@ package com.msm.core.commons;
 public final class Constants {
 
     public static final String OBJECT_PK = "id";
-    public static final String OBJECT_HOOK_KEY = "{0}:{1}";
-    public static final String GENERIC_OBJECT_HOOK_NAME = "GenericHookObject";
+    public static final String OBJECT_HOOK_KEY = "{0}:{1}:{2}";
+    public static final String GENERIC_OBJECT_HOOK_NAME = "GenericObjectHook";
 
     public static final String INVALID_DATA_TYPE = "{0} loại dữ liệu không hợp lệ";
     public static final String REQUIRE_INPUT_VALUE = "{0} bắt buộc";

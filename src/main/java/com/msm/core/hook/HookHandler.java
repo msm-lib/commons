@@ -1,5 +1,5 @@
 package com.msm.core.hook;
 
-public interface HookHandler extends ObjectTypeMetadata {
-    void execute(HookContext ctx) throws Exception;
-}
+import com.msm.core.commons.Handler;
+
+public interface HookHandler extends Handler<HookContext> {}

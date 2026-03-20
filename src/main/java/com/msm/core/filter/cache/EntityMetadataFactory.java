@@ -1,6 +1,6 @@
 package com.msm.core.filter.cache;
 
-import com.msm.core.commons.Utils;
+import com.msm.core.commons.DataConvertFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -34,23 +34,28 @@ public final class EntityMetadataFactory {
     }
 
     private static void scanRecursive(Class<?> type, String prefix, Map<String, FieldMetadata> map) {
-        for (Field field : type.getDeclaredFields()) {
-            Class<?> fieldType = field.getType();
-            String fullPath = prefix.isEmpty() ? field.getName() : prefix + "." + field.getName();
-            boolean jsonType = isJsonField(field);
-            map.put(fullPath, new FieldMetadata(
-                    fullPath,
-                    fieldType,
-                    Comparable.class.isAssignableFrom(Utils.O.normalize(fieldType)),
-                    Objects.equals(fieldType, String.class),
-                    fieldType.isEnum(),
-                    jsonType)
-            );
+        Class<?> current = type;
+        while (current != null && current != Object.class) {
+            for (Field field : current.getDeclaredFields()) {
+                Class<?> fieldType = field.getType();
+                String fullPath = prefix.isEmpty() ? field.getName() : prefix + "." + field.getName();
+                boolean jsonType = isJsonField(field);
+                map.put(fullPath, new FieldMetadata(
+                        fullPath,
+                        fieldType,
+                        Comparable.class.isAssignableFrom(DataConvertFactory.normalizeDataType(fieldType)),
+                        Objects.equals(fieldType, String.class),
+                        fieldType.isEnum(),
+                        jsonType)
+                );
 
-            // Entity relation → recurse
-            if (fieldType.isAnnotationPresent(Entity.class)) {
-                scanRecursive(fieldType, fullPath, map);
+                // Entity relation → recurse
+                if (fieldType.isAnnotationPresent(Entity.class)) {
+                    scanRecursive(fieldType, fullPath, map);
+                }
             }
+
+            current = current.getSuperclass();
         }
     }
 

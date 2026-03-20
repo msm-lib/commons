@@ -14,17 +14,20 @@ import java.util.UUID;
 public final class HookContext {
 
     private String objectApi;
-    private UUID recordId;
-    private Map<String, Object> payload;
+    private String action;
     private HookPhase phase;
+    private UUID recordId;
+    private Object oldRecord;
+    private Map<String, Object> payload;
+
     private Map<String, Object> additionalData;
 
     public HookContext forAfterCommit() {
-        return new HookContext(objectApi, recordId, new HashMap<>(payload), HookPhase.AFTER_EVENT, new HashMap<>());
+        return new HookContext(objectApi, action, HookPhase.AFTER_EVENT, recordId, oldRecord, new HashMap<>(payload), new HashMap<>());
     }
 
-    public static HookContext ofDefault(String objectApi, Map<String, Object> payload) {
-        return new HookContext(objectApi, null, payload, HookPhase.BEFORE_EVENT, new HashMap<>());
+    public static HookContext ofDefault(String objectApi, String action, Map<String, Object> payload) {
+        return new HookContext(objectApi, action, HookPhase.BEFORE_EVENT, null, null, payload, new HashMap<>());
     }
 
     public void nextPhase(HookPhase nextPPhase) {

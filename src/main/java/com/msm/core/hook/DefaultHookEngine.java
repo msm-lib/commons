@@ -64,22 +64,22 @@ public final class DefaultHookEngine implements HookEngine {
      * @throws Exception if any handler execution fails or resolution errors occur
      */
     public void execute(String objectName, HookContext ctx) throws Exception {
-        List<ObjectHookMetadata> hooks = ObjectServiceFactory.getGroup(objectName, ctx.getPhase().name());
+        List<ObjectHookMetadata> hooks = ObjectHookMetaDataFactory.get(objectName, ctx.getAction(), ctx.getPhase().name());
         if(Utils.CL.isEmpty(hooks)) {
-            log.warn("No hook found for object: {}", objectName);
+            log.warn("Event hook not found for object: {}", objectName);
             return;
         }
-        List<HookHandler> handlers = hooks
+        List<HookHandler> handlers = Utils.CL.emptyIfNull(hooks)
                 .stream()
                 .sorted(Comparator.comparingInt(o -> o.definition().getOrder()))
-                .map(hook -> ObjectServiceFactory.get(hook.definition().getHandlerName(), HookHandler.class))
+                .map(hook -> hook.definition().getHookHandler())
                 .toList();
 
         if (HookPhase.AFTER_COMMIT_EVENT.equals(ctx.getPhase())) {
             asyncExecutor.executeAsync(handlers, ctx.forAfterCommit());
         } else {
             for (HookHandler h : handlers) {
-                h.execute(ctx);
+                h.handle(ctx, null);
             }
         }
     }

@@ -1,11 +1,16 @@
 package com.msm.core.commons;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -24,51 +29,60 @@ public final class ObjectUtils {
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-    private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = Map.of(
-            int.class, Integer.class,
-            long.class, Long.class,
-            double.class, Double.class,
-            boolean.class, Boolean.class,
-            float.class, Float.class,
-            short.class, Short.class,
-            byte.class, Byte.class,
-            char.class, Character.class
-    );
-    private static final Map<Class<?>, Function<String, ?>> CONVERTERS = Map.of(
-            Integer.class, Integer::valueOf,
-            Long.class, Long::valueOf,
-            Double.class, Double::valueOf,
-            BigDecimal.class, BigDecimal::new,
-            Boolean.class, Boolean::valueOf,
-            LocalDate.class, LocalDate::parse,
-            LocalDateTime.class, LocalDateTime::parse,
-            UUID.class, UUID::fromString
-    );
+//    private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = Map.of(
+//            int.class, Integer.class,
+//            long.class, Long.class,
+//            double.class, Double.class,
+//            boolean.class, Boolean.class,
+//            float.class, Float.class,
+//            short.class, Short.class,
+//            byte.class, Byte.class,
+//            char.class, Character.class
+//    );
+//    private static final Map<Class<?>, Function<String, ?>> CONVERTERS = Map.of(
+//            Integer.class, Integer::valueOf,
+//            Long.class, Long::valueOf,
+//            Double.class, Double::valueOf,
+//            BigDecimal.class, BigDecimal::new,
+//            Boolean.class, Boolean::valueOf,
+//            LocalDate.class, LocalDate::parse,
+//            LocalDateTime.class, LocalDateTime::parse,
+//            UUID.class, UUID::fromString
+//    );
+//
+//    public Class<?> normalizeDataType(Class<?> type) {
+//        return type.isPrimitive() ? PRIMITIVE_WRAPPERS.get(type) : type;
+//    }
+//
+//    public Function<String, ?> getCastFunction(Class<?> targetType) {
+//        Class<?> normalized = normalizeDataType(targetType);
+//        return CONVERTERS.get(normalized);
+//    }
 
-    public Class<?> normalize(Class<?> type) {
-        return type.isPrimitive() ? PRIMITIVE_WRAPPERS.get(type) : type;
+    public <T> T updateValues(T object, Map<String, Object> updates) throws JsonMappingException {
+        return MAPPER.updateValue(object, updates);
     }
 
-    public Function<String, ?> getCastFunction(Class<?> targetType) {
-        Class<?> normalized = normalize(targetType);
-        return CONVERTERS.get(normalized);
+    public <T> T read(InputStream src, TypeReference<T> valueTypeRef) throws IOException {
+        return MAPPER.readValue(src, valueTypeRef);
     }
 
-    public <T> T cast(Class<?> targetType, Object value) {
-        if (Objects.isNull(value)) return null;
-        if (targetType.isInstance(value)) {
-            return (T) value;
-        }
-        if (targetType.isEnum()) {
-            return (T) Enum.valueOf((Class<? extends Enum>) targetType, value.toString());
-        }
-        Function<String, ?> fn = getCastFunction(targetType);
-        if (Objects.nonNull(fn)) {
-            return (T) fn.apply(value.toString());
-        }
 
-        throw new IllegalArgumentException("Cannot cast value '" + value + "' to type " + targetType.getName());
-    }
+//    public <T> T cast(Class<?> targetType, Object value) {
+//        if (Objects.isNull(value)) return null;
+//        if (targetType.isInstance(value)) {
+//            return (T) value;
+//        }
+//        if (targetType.isEnum()) {
+//            return (T) Enum.valueOf((Class<? extends Enum>) targetType, value.toString());
+//        }
+//        Function<String, ?> fn = getCastFunction(targetType);
+//        if (Objects.nonNull(fn)) {
+//            return (T) fn.apply(value.toString());
+//        }
+//
+//        throw new IllegalArgumentException("Cannot cast value '" + value + "' to type " + targetType.getName());
+//    }
 
     public <T> T convertObject(Object object, Class<T> clazz) {
         if (Objects.isNull(object)) {

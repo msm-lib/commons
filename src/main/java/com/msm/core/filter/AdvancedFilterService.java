@@ -10,10 +10,12 @@ import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.*;
 
+@Data
 @SuppressWarnings({"unchecked"})
 public class AdvancedFilterService {
 

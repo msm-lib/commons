@@ -16,7 +16,7 @@ public class DefaultAsyncExecutor implements AsyncExecutor {
         hookTaskExecutor.execute(() -> {
             for (HookHandler h : handlers) {
                 try {
-                    h.execute(ctx);
+                    h.handle(ctx, null);
                 } catch (Exception e) {
                     log.error("Error executing hook task", e);
                 }
