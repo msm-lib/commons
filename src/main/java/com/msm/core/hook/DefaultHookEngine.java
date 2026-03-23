@@ -61,9 +61,8 @@ public final class DefaultHookEngine implements HookEngine {
      *
      * @param objectName the identifier used to determine which hooks should be executed
      * @param ctx the {@code HookContext} containing execution state and shared data
-     * @throws Exception if any handler execution fails or resolution errors occur
      */
-    public void execute(String objectName, HookContext ctx) throws Exception {
+    public void execute(String objectName, HookContext ctx) {
         List<ObjectHookMetadata> hooks = ObjectHookMetaDataFactory.get(objectName, ctx.getAction(), ctx.getPhase().name());
         if(Utils.CL.isEmpty(hooks)) {
             log.warn("Event hook not found for object: {}", objectName);

@@ -9,7 +9,7 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 
-public final class DataConvertFactory {
+public final class ValueConvertFactory {
     private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = new ConcurrentHashMap<>(
             Map.of(
                     int.class, Integer.class,

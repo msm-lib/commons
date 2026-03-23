@@ -1,6 +1,6 @@
 package com.msm.core.filter.operator;
 
-import com.msm.core.commons.DataConvertFactory;
+import com.msm.core.commons.ValueConvertFactory;
 import com.msm.core.filter.domain.FilterCondition;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.BooleanExpression;
@@ -18,7 +18,7 @@ public abstract class AbstractOperatorHandler implements OperatorHandler {
     protected abstract BooleanExpression doHandle(Path<?> path, Object value, FilterCondition condition);
 
     public static <T> T cast(Class<?> targetType, Object value) {
-        return DataConvertFactory.convert(targetType, value);
+        return ValueConvertFactory.convert(targetType, value);
     }
 
     protected final IllegalArgumentException typeError(String operator, Path<?> path, FilterCondition c) {

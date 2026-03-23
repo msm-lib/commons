@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Attribute {
-    private String attributeType;
+    private String fieldType;
     private String fieldName;
     private Boolean isRequired;
     private String sourceAttribute;
@@ -26,5 +26,5 @@ public class Attribute {
     private String formatValue;
     private String formula;
     private Boolean isSystem;
-    private String objectName;
+    private String objectType;
 }

@@ -1,6 +1,6 @@
 package com.msm.core.filter.cache;
 
-import com.msm.core.commons.DataConvertFactory;
+import com.msm.core.commons.ValueConvertFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -43,7 +43,7 @@ public final class EntityMetadataFactory {
                 map.put(fullPath, new FieldMetadata(
                         fullPath,
                         fieldType,
-                        Comparable.class.isAssignableFrom(DataConvertFactory.normalizeDataType(fieldType)),
+                        Comparable.class.isAssignableFrom(ValueConvertFactory.normalizeDataType(fieldType)),
                         Objects.equals(fieldType, String.class),
                         fieldType.isEnum(),
                         jsonType)

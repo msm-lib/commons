@@ -5,6 +5,7 @@ import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class EntityClassFactory {
@@ -23,7 +24,7 @@ public class EntityClassFactory {
 
     public Class<?> resolve(String name) {
         Class<?> cls = entityMap.get(name.toLowerCase());
-        if (cls == null) {
+        if (Objects.isNull(cls)) {
             throw new IllegalArgumentException("Unknown entity: " + name);
         }
         return cls;

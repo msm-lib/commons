@@ -1,12 +1,13 @@
 package com.msm.core.commons;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 public final class CollectionUtils {
 
-    public static <T> Collection<T> emptyCollection() {
+    public <T> Collection<T> emptyCollection() {
         return Collections.emptyList();
     }
 
@@ -70,6 +71,26 @@ public final class CollectionUtils {
             map.put(keyMapper.apply(o), valueMapper.apply(o));
         });
         return map;
+    }
+
+    public <K, V> Map<K, V> newHashMap() {
+        return new HashMap<>();
+    }
+
+    public <K, V> Map<K, V> newConcurrentHashMap() {
+        return new ConcurrentHashMap<>();
+    }
+
+    public <K, V> Map<K, V> newHashMap(K key, V value) {
+        return new HashMap<>() {{
+            put(key, value);
+        }};
+    }
+
+    public <K, V> Map<K, V> newConcurrentHashMap(K key, V value) {
+        return new ConcurrentHashMap<>() {{
+            put(key, value);
+        }};
     }
 
     CollectionUtils() {}

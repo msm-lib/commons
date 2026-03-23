@@ -58,6 +58,19 @@ public final class StringUtils {
         return isBlank(value) ? Utils.O.getSupplier(defaultSupplier) : value;
     }
 
+    public boolean equalIgnoreCase(final String value1, final String value2) {
+        if (Objects.equals(value1, value2)) {
+            return true;
+        }
+        if (Objects.isNull(value1) || Objects.isNull(value2)) {
+            return false;
+        }
+        if (length(value1) != length(value2)) {
+            return false;
+        }
+        return Objects.equals(lowCase(value1), lowCase(value2));
+    }
+
     public String toString(ByteBuffer buffer, int offset, int len) {
         StringBuilder stringBuilder = new StringBuilder();
         int end = offset + len;

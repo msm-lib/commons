@@ -18,12 +18,12 @@ public abstract class AbstractDynamicRecordService implements DynamicRecordServi
     private final AdvancedFilterService filterService;
 
     @Override
-    public <T> T save(String objectName, Map<String, Object> payload) throws Exception {
+    public <T> T save(String objectName, Map<String, Object> payload) {
         HookContext hookContext = HookContext.ofDefault(objectName, "create", payload);
         hookEngine.execute(objectName, hookContext);
         T returnObject = saveObject(objectName, payload);
         hookContext.nextPhase(HookPhase.BEFORE_EVENT);
-//        hookContext.setRecordId((UUID) Utils.O.getProperty(returnObject, "id"));
+        hookContext.setCurrentRecord(returnObject);
         hookEngine.execute(objectName, hookContext);
         hookContext.nextPhase(HookPhase.AFTER_EVENT);
         hookEngine.execute(objectName, hookContext);
@@ -31,32 +31,33 @@ public abstract class AbstractDynamicRecordService implements DynamicRecordServi
     }
 
     @Override
-    public void update(String objectName, Object id, Map<String, Object> payload) throws Exception {
-        Object currentObject = getObjectAttributeMapById(objectName, id);
+    public void update(String objectName, Object id, Map<String, Object> payload) {
+        Object currentObject = getObjectById(objectName, id);
         HookContext hookContext = HookContext.ofDefault(objectName, "update", payload);
-        hookContext.setOldRecord(currentObject);
+        hookContext.setCurrentRecord(currentObject);
         hookEngine.execute(objectName, hookContext);
         updateObject(objectName, id, currentObject, payload);
         hookContext.nextPhase(HookPhase.BEFORE_EVENT);
-//        hookContext.setRecordId(UUID.fromString(payload.get("id").toString()));
         hookEngine.execute(objectName, hookContext);
         hookContext.nextPhase(HookPhase.AFTER_EVENT);
         hookEngine.execute(objectName, hookContext);
     }
 
     @Override
-    public void delete(String objectName, Object id) throws Exception {
-        Map<String, Object> payload = getObjectAttributeMapById(objectName, id);
+    public void delete(String objectName, Object id) {
+        Object currentObject = getObjectById(objectName, id);
+        Map<String, Object> payload = Utils.CL.newHashMap(Constants.OBJECT_PK, id);
         HookContext hookContext = HookContext.ofDefault(objectName, "delete", payload);
+        hookContext.setCurrentRecord(currentObject);
         hookEngine.execute(objectName, hookContext);
-        deleteObject(objectName, id, payload);
+        deleteObject(objectName, id);
         hookContext.nextPhase(HookPhase.BEFORE_EVENT);
         hookEngine.execute(objectName, hookContext);
         hookContext.nextPhase(HookPhase.AFTER_EVENT);
         hookEngine.execute(objectName, hookContext);
     }
 
-    private <T> T getObjectAttributeMapById(String objectName, Object valId) throws Exception {
+    private <T> T getObjectById(String objectName, Object valId) {
         ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
                 .builder()
                 .objectInfo(ObjectFilterRequest.ObjectInfo.of(objectName))
@@ -71,7 +72,7 @@ public abstract class AbstractDynamicRecordService implements DynamicRecordServi
         return Utils.CL.isNotEmpty(result.getContents()) ? (T) Utils.O.toObject(result.getContents().getFirst(), returnClass) : null;
     }
 
-    public abstract <T> T saveObject(String objectName, Map<String, Object> payload);
-    public abstract <T> void updateObject(String objectName, Object id, T oldData, Map<String, Object> payload);
-    public abstract void deleteObject(String objectName, Object id, Map<String, Object> payload);
+    public abstract <X> X saveObject(String objectName, Map<String, Object> payload);
+    public abstract <X> void updateObject(String objectName, Object id, X oldData, Map<String, Object> payload);
+    public abstract <X> void deleteObject(String objectName, Object id);
 }

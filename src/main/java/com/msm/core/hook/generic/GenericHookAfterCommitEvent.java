@@ -3,6 +3,7 @@ package com.msm.core.hook.generic;
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
 import com.msm.core.hook.HookPhase;
+import com.msm.core.hook.ObjectHookMetaDataFactory;
 import com.msm.core.hook.ObjectHookMetadata;
 
 public abstract class GenericHookAfterCommitEvent implements ObjectHookMetadata {
@@ -14,7 +15,7 @@ public abstract class GenericHookAfterCommitEvent implements ObjectHookMetadata 
 
     @Override
     public String type() {
-        return Utils.STR.format(Constants.OBJECT_HOOK_KEY, objectName(), phase());
+        return ObjectHookMetaDataFactory.buildKey(objectName(), action(), phase().name());
     }
 
     @Override

@@ -25,5 +25,5 @@ public interface HookEngine {
      *   <li>Use {@code ctx} to share data</li>
      * </ul>
      */
-    void execute(String objectName, HookContext ctx) throws Exception;
+    void execute(String objectName, HookContext ctx);
 }

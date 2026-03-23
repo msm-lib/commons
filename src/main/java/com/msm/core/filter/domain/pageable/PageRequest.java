@@ -27,7 +27,7 @@ public class PageRequest {
 
     @JsonIgnore
     public int getOffset() {
-        return page * size;
+        return (page - 1) * size;
     }
     @JsonIgnore
     public int getLimit() {

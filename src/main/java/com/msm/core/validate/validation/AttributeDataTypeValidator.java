@@ -1,11 +1,10 @@
 package com.msm.core.validate.validation;
 
 import com.msm.core.commons.Constants;
-import com.msm.core.commons.DataConvertFactory;
+import com.msm.core.commons.ValueConvertFactory;
+import com.msm.core.commons.GenericTypeResolverFactory;
 import com.msm.core.commons.Utils;
 import com.msm.core.filter.EntityClassFactory;
-import com.msm.core.filter.cache.EntityMetadataFactory;
-import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.validate.domain.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,11 +22,8 @@ public class AttributeDataTypeValidator implements AttributeValidator {
 
     private boolean isDataTypeValid(Attribute attr, Object data) {
         try {
-            FieldMetadata fieldMetadata = EntityMetadataFactory.get(entityClassFactory.resolve(attr.getObjectName()), attr.getFieldName());
-            if(Objects.nonNull(fieldMetadata)){
-                Class<?> aClass = fieldMetadata.javaType();
-                DataConvertFactory.convert(aClass, data);
-            }
+            Class<?> aClass = GenericTypeResolverFactory.resolve(attr.getFieldType()).getRawClass();
+            ValueConvertFactory.convert(aClass, data);
             return true;
         } catch (Exception e) {
             return false;

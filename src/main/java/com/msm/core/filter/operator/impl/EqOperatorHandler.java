@@ -24,9 +24,9 @@ public class EqOperatorHandler extends AbstractOperatorHandler {
             throw typeError(FilterOperator.EQUALS.name(), path, c);
         }
         if (Objects.nonNull(value)) {
-            Object typedValue = cast(exp.getType(), value);
+            FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), c.getField());
+            Object typedValue = cast(meta.javaType(), value);
             List<String> parts = PathCache.pathAsArray(c.getField());
-            FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), parts.getFirst());
             if (meta.jsonType()) {
                 EntityPathBase<?> tEntityPathBase = EntityPathResolver.resolve(path.getRoot().getType());
                 FieldMetadata metadata = EntityMetadataFactory.getFieldMetadata(path.getRoot().getType(), parts);
