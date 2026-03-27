@@ -5,6 +5,7 @@ import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.msm.core.filter.json.JsonFieldResolver;
+import com.msm.core.filter.utils.ResolveUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
@@ -25,7 +26,7 @@ public final class DynamicSelectBuilder {
         Map<String, Expression<?>> result = new HashMap<>();
         List<String> fieldNames = getOrSelectAll(fields, root);
         for (String field : fieldNames) {
-            result.computeIfAbsent(field, f -> resolveExpression(f, root, joinResolver));
+            result.computeIfAbsent(field, f -> ResolveUtils.resolveExpression(f, root, joinResolver));
         }
 
         return result;
@@ -40,9 +41,9 @@ public final class DynamicSelectBuilder {
         PathBuilder<?> current = root;
 
         FieldMetadata fieldMetadata = EntityMetadataFactory.get(root.getType(), parts[0]);
-        if(fieldMetadata.jsonType()) {
+        if(fieldMetadata.isJsonType()) {
             Expression<?> expression = JsonFieldResolver.resolve(root, field);
-            Expressions.as(expression, fieldMetadata.field());
+            Expressions.as(expression, fieldMetadata.getField());
             return expression;
         }
 

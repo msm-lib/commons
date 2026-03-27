@@ -2,8 +2,8 @@ package com.msm.core.filter.cache;
 
 import com.msm.core.commons.ValueConvertFactory;
 import com.msm.core.filter.domain.FieldMetadata;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
@@ -11,6 +11,7 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
+@Slf4j
 public final class EntityMetadataFactory {
     private static final Map<Class<?>, Map<String, FieldMetadata>> CACHE = new ConcurrentHashMap<>();
 
@@ -29,7 +30,7 @@ public final class EntityMetadataFactory {
     private static Map<String, FieldMetadata> scan(Class<?> entityClass) {
         Map<String, FieldMetadata> map = new HashMap<>();
         scanRecursive(entityClass, "", map);
-
+        log.error(map.toString());
         return map;
     }
 
@@ -40,17 +41,28 @@ public final class EntityMetadataFactory {
                 Class<?> fieldType = field.getType();
                 String fullPath = prefix.isEmpty() ? field.getName() : prefix + "." + field.getName();
                 boolean jsonType = isJsonField(field);
+                boolean isRelation = isRelation(field);
                 map.put(fullPath, new FieldMetadata(
                         fullPath,
                         fieldType,
                         Comparable.class.isAssignableFrom(ValueConvertFactory.normalizeDataType(fieldType)),
                         Objects.equals(fieldType, String.class),
                         fieldType.isEnum(),
-                        jsonType)
+                        jsonType,
+                        fieldType.isAnnotationPresent(Embeddable.class),
+                        isRelation)
                 );
 
                 // Entity relation → recurse
                 if (fieldType.isAnnotationPresent(Entity.class)) {
+                    scanRecursive(fieldType, fullPath, map);
+                }
+
+//                if (isRelation) {
+//                    scanRecursive(fieldType, fullPath, map);
+//                }
+
+                if (fieldType.isAnnotationPresent(Embeddable.class)) {
                     scanRecursive(fieldType, fullPath, map);
                 }
             }
@@ -78,18 +90,24 @@ public final class EntityMetadataFactory {
                 || f.getType().getName().contains("PGobject");
     }
 
+    private static boolean isRelation(Field f) {
+        return f.isAnnotationPresent(ManyToOne.class)
+                || f.isAnnotationPresent(OneToMany.class)
+                || f.isAnnotationPresent(OneToOne.class);
+    }
+
     public static FieldMetadata getFieldMetadata(Class<?> clazz, List<String> parts) {
 
         FieldMetadata fieldMetadata = get(clazz, parts.getFirst());
         if(parts.size() == 1) {
             return fieldMetadata;
         }
-        Class<?> entityClass = fieldMetadata.javaType();
+        Class<?> entityClass = fieldMetadata.getJavaType();
         for (int i = 1; i <= parts.size() - 1; i++) {
             FieldMetadata meta = get(entityClass, parts.get(i));
             if(Objects.nonNull(meta)) {
                 fieldMetadata = meta;
-                entityClass = meta.javaType();
+                entityClass = meta.getJavaType();
             }
         }
         return fieldMetadata;

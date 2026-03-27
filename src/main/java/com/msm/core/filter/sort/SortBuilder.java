@@ -60,6 +60,6 @@ public final class SortBuilder {
                 : fieldPath;
 
         FieldMetadata f = EntityMetadataFactory.get(rootEntity, rootField);
-        return f.jsonType();
+        return f.isJsonType();
     }
 }

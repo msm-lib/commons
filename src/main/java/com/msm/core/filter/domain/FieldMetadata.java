@@ -1,10 +1,21 @@
 package com.msm.core.filter.domain;
 
-public record FieldMetadata(
-        String field,
-        Class<?> javaType,
-        boolean comparable,
-        boolean stringLike,
-        boolean isEnum,
-        boolean jsonType
-) {}
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class FieldMetadata{
+    private String field;
+    private Class<?> javaType;
+    private boolean comparable;
+    private boolean isStringLike;
+    private boolean isEnum;
+    private boolean isJsonType;
+    private boolean isEmbedded;
+    private boolean isRelation;
+}

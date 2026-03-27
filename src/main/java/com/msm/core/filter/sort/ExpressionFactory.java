@@ -13,7 +13,7 @@ public final class ExpressionFactory {
 
     public static Expression<?> toSortable(Path<?> path, Sort sort) {
         FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), sort.getAttribute());
-        Class<?> type = meta.javaType();
+        Class<?> type = meta.getJavaType();
 
         // String
         if (String.class.equals(type)) {
