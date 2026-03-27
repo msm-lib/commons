@@ -104,7 +104,7 @@ public class AdvancedFilterService {
             List<String> fields = searchRequest.getFields();
             if(Utils.CL.isNotEmpty(fields) && Utils.STR.isNotBlank(searchRequest.getKeyword())) {
                 FilterGroup.FilterGroupBuilder filterGroup = FilterGroup.builder();
-                filterGroup.operator(LogicalOperator.AND);
+                filterGroup.operator(LogicalOperator.OR);
                 List<FilterObject> filterConditionList = fields.stream().map(field -> (FilterObject)FilterCondition
                         .builder()
                         .field(field)
