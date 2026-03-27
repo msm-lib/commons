@@ -1,4 +1,6 @@
-package com.msm.core.hook;
+package com.msm.core.hook.common;
+
+import com.msm.core.hook.context.HookContext;
 
 /**
  * Defines the contract for a hook execution engine.
@@ -20,10 +22,9 @@ public interface HookEngine {
      * Executes all hooks associated with the specified object name.
      * The implementation is expected to:
      * <ul>
-     *   <li>Resolve hooks based on {@code objectName}</li>
      *   <li>Execute them in order</li>
      *   <li>Use {@code ctx} to share data</li>
      * </ul>
      */
-    void execute(String objectName, HookContext ctx);
+    void execute(HookContext ctx);
 }

@@ -1,6 +1,6 @@
 package com.msm.core.hook;
 
-import com.msm.core.commons.Handler;
+import com.msm.core.hook.common.HookHandler;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

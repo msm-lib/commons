@@ -11,6 +11,25 @@ public final class CollectionUtils {
         return Collections.emptyList();
     }
 
+    @SafeVarargs
+    public final <T> List<T> newArrayList(final T... elements) {
+        if(Objects.isNull(elements)) {
+            return new ArrayList<>();
+        }
+        List<T> returnList = new ArrayList<>(elements.length);
+        Collections.addAll(returnList, elements);
+        return returnList;
+    }
+
+    public <T> List<T> newArrayList(final Collection<T> elements) {
+        if(Objects.isNull(elements)) {
+            return new ArrayList<>();
+        }
+        List<T> returnList = new ArrayList<>(elements.size());
+        returnList.addAll(elements);
+        return returnList;
+    }
+
     public <T> Collection<T> defaultIfEmpty(final Collection<T> input, final Supplier<Collection<T>> defaultSupplier) {
         Objects.requireNonNull(defaultSupplier);
         return isEmpty(input) ? defaultSupplier.get() : input;
