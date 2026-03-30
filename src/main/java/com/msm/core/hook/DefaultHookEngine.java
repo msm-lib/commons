@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Default implementation of {@link HookEngine} responsible for resolving
@@ -107,6 +108,7 @@ public final class DefaultHookEngine implements HookEngine {
 
         List<HookHandler> hookHandlers = Utils.CL.emptyIfNull(hooks)
                 .stream()
+                .filter(hook -> Objects.nonNull(hook.getCondition()) && hook.getCondition().test(ctx))
                 .sorted(Comparator.comparingInt(o -> o.getDefinition().getOrder()))
                 .map(hook -> hook.getDefinition().getHookHandler())
                 .toList();

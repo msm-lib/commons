@@ -1,5 +1,6 @@
 package com.msm.core.hook.context;
 
+import com.msm.core.commons.Converter;
 import com.msm.core.hook.common.ExecutionContext;
 import lombok.*;
 
@@ -17,6 +18,8 @@ public class ActionRequest implements ExecutionContext {
     private String action;
     private Object objectId;
     private Map<String, Object> payload;
+    @Builder.Default
+    private Converter<ActionRequest, HookContext> hookContextConvertStrategy = new DefaultHookContextConvertStrategy();
     @Builder.Default
     private Map<ContextKey<?>, Object> contextData = new HashMap<>();
 

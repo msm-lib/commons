@@ -21,7 +21,7 @@ public class DefaultActionExecutor implements ActionExecutor {
             throw new UnsupportedActionException("Unsupported action: " + request.getAction());
         }
 
-        HookContext hookContext = ActionHookContextFactory.from(request);
+        HookContext hookContext = request.getHookContextConvertStrategy().convert(request);
         hookContext.setPhase(HookPhase.BEFORE_EVENT);
         hookEngine.execute(hookContext);
         T returnObject = handler.handle(request);

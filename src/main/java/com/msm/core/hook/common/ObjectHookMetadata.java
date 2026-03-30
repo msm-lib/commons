@@ -6,4 +6,7 @@ import com.msm.core.hook.HookPhase;
 public interface ObjectHookMetadata extends ExecutionMetadata {
     HookPhase getHookPhase();
     HookDefinition getDefinition();
+    default HookCondition getCondition() {
+        return ctx -> true;
+    }
 }
