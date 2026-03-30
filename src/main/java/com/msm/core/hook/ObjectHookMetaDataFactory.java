@@ -9,7 +9,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 @Slf4j
-@SuppressWarnings("unchecked")
 public final class ObjectHookMetaDataFactory {
     private static final Map<String, List<ObjectHookMetadata>> INSTANCES = new ConcurrentHashMap<>();
 

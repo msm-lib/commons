@@ -15,7 +15,7 @@ public class DefaultActionExecutor implements ActionExecutor {
 
     @Override
     public <T> T execute(ActionRequest request) {
-
+        Objects.requireNonNull(request.getAction(), "The action cannot be null");
         ActionHandler handler = ActionHandlerFactory.getHandler(request.getAction());
         if (Objects.isNull(handler)) {
             throw new UnsupportedActionException("Unsupported action: " + request.getAction());

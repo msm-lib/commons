@@ -17,6 +17,7 @@ public class ActionRequest implements ExecutionContext {
     private String objectName;
     private String action;
     private Object objectId;
+    private Object additionalParameter;
     private Map<String, Object> payload;
     @Builder.Default
     private Converter<ActionRequest, HookContext> hookContextConvertStrategy = new DefaultHookContextConvertStrategy();
