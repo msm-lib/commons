@@ -11,8 +11,8 @@ public class ActionHookContextFactory {
         ctx.setPayload(req.getPayload());
 
         //Copy context data
-        if(Utils.CL.isNotEmpty(req.getContextData())) {
-            ctx.getContextData().putAll(req.getContextData());
+        if(Utils.CL.isNotEmpty(req.getContextKey())) {
+            ctx.getContextKey().putAll(req.getContextKey());
         }
 
         return ctx;

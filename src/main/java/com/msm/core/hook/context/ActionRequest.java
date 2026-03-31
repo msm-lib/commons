@@ -22,10 +22,10 @@ public class ActionRequest implements ExecutionContext {
     @Builder.Default
     private Converter<ActionRequest, HookContext> hookContextConvertStrategy = new DefaultHookContextConvertStrategy();
     @Builder.Default
-    private Map<ContextKey<?>, Object> contextData = new HashMap<>();
+    private Map<ContextKey<?>, Object> contextKey = new HashMap<>();
 
     @Override
-    public Map<ContextKey<?>, Object> getContextData() {
-        return contextData;
+    public Map<ContextKey<?>, Object> getContextKey() {
+        return contextKey;
     }
 }

@@ -7,5 +7,5 @@ import java.util.Map;
 public interface ExecutionMetadata {
     String getObjectName();
     String getAction();
-    Map<ContextKey<?>, Object> getContextData();
+    Map<ContextKey<?>, Object> getContextKey();
 }

@@ -1,16 +1,11 @@
 package com.msm.core.hook;
 
 import com.msm.core.commons.Utils;
-import com.msm.core.hook.common.AsyncExecutor;
-import com.msm.core.hook.common.HookEngine;
-import com.msm.core.hook.common.HookHandler;
-import com.msm.core.hook.common.ObjectHookMetadata;
+import com.msm.core.hook.common.*;
 import com.msm.core.hook.context.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * Default implementation of {@link HookEngine} responsible for resolving
@@ -66,58 +61,20 @@ public final class DefaultHookEngine implements HookEngine {
      *
      * @param ctx the {@code HookContext} containing execution state and shared data
      */
-//    public void execute(HookContext ctx) {
-//        List<String> keys = hookKeyStrategy.build(ctx);
-//
-//        List<ObjectHookMetadata> hooks = keys
-//                .stream()
-//                .filter(ObjectHookMetaDataFactory::contains)
-//                .flatMap(key -> ObjectHookMetaDataFactory.get(key).stream())
-//                .distinct()
-//                .toList();
-//
-////        List<ObjectHookMetadata> hooks = ObjectHookMetaDataFactory.getOrDefault(ctx.hookMetaDataKey(), ctx.defaultHookMetaDataKey());
-//        if(Utils.CL.isEmpty(hooks)) {
-//            log.warn("Event hook not found for object: {}", objectName);
-//            return;
-//        }
-//        List<HookHandler> handlers = Utils.CL.emptyIfNull(hooks)
-//                .stream()
-//                .sorted(Comparator.comparingInt(o -> o.definition().getOrder()))
-//                .map(hook -> hook.definition().getHookHandler())
-//                .toList();
-//
-//        if (HookPhase.AFTER_COMMIT_EVENT.equals(ctx.getPhase())) {
-//            asyncExecutor.executeAsync(handlers, ctx.forAfterCommit());
-//        } else {
-//            for (HookHandler h : handlers) {
-//                h.handle(ctx, null);
-//            }
-//        }
-//    }
-
-
     public void execute(HookContext ctx) {
         String key = KeyDimensionResolver.resolve(ctx);
-        List<ObjectHookMetadata> hooks = ObjectHookMetaDataFactory.get(key);
+        List<HookDefinitionHandler> hooks = HookDefinitionHandlerFactory.get(key);
         if(Utils.CL.isEmpty(hooks)) {
             log.warn("Event hook not found for object: {}", ctx.getObjectName());
             key = KeyDimensionResolver.getDefaultKey(ctx);
-            hooks = ObjectHookMetaDataFactory.get(key);
+            hooks = HookDefinitionHandlerFactory.get(key);
         }
 
-        List<HookHandler> hookHandlers = Utils.CL.emptyIfNull(hooks)
-                .stream()
-                .filter(hook -> Objects.nonNull(hook.getCondition()) && hook.getCondition().test(ctx))
-                .sorted(Comparator.comparingInt(o -> o.getDefinition().getOrder()))
-                .map(hook -> hook.getDefinition().getHookHandler())
-                .toList();
-
         if (HookPhase.AFTER_COMMIT_EVENT.equals(ctx.getPhase())) {
-            asyncExecutor.executeAsync(hookHandlers, ctx);
+            asyncExecutor.executeAsync(hooks, ctx);
         } else {
-            for (HookHandler h : hookHandlers) {
-                h.handle(ctx, null);
+            for (HookDefinitionHandler h : hooks) {
+                h.execute(ctx);
             }
         }
     }

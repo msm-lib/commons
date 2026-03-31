@@ -1,8 +1,6 @@
 package com.msm.core.hook.context;
 
-import com.msm.core.commons.Constants;
 import com.msm.core.hook.HookPhase;
-import com.msm.core.hook.ObjectHookMetaDataFactory;
 import com.msm.core.hook.common.ExecutionContext;
 import lombok.*;
 
@@ -59,32 +57,22 @@ public class HookContext implements ExecutionContext {
         this.phase = nextPPhase;
     }
 
-    protected String hookMetaDataKey() {
-        return ObjectHookMetaDataFactory.buildKey(getObjectName(), getAction(), getPhase().name());
-    }
+    private Map<ContextKey<?>, Object> contextKey = new LinkedHashMap<>();
 
-    protected String defaultHookMetaDataKey() {
-        return ObjectHookMetaDataFactory.buildKey(Constants.GENERIC_OBJECT_HOOK_NAME, getAction(), getPhase().name());
-    }
-
-
-
-    private Map<ContextKey<?>, Object> contextData = new LinkedHashMap<>();
-
-    public <T> void put(ContextKey<T> key, T value) {
-        contextData.put(key, value);
-    }
-
-    public <T> T get(ContextKey<T> key) {
-        return (T) contextData.get(key);
-    }
+//    public <T> void put(ContextKey<T> key, T value) {
+//        contextKey.put(key, value);
+//    }
+//
+//    public <T> T get(ContextKey<T> key) {
+//        return (T) contextKey.get(key);
+//    }
 
 //    public <T> Optional<T> getOptional(ContextKey<T> key) {
 //        return Optional.ofNullable(get(key));
 //    }
 
     @Override
-    public Map<ContextKey<?>, Object> getContextData() {
-        return contextData;
+    public Map<ContextKey<?>, Object> getContextKey() {
+        return contextKey;
     }
 }

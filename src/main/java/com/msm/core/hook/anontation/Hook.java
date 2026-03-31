@@ -14,4 +14,5 @@ public @interface Hook {
     String object();
     String action();
     int order() default 0;
+    ContextKey[] keyContexts() default {};
 }

@@ -11,11 +11,11 @@ public interface ExecutionContext extends ExecutionMetadata {
     Map<String, Object> getPayload();
 
     default  <T> void addContextKey(ContextKey<T> key, T value) {
-        getContextData().put(key, value);
+        getContextKey().put(key, value);
     }
 
     default  <T> T getContextKey(ContextKey<T> key) {
-        return (T) getContextData().get(key);
+        return (T) getContextKey().get(key);
     }
 
     default  <T> Optional<T> getOptional(ContextKey<T> key) {

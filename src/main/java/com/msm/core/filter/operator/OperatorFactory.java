@@ -1,5 +1,6 @@
 package com.msm.core.filter.operator;
 
+import com.msm.core.exceptions.UnsupportedException;
 import com.msm.core.filter.domain.FilterOperator;
 import com.msm.core.filter.operator.impl.*;
 
@@ -19,6 +20,7 @@ public class OperatorFactory {
         register(FilterOperator.LESS_THAN, new LtOperatorHandler());
         register(FilterOperator.LESS_THAN_OR_EQUAL, new LteOperatorHandler());
         register(FilterOperator.IN, new InOperatorHandler());
+        register(FilterOperator.NOT_IN, new NotInOperatorHandler());
         register(FilterOperator.BETWEEN, new BetweenOperatorHandler());
     }
 
@@ -31,7 +33,7 @@ public class OperatorFactory {
         if(Objects.nonNull(handler)){
             return handler;
         }
-        throw new IllegalArgumentException("Unsupported operator: " + operator);
+        throw new UnsupportedException("Unsupported operator: " + operator);
     }
 
 }

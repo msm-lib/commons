@@ -1,6 +1,6 @@
 package com.msm.core.hook;
 
-import com.msm.core.exceptions.UnsupportedActionException;
+import com.msm.core.exceptions.UnsupportedException;
 import com.msm.core.hook.common.HookEngine;
 import com.msm.core.hook.common.ActionExecutor;
 import com.msm.core.hook.common.ActionHandler;
@@ -18,7 +18,7 @@ public class DefaultActionExecutor implements ActionExecutor {
         Objects.requireNonNull(request.getAction(), "The action cannot be null");
         ActionHandler handler = ActionHandlerFactory.getHandler(request.getAction());
         if (Objects.isNull(handler)) {
-            throw new UnsupportedActionException("Unsupported action: " + request.getAction());
+            throw new UnsupportedException("Unsupported action: " + request.getAction());
         }
 
         HookContext hookContext = request.getHookContextConvertStrategy().convert(request);
