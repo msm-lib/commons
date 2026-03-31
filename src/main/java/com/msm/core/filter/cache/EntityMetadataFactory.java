@@ -29,16 +29,21 @@ public final class EntityMetadataFactory {
 
     private static Map<String, FieldMetadata> scan(Class<?> entityClass) {
         Map<String, FieldMetadata> map = new HashMap<>();
-        scanRecursive(entityClass, "", map);
-        log.error(map.toString());
+        Set<String> objectTraversal = new HashSet<>();
+        scanRecursive(entityClass, "", map, objectTraversal);
         return map;
     }
 
-    private static void scanRecursive(Class<?> type, String prefix, Map<String, FieldMetadata> map) {
+    private static void scanRecursive(Class<?> type, String prefix, Map<String, FieldMetadata> map, Set<String> objectTraversal) {
         Class<?> current = type;
+        if (objectTraversal.contains(current.getName())) {
+            return;
+        }
+        objectTraversal.add(current.getName());
         while (current != null && current != Object.class) {
             for (Field field : current.getDeclaredFields()) {
                 Class<?> fieldType = field.getType();
+                if(isSerial(field)) continue;
                 String fullPath = prefix.isEmpty() ? field.getName() : prefix + "." + field.getName();
                 boolean jsonType = isJsonField(field);
                 boolean isRelation = isRelation(field);
@@ -54,16 +59,16 @@ public final class EntityMetadataFactory {
                 );
 
                 // Entity relation → recurse
-                if (fieldType.isAnnotationPresent(Entity.class)) {
-                    scanRecursive(fieldType, fullPath, map);
-                }
+//                if (fieldType.isAnnotationPresent(Entity.class)) {
+//                    scanRecursive(fieldType, fullPath, map, objectTraversal);
+//                }
 
 //                if (isRelation) {
 //                    scanRecursive(fieldType, fullPath, map);
 //                }
 
                 if (fieldType.isAnnotationPresent(Embeddable.class)) {
-                    scanRecursive(fieldType, fullPath, map);
+                    scanRecursive(fieldType, fullPath, map, objectTraversal);
                 }
             }
 
@@ -94,6 +99,10 @@ public final class EntityMetadataFactory {
         return f.isAnnotationPresent(ManyToOne.class)
                 || f.isAnnotationPresent(OneToMany.class)
                 || f.isAnnotationPresent(OneToOne.class);
+    }
+
+    private static boolean isSerial(Field f) {
+        return f.getName().equals("serialVersionUID");
     }
 
     public static FieldMetadata getFieldMetadata(Class<?> clazz, List<String> parts) {
