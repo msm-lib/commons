@@ -2,7 +2,6 @@ package com.msm.core.filter;
 
 import com.msm.core.commons.Utils;
 import com.msm.core.filter.domain.*;
-import com.msm.core.filter.domain.pageable.PageRequest;
 import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -11,7 +10,11 @@ import com.querydsl.core.types.dsl.EntityPathBase;
 import com.querydsl.core.types.dsl.PathBuilder;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.EntityType;
+import jakarta.persistence.metamodel.SingularAttribute;
 import lombok.Data;
+import org.hibernate.metamodel.model.domain.internal.SingularAttributeImpl;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -36,16 +39,28 @@ public class AdvancedFilterService {
 
     public <T> PageResponse<T> filter(ObjectFilterRequest objectFilterRequest) {
         resolveSearchFilter(objectFilterRequest);
-        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityClassFactory.resolve(objectFilterRequest.getObjectInfo().getName()));
+        EntityType<?> entityType = entityClassFactory.getEntityType(objectFilterRequest.getObjectInfo().getName());
+        EntityPathBase<T> tEntityPathBase = EntityPathResolver.resolve((Class<T>) entityType.getJavaType());
         PathBuilder<T> root = new PathBuilder<>(tEntityPathBase.getType(), tEntityPathBase.getMetadata());
         BooleanExpression predicate = predicateFactory.create(objectFilterRequest.getFilters(), root, joinResolver);
-        Map<String, Expression<?>> selectExpr = DynamicSelectBuilder.build(objectFilterRequest.getReturnFields(), root, joinResolver);
+        Map<String, Expression<?>> selectExpr;
+        if(Utils.CL.isEmpty(objectFilterRequest.getReturnFields())) {
+            selectExpr = new HashMap<>();
+            for (SingularAttribute<?,?> attr : entityType.getSingularAttributes()) {
+                Attribute.PersistentAttributeType type = ((SingularAttributeImpl<?,?>) attr).getAttributeClassification().getJpaClassification();
+                if(Attribute.PersistentAttributeType.BASIC.equals(type)) {
+                    selectExpr.put(attr.getName(), root.get(attr.getName()));
+                }
+            }
+        } else {
+            selectExpr = DynamicSelectBuilder.build(objectFilterRequest.getReturnFields(), root, joinResolver);
+        }
 
         JPAQueryBuilder<Tuple> queryBuilder = JPAQueryBuilder.create(queryFactory, root, predicate, joinResolver, selectExpr.values().stream().toList(), objectFilterRequest.getPageRequest());
         JPAQuery<Tuple> dataQuery0 = queryBuilder.selectQuery();
         List<Tuple> tuples = dataQuery0.fetch();
 
-        //Curent version not support query aggregate
+        //Current version not support query aggregate
 //        Map<String, Object> aggregateResult = null;
 //        if (objectFilter.getAggregate() != null && !objectFilter.getAggregate().isEmpty()) {
 //            aggregateResult = executeAggregate(tEntityPathBase, objectFilter.getAggregate(), root, predicate);
@@ -130,7 +145,8 @@ public class AdvancedFilterService {
                 if(Utils.CL.isEmpty(filterConditionList)) {
                     filter.setFilters(searchFilterGroup);
                 } else {
-                    filterConditionList.add(searchFilterGroup);
+                    FilterGroup newSearchFilterGroup = FilterGroup.builder().operator(LogicalOperator.AND).conditions(Utils.CL.newArrayList(searchFilterGroup)).build();
+                    currentFilterGroup.getConditions().add(newSearchFilterGroup);
                 }
             }
         }

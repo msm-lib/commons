@@ -7,18 +7,18 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class HookDefinitionHandlerFactory {
-    private final static Map<String, List<HookDefinitionHandler>> INSTANCES = new ConcurrentHashMap<>();
+    private final static Map<String, List<HookDefinitionExecutor>> INSTANCES = new ConcurrentHashMap<>();
 
-    public static void register(String compositeKey, HookDefinitionHandler instance) {
+    public static void register(String compositeKey, HookDefinitionExecutor instance) {
         INSTANCES.computeIfAbsent(compositeKey, key -> new ArrayList<>()).add(instance);
     }
 
-    public static void register(String compositeKey, List<HookDefinitionHandler> instances) {
+    public static void register(String compositeKey, List<HookDefinitionExecutor> instances) {
         INSTANCES.put(compositeKey, instances);
     }
 
-    public static List<HookDefinitionHandler> get(String key) {
-        List<HookDefinitionHandler> service = INSTANCES.get(key);
+    public static List<HookDefinitionExecutor> get(String key) {
+        List<HookDefinitionExecutor> service = INSTANCES.get(key);
         if (Objects.isNull(service)) {
             log.warn("No hooks found for key: {}", key);
             return Collections.emptyList();

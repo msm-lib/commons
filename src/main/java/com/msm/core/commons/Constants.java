@@ -4,7 +4,9 @@ public final class Constants {
 
     public static final String OBJECT_PK = "id";
     public static final String OBJECT_HOOK_KEY = "{0}:{1}:{2}";
-    public static final String GENERIC_OBJECT_HOOK_NAME = "GenericObjectHook";
+    public static final String ACTION_PREFIX = "Action";
+    public static final String HOOK_PREFIX = "Hook";
+    public static final String GENERIC_OBJECT_NAME = "GenericObject";
     public static final String GENERIC_OBJECT_RECORD_TYPE = "RecordTypeHook";
 
     public static final String INVALID_DATA_TYPE = "{0} loại dữ liệu không hợp lệ";

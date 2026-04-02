@@ -1,6 +1,8 @@
 package com.msm.core.hook.context;
 
 import com.msm.core.commons.Constants;
+import com.msm.core.commons.Utils;
+import com.msm.core.hook.anontation.Handler;
 import com.msm.core.hook.anontation.Hook;
 import com.msm.core.hook.anontation.ContextKey;
 
@@ -11,12 +13,13 @@ public final class KeyDimensionResolver {
 
     public static String resolve(Hook hook) {
         Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
+        dims.put(ContextKeys.HOOK_PREFIX, Constants.HOOK_PREFIX);
         dims.put(ContextKeys.OBJECT_NAME, hook.object());
         dims.put(ContextKeys.ACTION, hook.action());
         dims.put(ContextKeys.PHASE, hook.phase().name());
 
         for (ContextKey kv : hook.keyContexts()) {
-            dims.put( com.msm.core.hook.context.ContextKey.of(kv.key()), kv.value());
+            dims.put(com.msm.core.hook.context.ContextKey.of(kv.key()), kv.value());
         }
 
         return build(dims.values());
@@ -24,6 +27,7 @@ public final class KeyDimensionResolver {
 
     public static String resolve(HookContext ctx) {
         Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
+        dims.put(ContextKeys.HOOK_PREFIX, Constants.HOOK_PREFIX);
         dims.put(ContextKeys.OBJECT_NAME, ctx.getObjectName());
         dims.put(ContextKeys.ACTION, ctx.getAction());
         dims.put(ContextKeys.PHASE, ctx.getPhase().name());
@@ -32,13 +36,68 @@ public final class KeyDimensionResolver {
         return build(dims.values());
     }
 
-    public static String getDefaultKey(HookContext ctx) {
+    public static String resolveDefaultKey(HookContext ctx) {
         return build(List.of(
-                Constants.GENERIC_OBJECT_HOOK_NAME,
+                Constants.HOOK_PREFIX,
+                Constants.GENERIC_OBJECT_NAME,
                 ctx.getAction(),
                 ctx.getPhase().name()
         ));
     }
+
+
+    public static String resolve(Handler handler) {
+        Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
+        dims.put(ContextKeys.ACTION_PREFIX, Constants.ACTION_PREFIX);
+        dims.put(ContextKeys.OBJECT_NAME, handler.object());
+        dims.put(ContextKeys.ACTION, handler.action());
+
+        for (ContextKey kv : handler.keyContexts()) {
+            dims.put(com.msm.core.hook.context.ContextKey.of(kv.key()), kv.value());
+        }
+
+        return build(dims.values());
+    }
+
+    public static String resolve(ActionRequest actionRequest) {
+        Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
+        dims.put(ContextKeys.ACTION_PREFIX, Constants.ACTION_PREFIX);
+        dims.put(ContextKeys.OBJECT_NAME, actionRequest.getObjectName());
+        dims.put(ContextKeys.ACTION, actionRequest.getAction());
+        actionRequest.getContextKey().forEach((k, v) -> {
+            dims.put(k, (String) v);
+        });
+
+        return build(dims.values());
+    }
+
+    public static String resolveDefaultKey(ActionRequest actionRequest) {
+        Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
+        dims.put(ContextKeys.ACTION_PREFIX, Constants.ACTION_PREFIX);
+        dims.put(ContextKeys.OBJECT_NAME, Constants.GENERIC_OBJECT_NAME);
+        dims.put(ContextKeys.ACTION, actionRequest.getAction());
+        actionRequest.getContextKey().forEach((k, v) -> {
+            dims.put(k, (String) v);
+        });
+
+        return build(dims.values());
+    }
+
+//    public static String resolve(String object, String action, Map<com.msm.core.hook.context.ContextKey<?>, Object> keyObjectMap) {
+//        Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
+//        dims.put(ContextKeys.ACTION_PREFIX, Constants.ACTION_PREFIX);
+//        dims.put(ContextKeys.OBJECT_NAME, object);
+//        dims.put(ContextKeys.ACTION, action);
+//        keyObjectMap.forEach((k, v) -> {
+//            dims.put(k, (String) v);
+//        });
+//
+//        return build(dims.values());
+//    }
+
+//    public static String getDefaultHandlerKey(String action, Map<com.msm.core.hook.context.ContextKey<?>, Object> keyObjectMap) {
+//        return getHandlerKey(Constants.GENERIC_OBJECT_NAME, action, keyObjectMap);
+//    }
 
     private static String build(Collection<String> keys) {
         return keys.stream()

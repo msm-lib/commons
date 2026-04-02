@@ -1,4 +1,4 @@
-package com.msm.core.filter.json;
+package com.msm.core.filter.expressions.json;
 
 import com.msm.core.filter.DataTypeUtils;
 import com.querydsl.core.types.dsl.*;

@@ -6,7 +6,7 @@ import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.JoinType;
 import com.msm.core.filter.domain.pageable.Sort;
 import com.msm.core.filter.join.ReferenceJoinResolver;
-import com.msm.core.filter.json.JsonOrderSpecifierFactory;
+import com.msm.core.filter.expressions.json.JsonOrderSpecifierFactory;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.PathBuilder;

@@ -5,15 +5,18 @@ import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterOperator;
-import com.msm.core.filter.json.JsonbExpressions;
+import com.msm.core.filter.expressions.ExpressionUtils;
+import com.msm.core.filter.expressions.json.JsonbExpressions;
 import com.msm.core.filter.operator.AbstractOperatorHandler;
 import com.msm.core.filter.utils.ResolveUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.*;
 
+import java.text.Normalizer;
 import java.util.List;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class LikeOperatorHandler extends AbstractOperatorHandler {
 
@@ -49,10 +52,9 @@ public class LikeOperatorHandler extends AbstractOperatorHandler {
             return ((StringExpression) expression0).containsIgnoreCase(typedValue);
         }
         if (meta.isStringLike()) {
-            StringExpression stringExp = Expressions.stringPath(path.getMetadata());
             if (Objects.nonNull(value)) {
-                String typedValue = cast(path.getType(), value);
-                return stringExp.containsIgnoreCase(typedValue);
+                String keyword = cast(path.getType(), value);
+                return ExpressionUtils.likeUnaccent(path, keyword);
             }
         }
 
@@ -65,6 +67,19 @@ public class LikeOperatorHandler extends AbstractOperatorHandler {
         SimpleExpression exp = Expressions.path(meta.getJavaType(), path.getMetadata());
 
         return exp.eq(enumValue);
+    }
+
+    public static String normalizeVietnamese(String input) {
+        if (input == null) return null;
+
+        String normalized = Normalizer.normalize(input, Normalizer.Form.NFD);
+
+        return Pattern.compile("\\p{InCombiningDiacriticalMarks}+")
+                .matcher(normalized)
+                .replaceAll("")
+                .replace("đ", "d")
+                .replace("Đ", "D")
+                .toLowerCase();
     }
 
 }

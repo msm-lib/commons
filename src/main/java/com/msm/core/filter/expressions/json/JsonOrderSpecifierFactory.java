@@ -1,6 +1,5 @@
-package com.msm.core.filter.json;
+package com.msm.core.filter.expressions.json;
 
-import com.msm.core.filter.JsonExpressionFactory;
 import com.msm.core.filter.domain.pageable.SortDirection;
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.dsl.EntityPathBase;

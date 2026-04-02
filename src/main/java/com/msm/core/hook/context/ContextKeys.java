@@ -3,8 +3,9 @@ package com.msm.core.hook.context;
 import java.util.Map;
 
 public class ContextKeys {
-
+    public static final ContextKey<String> HOOK_PREFIX = ContextKey.of("hookPrefix");
     public static final ContextKey<String> OBJECT_NAME = ContextKey.of("objectName");
+    public static final ContextKey<String> ACTION_PREFIX = ContextKey.of("actionPrefix");
     public static final ContextKey<String> ACTION = ContextKey.of("action");
     public static final ContextKey<String> PHASE = ContextKey.of("phase");
     public static final ContextKey<Map<String, Object>> PAYLOAD = ContextKey.of("payload");

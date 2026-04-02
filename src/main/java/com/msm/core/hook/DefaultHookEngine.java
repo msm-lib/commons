@@ -63,17 +63,18 @@ public final class DefaultHookEngine implements HookEngine {
      */
     public void execute(HookContext ctx) {
         String key = KeyDimensionResolver.resolve(ctx);
-        List<HookDefinitionHandler> hooks = HookDefinitionHandlerFactory.get(key);
+        List<HookDefinitionExecutor> hooks = HookDefinitionHandlerFactory.get(key);
         if(Utils.CL.isEmpty(hooks)) {
             log.warn("Event hook not found for object: {}", ctx.getObjectName());
-            key = KeyDimensionResolver.getDefaultKey(ctx);
+            key = KeyDimensionResolver.resolveDefaultKey(ctx);
             hooks = HookDefinitionHandlerFactory.get(key);
         }
 
         if (HookPhase.AFTER_COMMIT_EVENT.equals(ctx.getPhase())) {
-            asyncExecutor.executeAsync(hooks, ctx);
+            List<HookDefinitionExecutor> finalHooks = hooks;
+            TransactionUtils.runAfterCommit(() -> asyncExecutor.executeAsync(finalHooks, ctx));
         } else {
-            for (HookDefinitionHandler h : hooks) {
+            for (HookDefinitionExecutor h : hooks) {
                 h.execute(ctx);
             }
         }

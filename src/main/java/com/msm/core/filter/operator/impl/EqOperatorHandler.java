@@ -5,7 +5,7 @@ import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterOperator;
-import com.msm.core.filter.json.JsonbExpressions;
+import com.msm.core.filter.expressions.json.JsonbExpressions;
 import com.msm.core.filter.operator.AbstractOperatorHandler;
 import com.msm.core.filter.utils.ResolveUtils;
 import com.querydsl.core.types.Expression;

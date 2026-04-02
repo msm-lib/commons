@@ -6,10 +6,10 @@ import lombok.*;
 
 import java.util.*;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class HookContext implements ExecutionContext {
 
     private String objectName;
@@ -19,57 +19,13 @@ public class HookContext implements ExecutionContext {
     private Object currentRecord;
     private Map<String, Object> payload;
     private Map<String, Object> additionalData;
-
-//    public HookContext forAfterCommit() {
-//        return new HookContext(objectName,
-//                Utils.STR.defaultIfBlank(objectRecordType, () -> Constants.GENERIC_OBJECT_RECORD_TYPE),
-//                action,
-//                HookPhase.AFTER_EVENT,
-//                recordId,
-//                currentRecord,
-//                new HashMap<>(payload),
-//                new HashMap<>());
-//    }
-//
-//    public static HookContext ofDefault(String objectName, String objectRecordType, String action, Map<String, Object> payload) {
-//        return new HookContext(objectName,
-//                Utils.STR.defaultIfBlank(objectRecordType, () -> Constants.GENERIC_OBJECT_RECORD_TYPE),
-//                action,
-//                HookPhase.BEFORE_EVENT,
-//                null,
-//                null,
-//                payload,
-//                new HashMap<>());
-//    }
-//
-//    public static HookContext ofDefault(String objectName, String action, Map<String, Object> payload) {
-//        return new HookContext(objectName,
-//                Constants.GENERIC_OBJECT_RECORD_TYPE,
-//                action,
-//                HookPhase.BEFORE_EVENT,
-//                null,
-//                null,
-//                payload,
-//                new HashMap<>());
-//    }
+    private Throwable error;
 
     public void nextPhase(HookPhase nextPPhase) {
         this.phase = nextPPhase;
     }
 
     private Map<ContextKey<?>, Object> contextKey = new LinkedHashMap<>();
-
-//    public <T> void put(ContextKey<T> key, T value) {
-//        contextKey.put(key, value);
-//    }
-//
-//    public <T> T get(ContextKey<T> key) {
-//        return (T) contextKey.get(key);
-//    }
-
-//    public <T> Optional<T> getOptional(ContextKey<T> key) {
-//        return Optional.ofNullable(get(key));
-//    }
 
     @Override
     public Map<ContextKey<?>, Object> getContextKey() {
