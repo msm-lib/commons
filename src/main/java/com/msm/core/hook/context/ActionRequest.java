@@ -13,7 +13,8 @@ import java.util.Map;
 @Builder
 public class ActionRequest implements ExecutionContext {
 
-    private String objectName;
+    @Builder.Default
+    private String objectName = "";
     private String action;
     private Object objectId;
     private Object additionalParameter;
