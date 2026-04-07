@@ -1,8 +1,11 @@
 package com.msm.core.filter.operator.impl;
 
+import com.msm.core.filter.cache.EntityMetadataFactory;
+import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterOperator;
 import com.msm.core.filter.operator.AbstractOperatorHandler;
+import com.msm.core.filter.utils.ResolveUtils;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.SimpleExpression;
@@ -24,6 +27,15 @@ public class NotInOperatorHandler extends AbstractOperatorHandler {
         if (Objects.nonNull(value)) {
             if (!(value instanceof Collection<?> values)) {
                 throw new IllegalArgumentException("Not in operator requires a collection value");
+            }
+            String metadataPath = ResolveUtils.resolveStringPath(path);
+            FieldMetadata meta = EntityMetadataFactory.get(path.getRoot().getType(), metadataPath);
+            if(Objects.nonNull(meta)) {
+                List<?> converted = values
+                        .stream()
+                        .map(v -> cast(meta.getJavaType(), v))
+                        .toList();
+                return ((SimpleExpression) path).notIn(converted);
             }
             List<?> converted = values
                     .stream()
