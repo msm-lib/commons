@@ -60,7 +60,7 @@ public final class DefaultHookEngine implements HookEngine {
      *
      * @param ctx the {@code HookContext} containing execution state and shared data
      */
-    public void execute(HookContext ctx) {
+    public <X> void execute(HookContext<X> ctx) {
         String key = KeyDimensionResolver.resolve(ctx);
         List<HookDefinitionExecutor> hooks = HookDefinitionHandlerFactory.get(key);
         if(Utils.CL.isEmpty(hooks)) {

@@ -17,12 +17,12 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class HookDefinitionExecutor {
     private final Condition condition;
-    private final Consumer<HookContext> invoker;
+    private final Consumer<HookContext<?>> invoker;
     private final int order;
 
     private final boolean stopOnError;
 
-    public void execute(HookContext ctx) {
+    public <X> void execute(HookContext<X> ctx) {
         if (!condition.matches(ctx)) {
             return;
         }
@@ -33,7 +33,7 @@ public class HookDefinitionExecutor {
         try {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             MethodHandle handle = lookup.unreflect(method).bindTo(bean);
-            Consumer<HookContext> invoker = ctx -> {
+            Consumer<HookContext<?>> invoker = ctx -> {
                 try {
                     handle.invoke(ctx);
                 } catch (Throwable e) {

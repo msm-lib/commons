@@ -17,8 +17,8 @@ import java.util.function.Function;
 @RequiredArgsConstructor
 public class ActionDefinitionExecutor {
     private final Condition condition;
-    private final Function<ActionRequest, ?> invoker;
-    public <X> X execute(ActionRequest actionRequest) {
+    private final Function<ActionRequest<?>, ?> invoker;
+    public <X, T> X execute(ActionRequest<T> actionRequest) {
         return (X) invoker.apply(actionRequest);
     }
 
@@ -27,7 +27,7 @@ public class ActionDefinitionExecutor {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             MethodHandle handle = lookup.unreflect(method).bindTo(bean);
 
-            Function<ActionRequest, ?> invoker = request -> {
+            Function<ActionRequest<?>, ?> invoker = request -> {
                 try {
                     return handle.invoke(request);
                 } catch (Throwable e) {

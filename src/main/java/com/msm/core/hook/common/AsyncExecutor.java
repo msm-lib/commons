@@ -6,5 +6,5 @@ import com.msm.core.hook.context.HookContext;
 import java.util.List;
 
 public interface AsyncExecutor {
-    void executeAsync(List<HookDefinitionExecutor> handlers, HookContext ctx);
+    <X> void executeAsync(List<HookDefinitionExecutor> handlers, HookContext<X> ctx);
 }

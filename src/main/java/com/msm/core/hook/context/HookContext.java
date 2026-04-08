@@ -10,14 +10,14 @@ import java.util.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class HookContext implements ExecutionContext {
+public class HookContext<T> implements ExecutionContext {
 
     private String objectName;
     private String action;
     private HookPhase phase;
     private UUID recordId;
     private Object currentRecord;
-    private Map<String, Object> payload;
+    private T payload;
     private Map<String, Object> additionalData;
     private Throwable error;
 

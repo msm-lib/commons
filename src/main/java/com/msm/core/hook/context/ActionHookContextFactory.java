@@ -4,8 +4,8 @@ import com.msm.core.commons.Utils;
 
 public class ActionHookContextFactory {
 
-    public static HookContext from(ActionRequest req) {
-        HookContext ctx = new HookContext();
+    public static <T> HookContext<T> from(ActionRequest<T> req) {
+        HookContext<T> ctx = new HookContext<>();
         ctx.setObjectName(req.getObjectName());
         ctx.setAction(req.getAction());
         ctx.setPayload(req.getPayload());

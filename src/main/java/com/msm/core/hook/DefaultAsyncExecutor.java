@@ -14,7 +14,7 @@ public class DefaultAsyncExecutor implements AsyncExecutor {
     private final Executor hookTaskExecutor;
 
     @Override
-    public void executeAsync(List<HookDefinitionExecutor> handlers, HookContext ctx) {
+    public <X> void executeAsync(List<HookDefinitionExecutor> handlers, HookContext<X> ctx) {
         hookTaskExecutor.execute(() -> {
             for (HookDefinitionExecutor h : handlers) {
                 try {

@@ -2,10 +2,10 @@ package com.msm.core.hook.context;
 
 import com.msm.core.commons.Converter;
 
-public class DefaultHookContextConvertStrategy implements Converter<ActionRequest, HookContext> {
+public class DefaultHookContextConvertStrategy<T> implements Converter<ActionRequest<T>, HookContext<T>> {
 
     @Override
-    public HookContext convert(ActionRequest request) {
+    public HookContext<T> convert(ActionRequest<T> request) {
         return ActionHookContextFactory.from(request);
     }
 }

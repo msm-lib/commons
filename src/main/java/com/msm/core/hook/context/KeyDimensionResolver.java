@@ -24,7 +24,7 @@ public final class KeyDimensionResolver {
         return build(dims.values());
     }
 
-    public static String resolve(HookContext ctx) {
+    public static <T> String resolve(HookContext<T> ctx) {
         Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
         dims.put(ContextKeys.HOOK_PREFIX, Constants.HOOK_PREFIX);
         dims.put(ContextKeys.OBJECT_NAME, ctx.getObjectName());
@@ -35,7 +35,7 @@ public final class KeyDimensionResolver {
         return build(dims.values());
     }
 
-    public static String resolveDefaultKey(HookContext ctx) {
+    public static <T> String resolveDefaultKey(HookContext<T> ctx) {
         return build(List.of(
                 Constants.HOOK_PREFIX,
                 Constants.GENERIC_OBJECT_NAME,
@@ -58,7 +58,7 @@ public final class KeyDimensionResolver {
         return build(dims.values());
     }
 
-    public static String resolve(ActionRequest actionRequest) {
+    public static <T> String resolve(ActionRequest<T> actionRequest) {
         Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
         dims.put(ContextKeys.ACTION_PREFIX, Constants.ACTION_PREFIX);
         dims.put(ContextKeys.OBJECT_NAME, actionRequest.getObjectName());
@@ -70,7 +70,7 @@ public final class KeyDimensionResolver {
         return build(dims.values());
     }
 
-    public static String resolveDefaultKey(ActionRequest actionRequest) {
+    public static <T> String resolveDefaultKey(ActionRequest<T> actionRequest) {
         Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
         dims.put(ContextKeys.ACTION_PREFIX, Constants.ACTION_PREFIX);
         dims.put(ContextKeys.OBJECT_NAME, Constants.GENERIC_OBJECT_NAME);

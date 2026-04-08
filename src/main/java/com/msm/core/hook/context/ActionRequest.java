@@ -11,16 +11,16 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ActionRequest implements ExecutionContext {
+public class ActionRequest<T> implements ExecutionContext {
 
     @Builder.Default
     private String objectName = "";
     private String action;
     private Object objectId;
     private Object additionalParameter;
-    private Map<String, Object> payload;
+    private T payload;
     @Builder.Default
-    private Converter<ActionRequest, HookContext> hookContextConvertStrategy = new DefaultHookContextConvertStrategy();
+    private Converter<ActionRequest<T>, HookContext<T>> hookContextConvertStrategy = new DefaultHookContextConvertStrategy<>();
     @Builder.Default
     private Map<ContextKey<?>, Object> contextKey = new HashMap<>();
 

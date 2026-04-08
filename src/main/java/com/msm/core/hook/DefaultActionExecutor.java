@@ -2,7 +2,6 @@ package com.msm.core.hook;
 
 import com.msm.core.commons.Utils;
 import com.msm.core.exceptions.Errors;
-import com.msm.core.exceptions.UnsupportedException;
 import com.msm.core.hook.common.Condition;
 import com.msm.core.hook.common.HookEngine;
 import com.msm.core.hook.common.ActionExecutor;
@@ -19,13 +18,13 @@ public class DefaultActionExecutor implements ActionExecutor {
 
     @SneakyThrows
     @Override
-    public <T> T execute(ActionRequest request) {
+    public <T, X> T execute(ActionRequest<X> request) {
         Objects.requireNonNull(request.getAction(), "The action cannot be null");
         ActionDefinitionExecutor handler = getActionHandler(request);
         if (Objects.isNull(handler)) {
             throw Errors.unsupported("Unsupported action: " + request.getAction());
         }
-        HookContext hookContext = request.getHookContextConvertStrategy().convert(request);
+        HookContext<X> hookContext = request.getHookContextConvertStrategy().convert(request);
         hookContext.setPhase(HookPhase.BEFORE_EVENT);
         hookEngine.execute(hookContext);
         T returnObject = handler.execute(request);
@@ -37,7 +36,7 @@ public class DefaultActionExecutor implements ActionExecutor {
         return returnObject;
     }
 
-    public ActionDefinitionExecutor getActionHandler(ActionRequest request) {
+    public <X> ActionDefinitionExecutor getActionHandler(ActionRequest<X> request) {
 
         String key = KeyDimensionResolver.resolve(request);
         List<ActionDefinitionExecutor> executors = ActionHandlerFactory.getHandler(key);

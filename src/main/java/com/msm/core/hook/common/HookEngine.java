@@ -26,5 +26,5 @@ public interface HookEngine {
      *   <li>Use {@code ctx} to share data</li>
      * </ul>
      */
-    void execute(HookContext ctx);
+    <X> void execute(HookContext<X> ctx);
 }
