@@ -7,17 +7,19 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class ActionHandlerFactory {
-    private final static Map<String, ActionDefinitionExecutor> INSTANCES = new ConcurrentHashMap<>();
+    private final static Map<String, List<ActionDefinitionExecutor>> INSTANCES = new ConcurrentHashMap<>();
 
     public static void register(String compositeKey, ActionDefinitionExecutor instance) {
-        INSTANCES.put(compositeKey, instance);
+        INSTANCES.computeIfAbsent(compositeKey, key -> new ArrayList<>()).add(instance);
     }
 
-    public static ActionDefinitionExecutor getHandler(String key) {
-        ActionDefinitionExecutor service = INSTANCES.get(key);
+    public static List<ActionDefinitionExecutor> getHandler(String key) {
+        List<ActionDefinitionExecutor> service = INSTANCES.get(key);
         if (Objects.isNull(service)) {
-            log.warn("No action found for key: {}", key);
+            log.warn("No hooks found for key: {}", key);
+            return Collections.emptyList();
         }
+
         return service;
     }
 

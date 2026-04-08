@@ -1,11 +1,8 @@
 package com.msm.core.exceptions;
 
-public class DuplicateKeyException extends RuntimeException {
-    public DuplicateKeyException() {}
+public class DuplicateKeyException extends GenericBaseException {
+
     public DuplicateKeyException(String message) {
-        super(message);
-    }
-    public Throwable fillInStackTrace() {
-        return this;
+        super(ErrorCode.DUPLICATE_KEY.getCode(), message);
     }
 }

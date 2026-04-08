@@ -1,7 +1,6 @@
 package com.msm.core.hook.context;
 
 import com.msm.core.commons.Constants;
-import com.msm.core.commons.Utils;
 import com.msm.core.hook.anontation.Handler;
 import com.msm.core.hook.anontation.Hook;
 import com.msm.core.hook.anontation.ContextKey;
@@ -82,22 +81,6 @@ public final class KeyDimensionResolver {
 
         return build(dims.values());
     }
-
-//    public static String resolve(String object, String action, Map<com.msm.core.hook.context.ContextKey<?>, Object> keyObjectMap) {
-//        Map<com.msm.core.hook.context.ContextKey<?>, String> dims = new LinkedHashMap<>();
-//        dims.put(ContextKeys.ACTION_PREFIX, Constants.ACTION_PREFIX);
-//        dims.put(ContextKeys.OBJECT_NAME, object);
-//        dims.put(ContextKeys.ACTION, action);
-//        keyObjectMap.forEach((k, v) -> {
-//            dims.put(k, (String) v);
-//        });
-//
-//        return build(dims.values());
-//    }
-
-//    public static String getDefaultHandlerKey(String action, Map<com.msm.core.hook.context.ContextKey<?>, Object> keyObjectMap) {
-//        return getHandlerKey(Constants.GENERIC_OBJECT_NAME, action, keyObjectMap);
-//    }
 
     private static String build(Collection<String> keys) {
         return keys.stream()

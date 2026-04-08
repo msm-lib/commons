@@ -1,7 +1,7 @@
 package com.msm.core.hook.common;
 
-
 import com.msm.core.hook.context.ContextKey;
+import com.msm.core.hook.context.PayloadContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,4 +21,6 @@ public interface ExecutionContext extends ExecutionMetadata {
     default  <T> Optional<T> getOptional(ContextKey<T> key) {
         return Optional.ofNullable(getContextKey(key));
     }
+
+//    <T> PayloadContext<T> getPayloadContext();
 }

@@ -1,5 +1,6 @@
 package com.msm.core.filter.utils;
 
+import com.msm.core.exceptions.Errors;
 import com.msm.core.exceptions.InvalidFieldArgumentException;
 import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
@@ -31,7 +32,7 @@ public class ResolveUtils {
             String part = parts[i];
             FieldMetadata fieldMetadata = EntityMetadataFactory.get(currentType, part);
             if (Objects.isNull(fieldMetadata)) {
-                throw new InvalidFieldArgumentException("Invalid field: " + field);
+                throw Errors.invalid("Invalid field: " + field);
             }
             //For json
             if(fieldMetadata.isJsonType()) {
@@ -51,7 +52,7 @@ public class ResolveUtils {
             }
 
             // invalid traversal
-            throw new InvalidFieldArgumentException("Invalid nested field: " + field);
+            throw Errors.invalid("Invalid nested field: " + field);
         }
 
         return current.get(parts[parts.length - 1]);
@@ -68,7 +69,7 @@ public class ResolveUtils {
             String part = parts[i];
             FieldMetadata fieldMetadata = EntityMetadataFactory.get(currentType, part);
             if (fieldMetadata == null) {
-                throw new InvalidFieldArgumentException("Invalid field: " + field);
+                throw Errors.invalid("Invalid field: " + field);
             }
 
             // COLUMN (last node)
@@ -91,7 +92,7 @@ public class ResolveUtils {
             }
 
             // invalid traversal
-            throw new InvalidFieldArgumentException("Invalid nested field: " + field);
+            throw Errors.invalid("Invalid nested field: " + field);
         }
 
         throw new RuntimeException("Cannot resolve: " + field);

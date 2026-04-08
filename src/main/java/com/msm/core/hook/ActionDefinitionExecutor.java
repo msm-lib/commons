@@ -19,9 +19,6 @@ public class ActionDefinitionExecutor {
     private final Condition condition;
     private final Function<ActionRequest, ?> invoker;
     public <X> X execute(ActionRequest actionRequest) {
-        if (!condition.test(actionRequest)) {
-            return null;
-        }
         return (X) invoker.apply(actionRequest);
     }
 

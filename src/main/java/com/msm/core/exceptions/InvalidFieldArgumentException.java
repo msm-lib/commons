@@ -1,11 +1,8 @@
 package com.msm.core.exceptions;
 
-public class InvalidFieldArgumentException extends RuntimeException{
-    public InvalidFieldArgumentException() {}
+public class InvalidFieldArgumentException extends GenericBaseException {
+
     public InvalidFieldArgumentException(String message) {
-        super(message);
-    }
-    public Throwable fillInStackTrace() {
-        return this;
+        super(ErrorCode.INVALID_ARGUMENT.getCode(), message);
     }
 }

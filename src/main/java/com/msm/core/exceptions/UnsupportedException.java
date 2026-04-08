@@ -1,17 +1,12 @@
 package com.msm.core.exceptions;
 
-public class UnsupportedException extends RuntimeException {
-    public UnsupportedException() {}
+public class UnsupportedException extends GenericBaseException {
 
     public UnsupportedException(String message) {
-        super(message);
+        super(ErrorCode.UNSUPPORTED.getCode(), message);
     }
 
     public UnsupportedException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public Throwable fillInStackTrace() {
-        return this;
+        super(ErrorCode.UNSUPPORTED.getCode(), message, cause);
     }
 }

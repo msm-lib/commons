@@ -1,6 +1,5 @@
 package com.msm.core.hook.anontation;
 
-import com.msm.core.commons.Constants;
 import com.msm.core.hook.AlwaysTrueCondition;
 import com.msm.core.hook.common.Condition;
 
@@ -16,5 +15,4 @@ public @interface Handler {
     String action();
     ContextKey[] keyContexts() default {};
     Class<? extends Condition> condition() default AlwaysTrueCondition.class;
-    int order() default 0;
 }

@@ -21,8 +21,8 @@ public class HookContext implements ExecutionContext {
     private Map<String, Object> additionalData;
     private Throwable error;
 
-    public void nextPhase(HookPhase nextPPhase) {
-        this.phase = nextPPhase;
+    public void nextPhase(HookPhase nextPhase) {
+        this.phase = nextPhase;
     }
 
     private Map<ContextKey<?>, Object> contextKey = new LinkedHashMap<>();

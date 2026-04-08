@@ -23,7 +23,7 @@ public class HookDefinitionExecutor {
     private final boolean stopOnError;
 
     public void execute(HookContext ctx) {
-        if (!condition.test(ctx)) {
+        if (!condition.matches(ctx)) {
             return;
         }
         invoker.accept(ctx);

@@ -5,7 +5,7 @@ import com.msm.core.hook.common.ExecutionContext;
 
 public class AlwaysTrueCondition implements Condition {
     @Override
-    public boolean test(ExecutionContext ctx) {
+    public boolean matches(ExecutionContext ctx) {
         return true;
     }
 }

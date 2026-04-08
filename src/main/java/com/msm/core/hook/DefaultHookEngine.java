@@ -39,7 +39,6 @@ import java.util.List;
  * </ul>
  *
  * @see HookEngine
- * @see HookHandler
  * @see HookPhase
  */
 @Slf4j

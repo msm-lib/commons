@@ -1,17 +1,12 @@
 package com.msm.core.exceptions;
 
-public class HookMethodInvocationException extends RuntimeException {
-    public HookMethodInvocationException() {}
+public class HookMethodInvocationException extends GenericBaseException {
 
     public HookMethodInvocationException(String message) {
-        super(message);
+        super(ErrorCode.HOOK_ERROR.getCode(), message);
     }
 
     public HookMethodInvocationException(String message, Throwable cause) {
-        super(message, cause);
-    }
-
-    public Throwable fillInStackTrace() {
-        return this;
+        super(ErrorCode.HOOK_ERROR.getCode(), message, cause);
     }
 }
