@@ -7,7 +7,6 @@ import com.msm.core.hook.common.HookEngine;
 import com.msm.core.hook.common.ActionExecutor;
 import com.msm.core.hook.context.*;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 
 import java.util.List;
 import java.util.Objects;
@@ -16,13 +15,15 @@ import java.util.Objects;
 public class DefaultActionExecutor implements ActionExecutor {
     private final HookEngine hookEngine;
 
-    @SneakyThrows
     @Override
     public <T, X> T execute(ActionRequest<X> request) {
         Objects.requireNonNull(request.getAction(), "The action cannot be null");
         ActionDefinitionExecutor handler = getActionHandler(request);
         if (Objects.isNull(handler)) {
             throw Errors.unsupported("Unsupported action: " + request.getAction());
+        }
+        if(request.isDisableHookEvent()) {
+            return handler.execute(request);
         }
         HookContext<X> hookContext = request.getHookContextConvertStrategy().convert(request);
         hookContext.setPhase(HookPhase.BEFORE_EVENT);

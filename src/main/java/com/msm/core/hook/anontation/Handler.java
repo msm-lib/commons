@@ -13,6 +13,6 @@ import java.lang.annotation.Target;
 public @interface Handler {
     String object() default "";
     String action();
-    ContextKey[] keyContexts() default {};
+    ExtendContextKey[] keyContexts() default {};
     Class<? extends Condition> condition() default AlwaysTrueCondition.class;
 }

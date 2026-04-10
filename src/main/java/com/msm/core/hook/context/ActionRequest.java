@@ -20,6 +20,8 @@ public class ActionRequest<T> implements ExecutionContext {
     private Object additionalParameter;
     private T payload;
     @Builder.Default
+    private boolean disableHookEvent = false;
+    @Builder.Default
     private Converter<ActionRequest<T>, HookContext<T>> hookContextConvertStrategy = new DefaultHookContextConvertStrategy<>();
     @Builder.Default
     private Map<ContextKey<?>, Object> contextKey = new HashMap<>();

@@ -16,7 +16,7 @@ public @interface Hook {
     String action();
     HookPhase phase();
     int order() default 0;
-    ContextKey[] keyContexts() default {};
+    ExtendContextKey[] keyContexts() default {};
     Class<? extends Condition> condition() default AlwaysTrueCondition.class;
     boolean stopOnError() default true;
 }

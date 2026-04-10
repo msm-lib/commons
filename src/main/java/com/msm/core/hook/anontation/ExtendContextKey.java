@@ -8,7 +8,7 @@ import java.lang.annotation.Target;
 @Target({})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface ContextKey {
+public @interface ExtendContextKey {
     String key();
     String value();
 }
