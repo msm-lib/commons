@@ -32,7 +32,7 @@ repositories {
 
 val lombokVersion = "1.18.30"
 val guavaVersion = "33.4.8-jre"
-
+val jooqVersion = "3.21.1"
 dependencies {
 
 //	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -65,6 +65,8 @@ dependencies {
     //jeasy rules
     implementation("org.jeasy:easy-rules-core:4.1.0")
     implementation("org.jeasy:easy-rules-mvel:4.1.0")
+
+    implementation("org.jooq:jooq:${jooqVersion}")
 }
 
 tasks.withType<Test> {

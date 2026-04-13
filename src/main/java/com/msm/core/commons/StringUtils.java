@@ -183,7 +183,7 @@ public final class StringUtils {
         return toCamelCase(str, false, '_');
     }
 
-    public String camelCaseToUnderscore(String input) {
+    public String toSnakeCase(String input) {
         if (isEmpty(input)) {
             return input;
         }

@@ -20,6 +20,7 @@ public class Attribute {
     private Long maxValue;
     private Long minValue;
     private Long maxSize;
+    private Boolean isFreeText;
     private Object defaultValue;
     private Boolean multiSelect;
     private String regex;
