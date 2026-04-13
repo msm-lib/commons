@@ -2,6 +2,7 @@ package com.msm.core.validate.validation;
 
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
+import com.msm.core.exceptions.ErrorCode;
 import com.msm.core.validate.attr.ValueValidationHandlerFactory;
 import com.msm.core.validate.domain.*;
 import lombok.RequiredArgsConstructor;
@@ -28,6 +29,7 @@ public class DefaultAttributeValidator implements AttributeValidator {
                     MessageError messageError = MessageError
                             .builder()
                             .attribute(attr.getFieldName())
+                            .code(ErrorCode.REQUIRE_INPUT_VALUE.getCode())
                             .message(Utils.STR.format(Constants.REQUIRE_INPUT_VALUE, attr.getFieldName()))
                             .build();
                     errors.add(messageError);
@@ -38,6 +40,7 @@ public class DefaultAttributeValidator implements AttributeValidator {
                     MessageError messageError = MessageError
                             .builder()
                             .attribute(attr.getFieldName())
+                            .code(ErrorCode.INVALID_ARGUMENT.getCode())
                             .message(Utils.STR.format(Constants.INVALID_INPUT_VALUE, attr.getFieldName()))
                             .build();
                     errors.add(messageError);

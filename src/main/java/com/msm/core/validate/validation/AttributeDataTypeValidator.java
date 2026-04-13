@@ -4,6 +4,7 @@ import com.msm.core.commons.Constants;
 import com.msm.core.commons.ValueConvertFactory;
 import com.msm.core.commons.GenericTypeResolverFactory;
 import com.msm.core.commons.Utils;
+import com.msm.core.exceptions.ErrorCode;
 import com.msm.core.filter.EntityClassFactory;
 import com.msm.core.validate.domain.*;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +45,7 @@ public class AttributeDataTypeValidator implements AttributeValidator {
                 MessageError messageError = MessageError
                         .builder()
                         .attribute(attr.getFieldName())
+                        .code(ErrorCode.INVALID_DATA_TYPE.getCode())
                         .message(Utils.STR.format(Constants.INVALID_DATA_TYPE, attr.getFieldName()))
                         .build();
                 errors.add(messageError);
