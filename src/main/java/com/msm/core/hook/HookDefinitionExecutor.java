@@ -1,7 +1,7 @@
 package com.msm.core.hook;
 
 import com.msm.core.hook.anontation.Hook;
-import com.msm.core.hook.common.Condition;
+import com.msm.core.commons.Condition;
 import com.msm.core.hook.context.HookContext;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
 @Builder
 @RequiredArgsConstructor
 public class HookDefinitionExecutor {
-    private final Condition condition;
+    private final Condition<HookContext<?>> condition;
     private final Consumer<HookContext<?>> invoker;
     private final int order;
 
