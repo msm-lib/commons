@@ -102,9 +102,14 @@ public final class StringUtils {
         return MessageFormat.format(message, msgArgs);
     }
 
-    public String freeText(final String input) {
+    public String normalizeSystemText(final String input) {
         Pattern pattern = Pattern.compile("\\s+");
         return Utils.STR.isBlank(input) ? null : pattern.matcher(input.trim().toLowerCase()).replaceAll(" ");
+    }
+
+    public String normalizeText(final String input) {
+        String strTrim = trim(input);
+        return isEmpty(strTrim) ? null : strTrim;
     }
 
     public String uncapitalize(final String str) {
