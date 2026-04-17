@@ -37,7 +37,7 @@ public class HookDefinitionExecutor {
                 try {
                     handle.invoke(ctx);
                 } catch (Throwable e) {
-                    log.error("Exception while invoking {}", method, e);
+                    log.error("Exception while invoking {}", method);
                     if (stopOnError) {
                         throw Lombok.sneakyThrow(e);
                     }

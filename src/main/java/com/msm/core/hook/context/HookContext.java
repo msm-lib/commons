@@ -15,10 +15,10 @@ public class HookContext<T> implements ExecutionContext {
     private String objectName;
     private String action;
     private HookPhase phase;
-    private UUID recordId;
+    private Object objectId;
     private Object currentRecord;
     private T payload;
-    private Map<String, Object> additionalData;
+    private Object additionalData;
     private Throwable error;
 
     public void nextPhase(HookPhase nextPhase) {

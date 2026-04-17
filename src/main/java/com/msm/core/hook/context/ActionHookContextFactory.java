@@ -9,6 +9,8 @@ public class ActionHookContextFactory {
         ctx.setObjectName(req.getObjectName());
         ctx.setAction(req.getAction());
         ctx.setPayload(req.getPayload());
+        ctx.setObjectId(req.getObjectId());
+        ctx.setAdditionalData(req.getAdditionalParameter());
 
         //Copy context data
         if(Utils.CL.isNotEmpty(req.getContextKey())) {
