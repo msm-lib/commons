@@ -52,6 +52,7 @@ public class DefaultAttributeValidator implements AttributeValidator {
 
     private boolean requireValidate(Attribute attr, Map<String, Object> attributeData) {
         if(Boolean.TRUE.equals(attr.getIsRequired())) {
+            if(Objects.nonNull(attr.getDefaultValue())) return true;
             return Objects.nonNull(attributeData.get(attr.getFieldName()));
         }
         return true;
