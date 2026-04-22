@@ -64,5 +64,21 @@ public class DateUtils {
         return d1 != null && d2 != null && d1.isEqual(d2);
     }
 
+    public boolean isBetween(Instant target, Instant start, Instant end) {
+        if (target == null || start == null || end == null) {
+            return false;
+        }
+        // (target >= start) AND (target < end)
+        return !target.isBefore(start) && target.isBefore(end);
+    }
+
+    public boolean isBetweenInclusive(Instant target, Instant start, Instant end) {
+        if (target == null || start == null || end == null) {
+            return false;
+        }
+        // (target >= start) AND (target <= end)
+        return !target.isBefore(start) && !target.isAfter(end);
+    }
+
     DateUtils() {}
 }
