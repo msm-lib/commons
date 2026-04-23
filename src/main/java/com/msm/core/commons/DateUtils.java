@@ -1,12 +1,23 @@
 package com.msm.core.commons;
 
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 
 public class DateUtils {
+
+    public LocalDate toDate(Instant instant) {
+        return toDate(instant, ZoneOffset.UTC);
+    }
+
+    public LocalDate toDate(Instant instant, ZoneOffset offset) {
+        if(instant == null) return null;
+        return instant.atOffset(offset).toLocalDate();
+    }
+
+    public LocalDate toDate(OffsetDateTime odt) {
+        if(odt == null) return null;
+        return odt.toLocalDate();
+    }
 
     public boolean lessThan(LocalDateTime d1, LocalDateTime d2) {
         long diffTime = ChronoUnit.SECONDS.between(d1, d2);
@@ -77,6 +88,21 @@ public class DateUtils {
             return false;
         }
         // (target >= start) AND (target <= end)
+        return !target.isBefore(start) && !target.isAfter(end);
+    }
+
+    public boolean isBetween(LocalDate target, LocalDate start, LocalDate end) {
+        if (target == null || start == null || end == null) {
+            return false;
+        }
+        return !target.isBefore(start) && target.isBefore(end);
+    }
+
+    public boolean isBetweenInclusive(LocalDate target, LocalDate start, LocalDate end) {
+        if (target == null || start == null || end == null) {
+            return false;
+        }
+
         return !target.isBefore(start) && !target.isAfter(end);
     }
 
