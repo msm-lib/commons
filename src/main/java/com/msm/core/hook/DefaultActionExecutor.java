@@ -25,15 +25,12 @@ public class DefaultActionExecutor implements ActionExecutor {
         if(request.isDisableHookEvent()) {
             return handler.execute(request);
         }
-        HookContext<X> hookContext = request.getHookContextConvertStrategy().convert(request);
-        hookContext.setPhase(HookPhase.BEFORE_EVENT);
-        hookEngine.execute(hookContext);
+
+        hookEngine.execute(request, HookPhase.BEFORE_EVENT);
         T returnObject = handler.execute(request);
-        hookContext.nextPhase(HookPhase.AFTER_EVENT);
-        hookContext.setCurrentRecord(returnObject);
-        hookEngine.execute(hookContext);
-        hookContext.nextPhase(HookPhase.AFTER_COMMIT_EVENT);
-        hookEngine.execute(hookContext);
+        request.setResult(returnObject);
+        hookEngine.execute(request, HookPhase.AFTER_EVENT);
+        hookEngine.execute(request,  HookPhase.AFTER_COMMIT_EVENT);
         return returnObject;
     }
 
@@ -65,11 +62,6 @@ public class DefaultActionExecutor implements ActionExecutor {
         }
 
         if (extendMatched.size() > 1) {
-//            throw new IllegalStateException("Multiple handlers matched for: " + key + " → " +
-//                    matched.stream()
-//                            .map(ex -> ex.getMethod().getName())
-//                            .toList()
-//            );
             throw new IllegalStateException("Multiple handlers matched for: " + key);
         }
 

@@ -8,6 +8,9 @@ public final class Constants {
     public static final String HOOK_PREFIX = "Hook";
     public static final String GENERIC_OBJECT_NAME = "GenericObject";
     public static final String GENERIC_OBJECT_RECORD_TYPE = "RecordTypeHook";
+    public static final String OBJECT_CONVERSION_ACTION = "conversion";
+    public static final String GENERIC_FILTER_ACTION = "filter";
+    public static final String GENERIC_ALL_OBJECT_ACTION = "allObject";
 
     public static final String INVALID_DATA_TYPE = "{0} loại dữ liệu không hợp lệ";
     public static final String REQUIRE_INPUT_VALUE = "{0} bắt buộc";
@@ -19,6 +22,8 @@ public final class Constants {
     public static final String HOOK_HANDLER_AFTER_COMMIT_EVENT_NAME = "objectHandlerAfterCommitEvent";
     public static final class Action {
         public static final String CREATE = "create";
+        public static final String UPDATE = "update";
+        public static final String DELETE = "delete";
     };
 
     private Constants() {}

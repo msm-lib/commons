@@ -47,6 +47,10 @@ public final class CollectionUtils {
         return Objects.isNull(input) ? Collections.emptySet() : input;
     }
 
+    public <K, V> Map<K, V> emptyIfNull(final Map<K, V> input) {
+        return Objects.isNull(input) ? Collections.emptyMap() : input;
+    }
+
     @SafeVarargs
     public final <T> Set<T> newHashSet(final T... elements) {
         if (Objects.isNull(elements)) {

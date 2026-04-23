@@ -2,7 +2,7 @@ package com.msm.core.hook;
 
 import com.msm.core.hook.anontation.Hook;
 import com.msm.core.commons.Condition;
-import com.msm.core.hook.context.HookContext;
+import com.msm.core.hook.context.ActionRequest;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 
@@ -16,24 +16,28 @@ import java.util.function.Consumer;
 @Builder
 @RequiredArgsConstructor
 public class HookDefinitionExecutor {
-    private final Condition<HookContext<?>> condition;
-    private final Consumer<HookContext<?>> invoker;
+    private final Condition<ActionRequest<?>> condition;
+    private final Consumer<ActionRequest<?>> invoker;
     private final int order;
 
     private final boolean stopOnError;
 
-    public <X> void execute(HookContext<X> ctx) {
+    public <X> void execute(ActionRequest<X> ctx) {
         if (!condition.matches(ctx)) {
             return;
         }
         invoker.accept(ctx);
     }
 
-    public static HookDefinitionExecutor create(Object bean, Method method, Hook hook, Condition condition, boolean stopOnError) {
+    public static HookDefinitionExecutor create(Object bean, Method method, Hook hook, Condition<ActionRequest<?>> condition, boolean stopOnError) {
+        return create(bean, method, hook.order(), condition, stopOnError);
+    }
+
+    public static HookDefinitionExecutor create(Object bean, Method method, int order, Condition<ActionRequest<?>> condition, boolean stopOnError) {
         try {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             MethodHandle handle = lookup.unreflect(method).bindTo(bean);
-            Consumer<HookContext<?>> invoker = ctx -> {
+            Consumer<ActionRequest<?>> invoker = ctx -> {
                 try {
                     handle.invoke(ctx);
                 } catch (Throwable e) {
@@ -44,7 +48,7 @@ public class HookDefinitionExecutor {
                 }
             };
 
-            return new HookDefinitionExecutor(condition, invoker, hook.order(), stopOnError);
+            return new HookDefinitionExecutor(condition, invoker, order, stopOnError);
         } catch (IllegalAccessException e) {
             throw Lombok.sneakyThrow(e);
         }

@@ -1,18 +1,20 @@
-package com.msm.core.hook.anontation;
+package com.msm.core.hook.anontation.crud;
 
+import com.msm.core.commons.Condition;
 import com.msm.core.commons.Constants;
 import com.msm.core.hook.AlwaysTrueCondition;
 import com.msm.core.hook.HookPhase;
-import com.msm.core.commons.Condition;
+import com.msm.core.hook.anontation.ExtendContextKey;
+import com.msm.core.hook.anontation.Hook;
 
 import java.lang.annotation.*;
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
-public @interface Hook {
+@Target(ElementType.METHOD)
+@Documented
+@Hook(action = Constants.Action.DELETE, phase = HookPhase.AFTER_EVENT)
+public @interface HookAfterDelete {
     String object() default Constants.GENERIC_OBJECT_NAME;
-    String action() default "";
-    HookPhase phase();
     int order() default 0;
     ExtendContextKey[] keyContexts() default {};
     Class<? extends Condition> condition() default AlwaysTrueCondition.class;

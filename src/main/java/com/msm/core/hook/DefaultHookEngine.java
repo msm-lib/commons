@@ -47,29 +47,16 @@ public final class DefaultHookEngine implements HookEngine {
 
     private final AsyncExecutor asyncExecutor;
 
-    /**
-     * Executes hooks associated with the specified object name and context.
-     *
-     * <p>The method performs the following steps:</p>
-     * <ol>
-     *   <li>Retrieve hook metadata based on {@code objectName} and current phase</li>
-     *   <li>Sort hooks by their {@code order} in ascending order</li>
-     *   <li>Resolve corresponding {@code HookHandler} instances</li>
-     *   <li>Execute handlers either synchronously or asynchronously depending on phase</li>
-     * </ol>
-     *
-     * @param ctx the {@code HookContext} containing execution state and shared data
-     */
-    public <X> void execute(HookContext<X> ctx) {
-        String key = KeyDimensionResolver.resolve(ctx);
+    @Override
+    public <X> void execute(ActionRequest<X> ctx, HookPhase phase) {
+        String key = KeyDimensionResolver.resolve(ctx, phase);
         List<HookDefinitionExecutor> hooks = HookDefinitionHandlerFactory.get(key);
         if(Utils.CL.isEmpty(hooks)) {
-            log.warn("Event hook not found for object: {}", ctx.getObjectName());
-            key = KeyDimensionResolver.resolveDefaultKey(ctx);
+            key = KeyDimensionResolver.resolveDefaultKey(ctx, phase);
             hooks = HookDefinitionHandlerFactory.get(key);
         }
 
-        if (HookPhase.AFTER_COMMIT_EVENT.equals(ctx.getPhase())) {
+        if (HookPhase.AFTER_COMMIT_EVENT.equals(phase)) {
             List<HookDefinitionExecutor> finalHooks = hooks;
             TransactionUtils.runAfterCommit(() -> asyncExecutor.executeAsync(finalHooks, ctx));
         } else {

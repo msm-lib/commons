@@ -16,7 +16,7 @@ public class ActionHandlerFactory {
     public static List<ActionDefinitionExecutor> getHandler(String key) {
         List<ActionDefinitionExecutor> service = INSTANCES.get(key);
         if (Objects.isNull(service)) {
-            log.warn("No hooks found for key: {}", key);
+            log.warn("No handler found for key: {}", key);
             return Collections.emptyList();
         }
 

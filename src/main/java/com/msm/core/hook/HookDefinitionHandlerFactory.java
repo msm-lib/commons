@@ -20,7 +20,6 @@ public class HookDefinitionHandlerFactory {
     public static List<HookDefinitionExecutor> get(String key) {
         List<HookDefinitionExecutor> service = INSTANCES.get(key);
         if (Objects.isNull(service)) {
-            log.warn("No hooks found for key: {}", key);
             return Collections.emptyList();
         }
 
