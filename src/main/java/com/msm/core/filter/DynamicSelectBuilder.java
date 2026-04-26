@@ -3,13 +3,17 @@ package com.msm.core.filter;
 import com.msm.core.commons.Utils;
 import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
-import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.msm.core.filter.expressions.json.JsonFieldResolver;
+import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.msm.core.filter.utils.ResolveUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.PathBuilder;
-import java.util.*;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public final class DynamicSelectBuilder {
 

@@ -1,9 +1,9 @@
 package com.msm.core.dynamicquery.operator;
 
 import com.msm.core.filter.domain.FilterCondition;
+import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Condition;
-import org.jooq.Field;
 
 public interface OperatorHandler {
-    Condition handle(Field<?> field, FilterCondition condition);
+    Condition handle(ObjectMetadata objectMetadata, FilterCondition condition);
 }

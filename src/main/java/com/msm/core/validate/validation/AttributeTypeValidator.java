@@ -1,13 +1,11 @@
 package com.msm.core.validate.validation;
 
 import com.msm.core.commons.Constants;
-import com.msm.core.commons.ValueConvertFactory;
-import com.msm.core.commons.GenericTypeResolverFactory;
 import com.msm.core.commons.Utils;
 import com.msm.core.exceptions.ErrorCode;
-import com.msm.core.filter.EntityClassFactory;
-import com.msm.core.validate.domain.*;
-import lombok.RequiredArgsConstructor;
+import com.msm.core.metadata.Attribute;
+import com.msm.core.metadata.ObjectMetadata;
+import com.msm.core.validate.domain.MessageError;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -16,23 +14,19 @@ import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
-@RequiredArgsConstructor
-public class AttributeDataTypeValidator implements AttributeValidator {
-
-    private final EntityClassFactory entityClassFactory;
+public class AttributeTypeValidator implements AttributeValidator {
 
     private boolean isDataTypeValid(Attribute attr, Object data) {
         try {
-            Class<?> aClass = GenericTypeResolverFactory.resolve(attr.getFieldType()).getRawClass();
-            ValueConvertFactory.convert(aClass, data);
+            attr.cast(data);
             return true;
-        } catch (Exception e) {
+        } catch (Exception ignored) {
             return false;
         }
     }
 
     @Override
-    public List<MessageError> validate(ObjectAttribute objectAttribute, Map<String, Object> payload) {
+    public List<MessageError> validate(ObjectMetadata objectAttribute, Map<String, Object> payload) {
         List<MessageError>  errors = new ArrayList<>();
 
         List<Attribute> attributes = objectAttribute.getAttributes();

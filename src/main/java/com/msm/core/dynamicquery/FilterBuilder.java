@@ -6,35 +6,35 @@ import com.msm.core.exceptions.Errors;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterGroup;
 import com.msm.core.filter.domain.FilterObject;
+import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Condition;
-import org.jooq.Field;
-import org.jooq.Table;
 import org.jooq.impl.DSL;
+
 import java.util.List;
 
 public class FilterBuilder {
 
-    public static Condition build(FilterObject filter, Table<?> table) {
+    public static Condition build(FilterObject filter, ObjectMetadata objectMetadata) {
         if (filter == null) {
             return DSL.noCondition();
         }
 
         if (filter instanceof FilterCondition fc) {
-            return buildCondition(table, fc);
+            return buildCondition(fc, objectMetadata);
         }
 
         if (filter instanceof FilterGroup fg) {
-            return buildGroup(fg, table);
+            return buildGroup(fg, objectMetadata);
         }
 
         throw Errors.invalid("Unknown filter type");
     }
 
-    private static Condition buildGroup(FilterGroup group, Table<?> table) {
+    private static Condition buildGroup(FilterGroup group, ObjectMetadata objectMetadata) {
         List<Condition> conditions = group
                 .getConditions()
                 .stream()
-                .map(f -> build(f, table))
+                .map(f -> build(f, objectMetadata))
                 .toList();
 
         if (conditions.isEmpty()) {
@@ -47,8 +47,7 @@ public class FilterBuilder {
         };
     }
 
-    private static Condition buildCondition(Table<?> table, FilterCondition c) {
-        Field<?> path = FieldResolver.resolve(table, c.getField());
-        return OperatorFactory.get(c.getOperator()).handle(path, c);
+    private static Condition buildCondition(FilterCondition condition, ObjectMetadata objectMetadata) {
+        return OperatorFactory.get(condition.getOperator()).handle(objectMetadata, condition);
     }
 }

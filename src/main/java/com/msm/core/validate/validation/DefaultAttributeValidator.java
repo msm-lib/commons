@@ -3,8 +3,10 @@ package com.msm.core.validate.validation;
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
 import com.msm.core.exceptions.ErrorCode;
+import com.msm.core.metadata.Attribute;
+import com.msm.core.metadata.ObjectMetadata;
 import com.msm.core.validate.attr.ValueValidationHandlerFactory;
-import com.msm.core.validate.domain.*;
+import com.msm.core.validate.domain.MessageError;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -18,7 +20,7 @@ public class DefaultAttributeValidator implements AttributeValidator {
     private final AttributeValidator attributeDataTypeValidator;
 
     @Override
-    public List<MessageError> validate(ObjectAttribute objectAttribute, Map<String, Object> payload) {
+    public List<MessageError> validate(ObjectMetadata objectAttribute, Map<String, Object> payload) {
         List<MessageError> errors = attributeDataTypeValidator.validate(objectAttribute, payload);
         Set<String> attributeNameErrors = errors.stream().map(MessageError::getAttribute).collect(Collectors.toSet());
         List<Attribute> attributes = objectAttribute.getAttributes();

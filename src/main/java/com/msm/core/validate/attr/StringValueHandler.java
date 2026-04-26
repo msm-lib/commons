@@ -1,7 +1,8 @@
 package com.msm.core.validate.attr;
 
+import com.msm.core.metadata.Attribute;
 import com.msm.core.validate.attr.rules.AttributeSimpleRuleFactory;
-import com.msm.core.validate.domain.Attribute;
+
 import java.util.Objects;
 
 public final class StringValueHandler implements ValueValidationHandler {

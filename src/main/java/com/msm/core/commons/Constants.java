@@ -11,6 +11,7 @@ public final class Constants {
     public static final String OBJECT_CONVERSION_ACTION = "conversion";
     public static final String GENERIC_FILTER_ACTION = "filter";
     public static final String GENERIC_ALL_OBJECT_ACTION = "allObject";
+    public static final String IS_DELETED_FIELD = "isDeleted";
 
     public static final String INVALID_DATA_TYPE = "{0} loại dữ liệu không hợp lệ";
     public static final String REQUIRE_INPUT_VALUE = "{0} bắt buộc";
@@ -24,7 +25,19 @@ public final class Constants {
         public static final String CREATE = "create";
         public static final String UPDATE = "update";
         public static final String DELETE = "delete";
-    };
+    }
+    //For audit
+    public static final String CREATED_AT = "createdAt";
+    public static final String UPDATED_AT = "updatedAt";
+    public static final String DELETED_AT = "deletedAt";
+    public static final String CREATED_BY = "createdBy";
+    public static final String UPDATED_BY = "updatedBy";
+    public static final String DELETED_BY = "deletedBy";
+    public static final String CREATED_BY_ID = "createdById";
+    public static final String UPDATED_BY_ID = "updatedById";
+    public static final String DELETED_BY_ID = "deletedById";
+    public static final String IS_DELETED = "isDeleted";
+    public static final String VERSION = "version";
 
     private Constants() {}
 }

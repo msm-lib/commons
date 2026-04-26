@@ -18,6 +18,7 @@ public class ValueValidationHandlerFactory {
         register(new DateValueHandler());
         register(new StringValueHandler());
         register(new UuidTypeHandler());
+        register(new InstantValueHandler());
         register(new NumberValueHandler("BigDecimal"));
         register(new NumberValueHandler("Long"));
         register(new NumberValueHandler("Integer"));

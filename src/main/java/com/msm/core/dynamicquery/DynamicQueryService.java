@@ -1,95 +1,40 @@
 package com.msm.core.dynamicquery;
 
-import com.msm.core.commons.Utils;
 import com.msm.core.exceptions.Errors;
-import com.msm.core.filter.domain.*;
+import com.msm.core.filter.domain.ObjectFilterRequest;
+import com.msm.core.filter.domain.PageResponse;
+import com.msm.core.filter.domain.pageable.Sort;
 import com.msm.core.filter.domain.pageable.SortDirection;
+import com.msm.core.metadata.Attribute;
+import com.msm.core.metadata.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.jooq.*;
 import org.jooq.Record;
 import org.jooq.impl.DSL;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.Instant;
+import java.util.*;
 import java.util.stream.Collectors;
 
+@SuppressWarnings({"unchecked"})
 @RequiredArgsConstructor
 public class DynamicQueryService {
 
     private final DSLContext dsl;
 
-    public int insert(Table<?> table, Map<String, Object> values) {
-
-        Map<Field<?>, Object> map = new LinkedHashMap<>();
-        values.forEach((k, v) -> {
-            Field<?> field = resolve(table, k);
-            map.put(field, v);
-        });
-
-        return dsl.insertInto(table)
-                .set(map)
-                .execute();
-    }
-
-    public Map<String, Object> insertReturning(Table<?> table, Map<String, Object> values, List<Field<?>> returnField) {
-
-        Map<Field<?>, Object> map = new LinkedHashMap<>();
-        values.forEach((k, v) -> {
-            map.put(resolve(table, k), v);
-        });
-
-        return dsl.insertInto(table)
-                .set(map)
-                .returning(returnField)
-                .fetchOneMap();
-    }
-
-    public int update(Table<?> table, Map<String, Object> values, Condition where) {
-
-        Map<Field<?>, Object> map = new LinkedHashMap<>();
-        values.forEach((k, v) -> {
-            Field<?> field = resolve(table, k);
-            map.put(field, v);
-        });
-
-        return dsl.update(table)
-                .set(map)
-                .where(where)
-                .execute();
-    }
-
-    public int delete(Table<?> table, Condition condition) {
-
-        return dsl.deleteFrom(table)
-                .where(condition)
-                .execute();
-    }
-
-    public Field<?> resolve(Table<?> table, String path) {
-        String[] parts = path.split("\\.");
-        String columnField = Utils.STR.toSnakeCase(parts[0]);
-        Field<?> base = table.field(columnField);
-
-        if (parts.length == 1) {
-            return base;
-        }
-
-        throw Errors.unsupported("Unsupported field: " + path);
-    }
-
     public <T> PageResponse<T> query(ObjectFilterRequest request) {
-        resolveSearchFilter(request);
-        Table<?> table = TableMetadataFactory.getTable(request.getObjectInfo().getName());
+        SearchOrDefaultFilter.resolveSearchFilter(request);
+        ObjectMetadata objectMetadata = ObjectMetadataFactory.getObjectMetadata(request.getObjectInfo().getName());
+//        SearchOrDefaultFilter.addIsDeletedFilter(objectMetadata, request);
+        Table<?> table = objectMetadata.getTable();
 
-        Condition condition = FilterBuilder.build(request.getFilters(), table);
+        Condition condition = FilterBuilder.build(request.getFilters(), objectMetadata);
         SelectConditionStep<Record> query = dsl
-                .select(buildFields(request, table))
+                .select(SelectBuilder.buildFields(request, objectMetadata))
                 .from(table)
                 .where(condition);
 
-        applySorting(query, request, table);
+        applySorting(query, request, objectMetadata);
         applyPaging(query, request);
 
         List<Map<String, Object>> result = query.fetchMaps();
@@ -109,40 +54,17 @@ public class DynamicQueryService {
         return (PageResponse<T>) PageResponse.of(result);
     }
 
-    private List<SelectField<?>> buildFields(ObjectFilterRequest request, Table<?> table) {
-        if (request.getReturnFields() == null || request.getReturnFields().isEmpty()) {
-            return Utils.CL.newArrayList((SelectField<?>) DSL.asterisk());
-        }
-
-        return request.getReturnFields()
-                .stream()
-                .map(f -> getField(table, f))
-                .collect(Collectors.toList());
-    }
-
-    private SelectField<?> getField(Table<?> table, String fieldPath) {
-        String[] parts = fieldPath.split("\\.");
-        String alias = parts[0];
-        if (parts.length > 1) {
-            alias = String.join(".", parts);
-        }
-
-        Field<?> field = FieldResolver.resolve(table, fieldPath);
-
-        return field.as(alias);
-    }
-
     private void applySorting(SelectConditionStep<org.jooq.Record> query,
                               ObjectFilterRequest request,
-                              Table<?> table) {
+                              ObjectMetadata objectMetadata) {
 
         if (Objects.isNull(request.getPageRequest())) return;
-        var sorts = request.getPageRequest().getSorts();
+        List<Sort> sorts = request.getPageRequest().getSorts();
         if (Objects.isNull(sorts)) return;
 
         List<SortField<?>> sortFields = sorts.stream()
                 .map(s -> {
-                    Field<?> field = FieldResolver.resolve(table, s.getAttribute());
+                    Field<?> field = FieldResolver.resolve(s.getAttribute(), objectMetadata);
                     return SortDirection.ASC.name().equalsIgnoreCase(s.getDirection().name())
                             ? field.asc()
                             : field.desc();
@@ -156,61 +78,202 @@ public class DynamicQueryService {
                              ObjectFilterRequest request) {
 
         if (Objects.isNull(request.getPageRequest())) return;
-
         int size = request.getPageRequest().getSize();
         int offset = request.getPageRequest().getOffset();
 
         query.limit(size).offset(offset);
     }
 
-    private Condition buildSearch(SearchRequest search, Table<?> table) {
-        if (search == null || search.getKeyword() == null) {
-            return DSL.noCondition();
-        }
-
-        List<Condition> conditions = search.getFields().stream()
-                .map(f -> table.field(f, String.class)
-                        .likeIgnoreCase("%" + search.getKeyword() + "%"))
-                .collect(Collectors.toList());
-
-        return DSL.or(conditions);
-    }
-
-    private FilterGroup toFilterGroup(SearchRequest searchRequest) {
-        if(Objects.nonNull(searchRequest)) {
-            List<String> fields = searchRequest.getFields();
-            if(Utils.CL.isNotEmpty(fields) && Utils.STR.isNotBlank(searchRequest.getKeyword())) {
-                FilterGroup.FilterGroupBuilder filterGroup = FilterGroup.builder();
-                filterGroup.operator(LogicalOperator.OR);
-                List<FilterObject> filterConditionList = fields.stream().map(field -> (FilterObject)FilterCondition
-                        .builder()
-                        .field(field)
-                        .operator(FilterOperator.LIKE)
-                        .value(searchRequest.getKeyword())
-                        .build()).toList();
-
-                filterGroup.conditions(filterConditionList);
-                return filterGroup.build();
+    private Map<Field<?>, Object> getFieldValues(ObjectMetadata objectMetadata, Map<String, Object> values) {
+        List<Attribute> attrs = objectMetadata.getAttributes();
+        Map<Field<?>, Object> fieldValues = new HashMap<>();
+        for (Attribute attr : attrs) {
+            Object rawValue = values.get(attr.getFieldName());
+            Object casted = attr.cast(rawValue);
+            if (casted != null) {
+                Field<?> field = attr.getField();
+                fieldValues.put(field, casted);
             }
         }
-        return  null;
+        return fieldValues;
     }
 
-    private void resolveSearchFilter(ObjectFilterRequest filter) {
-        FilterGroup searchFilterGroup = toFilterGroup(filter.getSearch());
-        if(Objects.nonNull(searchFilterGroup)) {
-            FilterGroup currentFilterGroup = filter.getFilters();
-            if(Objects.isNull(currentFilterGroup)) {
-                filter.setFilters(searchFilterGroup);
-            } else {
-                List<FilterObject> filterConditionList = currentFilterGroup.getConditions();
-                if(Utils.CL.isEmpty(filterConditionList)) {
-                    filter.setFilters(searchFilterGroup);
-                } else {
-                    FilterGroup newSearchFilterGroup = FilterGroup.builder().operator(LogicalOperator.AND).conditions(Utils.CL.newArrayList(searchFilterGroup)).build();
-                    currentFilterGroup.getConditions().add(newSearchFilterGroup);
-                }
+    public int insert(ObjectMetadata objectMetadata, Map<String, Object> values) {
+        Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
+        applyInsertAudit(objectMetadata, fieldValues);
+        return dsl.insertInto(objectMetadata.getTable())
+                .set(fieldValues)
+                .execute();
+    }
+
+    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values, List<Field<?>> returnField) {
+        Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
+        applyInsertAudit(objectMetadata, fieldValues);
+        return dsl.insertInto(objectMetadata.getTable())
+                .set(fieldValues)
+                .returning(returnField)
+                .fetchOneMap();
+    }
+
+    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values) {
+        return insertReturning(objectMetadata, values, objectMetadata.getFields());
+    }
+
+    public int updateById(ObjectMetadata meta, Object id, Map<String, Object> values) {
+        Attribute attribute = meta.getIdAttribute();
+        Field<Object> fieldId = (Field<Object>) attribute.getField();
+        Object idValueCasted = attribute.cast(id);
+
+        return update(meta, values, fieldId.eq(idValueCasted));
+    }
+
+    public int update(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where) {
+        if (where == null) {
+            throw Errors.missingWhereConditionException("WHERE condition must not be null");
+        }
+
+        if (where.equals(org.jooq.impl.DSL.noCondition())) {
+            throw Errors.missingWhereConditionException("WHERE condition must not be empty");
+        }
+
+        Map<Field<?>, Object> map = new LinkedHashMap<>();
+        values.forEach((k, v) -> {
+            Attribute attribute = objectMetadata.getAttributeByName(k);
+            if (attribute != null) {
+                Field<?> field = attribute.getField();
+                map.put(field, attribute.cast(v));
+            }
+        });
+
+        applyUpdateAudit(objectMetadata, map);
+        //Add new version and update where condition
+        applyVersion(objectMetadata, map, where);
+
+        int affected = dsl.update(objectMetadata.getTable())
+                .set(map)
+                .where(where)
+                .execute();
+
+        if (affected == 0) {
+            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
+        }
+
+        return affected;
+    }
+
+    public int deleteById(ObjectMetadata meta, Object id) {
+        if (id == null) {
+            throw Errors.invalid("Id must not be null");
+        }
+
+        Attribute attribute = meta.getIdAttribute();
+        Field<Object> idField = (Field<Object>) attribute.getField();
+        Object idCasted = attribute.cast(id);
+        Condition condition = idField.eq(idCasted);
+
+        return delete(meta, condition);
+    }
+
+    public int delete(ObjectMetadata meta, Condition condition) {
+
+        if (condition == null || condition.equals(DSL.noCondition())) {
+            throw Errors.missingWhereConditionException("DELETE must have WHERE condition");
+        }
+
+        if(!isSoftDeleted(meta)) {
+            return dsl.deleteFrom(meta.getTable())
+                    .where(condition)
+                    .execute();
+        }
+
+        Map<Field<?>, Object> update = new LinkedHashMap<>();
+        applyAuditAndSoftDelete(meta, update);
+
+        Attribute isDeleted = meta.getAttributeByName(com.msm.core.commons.Constants.IS_DELETED);
+        Field<Object> isDeletedField = (Field<Object>) isDeleted.getField();
+
+        return dsl.update(meta.getTable())
+                .set(update)
+                .where(condition)
+                .and(isDeletedField.eq(Boolean.FALSE))
+                .execute();
+    }
+
+    private void applyInsertAudit(ObjectMetadata meta,
+                                  Map<Field<?>, Object> fields) {
+
+        Instant now = Instant.now();
+        Attribute createdAt = meta.getAttributeByName(com.msm.core.commons.Constants.CREATED_AT);
+        if (createdAt != null) {
+            fields.put(createdAt.getField(), now);
+        }
+        Attribute createdBy = meta.getAttributeByName(com.msm.core.commons.Constants.CREATED_BY);
+        if (createdBy != null) {
+            fields.put(createdBy.getField(), UserQuerySecurityContext.getUsername());
+        }
+        Attribute createdById = meta.getAttributeByName(com.msm.core.commons.Constants.CREATED_BY_ID);
+        if (createdBy != null) {
+            fields.put(createdById.getField(), UserQuerySecurityContext.getUserId());
+        }
+    }
+
+    private void applyUpdateAudit(ObjectMetadata meta, Map<Field<?>, Object> fields) {
+
+        Instant now = Instant.now();
+        Attribute updatedAt = meta.getAttributeByName(com.msm.core.commons.Constants.UPDATED_AT);
+        if (updatedAt != null) {
+            fields.put(updatedAt.getField(), now);
+        }
+        Attribute updatedBy = meta.getAttributeByName(com.msm.core.commons.Constants.UPDATED_BY);
+        if (updatedBy != null) {
+            fields.put(updatedBy.getField(), UserQuerySecurityContext.getUsername());
+        }
+        Attribute updatedById = meta.getAttributeByName(com.msm.core.commons.Constants.UPDATED_BY_ID);
+        if (updatedById != null) {
+            fields.put(updatedById.getField(), UserQuerySecurityContext.getUserId());
+        }
+    }
+
+    private void applyAuditAndSoftDelete(ObjectMetadata meta, Map<Field<?>, Object> fields) {
+
+        Instant now = Instant.now();
+        Attribute deletedAt = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_AT);
+        if (deletedAt != null) {
+            fields.put(deletedAt.getField(), now);
+        }
+        Attribute deletedBy = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY);
+        if (deletedBy != null) {
+            fields.put(deletedBy.getField(), UserQuerySecurityContext.getUsername());
+        }
+        Attribute deletedById = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY_ID);
+        if (deletedById != null) {
+            fields.put(deletedById.getField(), UserQuerySecurityContext.getUserId());
+        }
+
+        Attribute isDeleted = meta.getAttributeByName(com.msm.core.commons.Constants.IS_DELETED);
+        if (isDeleted != null) {
+            fields.put(isDeleted.getField(), Boolean.TRUE);
+        }
+    }
+
+    private void applyVersion(ObjectMetadata meta, Map<Field<?>, Object> fields, Condition condition) {
+
+        Attribute versionAttr = meta.getAttributeByName(com.msm.core.commons.Constants.VERSION);
+        if (versionAttr != null) {
+            Field<?> versionField = versionAttr.getField();
+            Object versionValueObject = fields.get(versionField);
+            if(versionValueObject instanceof Number currentVersion) {
+                condition.and(((Field<Object>) versionField).eq(currentVersion.longValue() + 1));
             }
         }
+
+    }
+
+    private boolean isSoftDeleted(ObjectMetadata meta) {
+        Attribute deletedAt = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_AT);
+        Attribute deletedBy = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY);
+        Attribute deletedById = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY_ID);
+        Attribute isDeleted = meta.getAttributeByName(com.msm.core.commons.Constants.IS_DELETED);
+        return isDeleted != null || deletedAt != null || deletedBy != null || deletedById != null;
     }
 }

@@ -22,6 +22,8 @@ public class OperatorFactory {
         register(FilterOperator.IN, new InOperatorHandler());
         register(FilterOperator.NOT_IN, new NotInOperatorHandler());
         register(FilterOperator.BETWEEN, new BetweenOperatorHandler());
+        register(FilterOperator.CONTAINS, new ContainsOperatorHandler());
+        register(FilterOperator.CONTAINS_ONE_OF, new ContainsOneOfOperatorHandler());
     }
 
     public static void register(FilterOperator operator, OperatorHandler handler) {

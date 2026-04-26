@@ -1,10 +1,9 @@
 package com.msm.core.validate.attr;
 
-import com.msm.core.validate.domain.Attribute;
+import com.msm.core.metadata.Attribute;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
 

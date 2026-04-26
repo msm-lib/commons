@@ -10,7 +10,9 @@ import com.msm.core.filter.operator.AbstractOperatorHandler;
 import com.msm.core.filter.utils.ResolveUtils;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
-import com.querydsl.core.types.dsl.*;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.core.types.dsl.EntityPathBase;
+import com.querydsl.core.types.dsl.SimpleExpression;
 
 import java.util.List;
 import java.util.Objects;

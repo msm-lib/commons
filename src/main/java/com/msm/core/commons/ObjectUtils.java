@@ -2,23 +2,16 @@ package com.msm.core.commons;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.*;
+import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.UUID;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked"})
@@ -29,35 +22,6 @@ public final class ObjectUtils {
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .registerModule(new JavaTimeModule())
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
-//    private static final Map<Class<?>, Class<?>> PRIMITIVE_WRAPPERS = Map.of(
-//            int.class, Integer.class,
-//            long.class, Long.class,
-//            double.class, Double.class,
-//            boolean.class, Boolean.class,
-//            float.class, Float.class,
-//            short.class, Short.class,
-//            byte.class, Byte.class,
-//            char.class, Character.class
-//    );
-//    private static final Map<Class<?>, Function<String, ?>> CONVERTERS = Map.of(
-//            Integer.class, Integer::valueOf,
-//            Long.class, Long::valueOf,
-//            Double.class, Double::valueOf,
-//            BigDecimal.class, BigDecimal::new,
-//            Boolean.class, Boolean::valueOf,
-//            LocalDate.class, LocalDate::parse,
-//            LocalDateTime.class, LocalDateTime::parse,
-//            UUID.class, UUID::fromString
-//    );
-//
-//    public Class<?> normalizeDataType(Class<?> type) {
-//        return type.isPrimitive() ? PRIMITIVE_WRAPPERS.get(type) : type;
-//    }
-//
-//    public Function<String, ?> getCastFunction(Class<?> targetType) {
-//        Class<?> normalized = normalizeDataType(targetType);
-//        return CONVERTERS.get(normalized);
-//    }
 
     public <T> T updateValues(T object, Map<String, Object> updates) throws JsonMappingException {
         return MAPPER.updateValue(object, updates);
@@ -67,22 +31,9 @@ public final class ObjectUtils {
         return MAPPER.readValue(src, valueTypeRef);
     }
 
-
-//    public <T> T cast(Class<?> targetType, Object value) {
-//        if (Objects.isNull(value)) return null;
-//        if (targetType.isInstance(value)) {
-//            return (T) value;
-//        }
-//        if (targetType.isEnum()) {
-//            return (T) Enum.valueOf((Class<? extends Enum>) targetType, value.toString());
-//        }
-//        Function<String, ?> fn = getCastFunction(targetType);
-//        if (Objects.nonNull(fn)) {
-//            return (T) fn.apply(value.toString());
-//        }
-//
-//        throw new IllegalArgumentException("Cannot cast value '" + value + "' to type " + targetType.getName());
-//    }
+    public <T> T read(String src, TypeReference<T> valueTypeRef) throws IOException {
+        return MAPPER.readValue(src, valueTypeRef);
+    }
 
     public <T> T convertObject(Object object, Class<T> clazz) {
         if (Objects.isNull(object)) {
@@ -112,6 +63,13 @@ public final class ObjectUtils {
             return null;
         }
         return MAPPER.readValue(object, clazz);
+    }
+
+    public <T> T toObject(String object, JavaType type) throws JsonProcessingException {
+        if (Objects.isNull(object)) {
+            return null;
+        }
+        return MAPPER.readValue(object, type);
     }
 
     public <T> String toJsonString(T value) throws JsonProcessingException {
@@ -153,6 +111,57 @@ public final class ObjectUtils {
 
     public void setProperty(Object root, String path, Object value) {
         PROPS.setProperty(root, path, value);
+    }
+
+    public <T> T[] convertListToArray(List<T> value, Class<?> clazz) {
+        if (value == null) return null;
+        ArrayType arrayType = MAPPER.getTypeFactory().constructArrayType(clazz);
+        return MAPPER.convertValue(value, arrayType);
+    }
+
+    public <T> T convertToType(Object value, String typeName) {
+        return convertToType(value, typeName, false);
+    }
+
+    public <T> T convertToType(Object value, String typeName, boolean acceptCollectionAsArray) {
+        if (value == null) return null;
+        JavaType targetType = GenericTypeResolverFactory.resolve(typeName);
+        try {
+            if (acceptCollectionAsArray && targetType.isCollectionLikeType() || targetType.isArrayType()) {
+                // Get type of Collection (exp: UUID, String, Instant)
+                JavaType contentType = targetType.getContentType();
+                // Create JavaType array to convert
+                JavaType arrayType = MAPPER.getTypeFactory().constructArrayType(contentType);
+                Object convertedArray = MAPPER.convertValue(value, arrayType);
+                return (T) convertedArray;
+            }
+            return MAPPER.convertValue(value, targetType);
+        } catch (IllegalArgumentException e) {
+            if (value instanceof String) {
+                try {
+                    return MAPPER.readValue((String) value, targetType);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T> T convertToType(Object value, Class<T> clazz) {
+        if (value == null) return null;
+        try {
+            return MAPPER.convertValue(value, clazz);
+        } catch (IllegalArgumentException e) {
+            if (value instanceof String) {
+                try {
+                    return MAPPER.readValue((String) value, clazz);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            throw new RuntimeException(e);
+        }
     }
 
     ObjectUtils() {}

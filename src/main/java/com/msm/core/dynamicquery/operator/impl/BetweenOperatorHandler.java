@@ -1,79 +1,108 @@
 package com.msm.core.dynamicquery.operator.impl;
 
-import com.msm.core.dynamicquery.operator.AbstractOperatorHandler;
+import com.fasterxml.jackson.databind.JavaType;
+import com.msm.core.commons.Utils;
+import com.msm.core.dynamicquery.FieldResolver;
+import com.msm.core.dynamicquery.operator.OperatorHandler;
 import com.msm.core.exceptions.Errors;
 import com.msm.core.filter.domain.FilterCondition;
+import com.msm.core.metadata.Attribute;
+import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Condition;
 import org.jooq.Field;
-import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
 import java.math.BigDecimal;
-import java.time.*;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
 import java.util.List;
-import java.util.function.Function;
 
 @SuppressWarnings({"unchecked"})
-public class BetweenOperatorHandler extends AbstractOperatorHandler {
-
+public class BetweenOperatorHandler implements OperatorHandler {
 
     @Override
-    protected Condition doHandle(Field<?> field, FilterCondition condition) {
-        return buildBetweenCondition(field, condition);
-    }
-
-    private Condition buildBetweenCondition(Field<?> field, Object value) {
+    public Condition handle(ObjectMetadata objectMetadata, FilterCondition condition) {
+        String fieldName = FieldResolver.pathAsFieldName(condition.getField());
+        Attribute attribute = objectMetadata.getAttributeByName(fieldName);
+        if(attribute == null) {
+            throw Errors.fieldNotFoundException(fieldName + " not found");
+        }
+        Object value = condition.getValue();
         if (!(value instanceof List<?> values) || values.size() != 2) {
             throw Errors.invalid("BETWEEN requires exactly 2 values");
         }
 
-        Object from = values.get(0);
-        Object to = values.get(1);
+        if(attribute.isJsonField()) {
+            Field<Object> field = (Field<Object>) FieldResolver.resolve(condition.getField(), objectMetadata);
+            return buildJsonbBetween(field, values.getFirst(), values.getLast());
+        }
+
+        Field<?> field = attribute.getField();
+        JavaType attrJavaType = attribute.getJavaType();
+        Object from = attribute.cast(values.getFirst());
+        Object to = attribute.cast(values.getLast());
 
         // detect type & cast
-        if (field.getType() == String.class) {
+        if (attrJavaType.isTypeOrSubTypeOf(String.class)) {
             return ((Field<String>) field).between(from.toString(), to.toString());
         }
 
-        if (Number.class.isAssignableFrom(field.getType())) {
+        if (attrJavaType.isTypeOrSubTypeOf(Number.class)) {
             return ((Field<BigDecimal>) field).between(
                     new BigDecimal(from.toString()),
                     new BigDecimal(to.toString())
             );
         }
 
-        if (field.getType() == java.time.LocalDate.class) {
+        if (attrJavaType.isTypeOrSubTypeOf(LocalDate.class)) {
             return ((Field<LocalDate>) field).between(
                     LocalDate.parse(from.toString()),
                     LocalDate.parse(to.toString())
             );
         }
 
-        if (field.getType() == java.time.LocalDateTime.class) {
+        if (attrJavaType.isTypeOrSubTypeOf(LocalDateTime.class)) {
             return ((Field<LocalDateTime>) field).between(
                     LocalDateTime.parse(from.toString()),
                     LocalDateTime.parse(to.toString())
             );
         }
 
-        //2024-01-01T10:15:30+07:00
-        //2024-01-01T03:15:30Z
-        if (field.getType() == OffsetDateTime.class) {
+        if (attrJavaType.isTypeOrSubTypeOf(OffsetDateTime.class)) {
             return ((Field<OffsetDateTime>) field).between(
                     OffsetDateTime.parse(from.toString()),
                     OffsetDateTime.parse(to.toString())
             );
         }
 
-        // fallback
-        return DSL.condition("{0} between {1} and {2}", field, from, to);
+        if (attrJavaType.isTypeOrSubTypeOf(Instant.class)) {
+            return ((Field<OffsetDateTime>) field).between(
+                    OffsetDateTime.parse(from.toString()),
+                    OffsetDateTime.parse(to.toString())
+            );
+        }
+
+        throw Errors.unsupported("BETWEEN operator unsupported for the field '"
+                + condition.getField() + "' with values[" + from + ", " + to + "]");
     }
 
-    private <T extends Comparable<T>> Condition between(
-            Field<T> field, Object from, Object to, Function<String, T> parser) {
-
-        return field.between(
-                parser.apply(from.toString()),
-                parser.apply(to.toString())
-        );
+    public Condition buildJsonbBetween(Field<?> extracted, Object start, Object end) {
+        if (start instanceof Number) {
+            BigDecimal startCasted = Utils.O.convertToType(start, BigDecimal.class.getSimpleName());
+            BigDecimal endCasted = Utils.O.convertToType(end, BigDecimal.class.getSimpleName());
+            return extracted.cast(SQLDataType.NUMERIC).between(startCasted, endCasted);
+        } else if (start instanceof Instant) {
+            Instant startCasted = Utils.O.convertToType(start, Instant.class.getSimpleName());
+            Instant endCasted = Utils.O.convertToType(end, Instant.class.getSimpleName());
+            return extracted.cast(SQLDataType.INSTANT).between(startCasted, endCasted);
+        } else if (start instanceof OffsetDateTime) {
+            OffsetDateTime startCasted = Utils.O.convertToType(start, OffsetDateTime.class.getSimpleName());
+            OffsetDateTime endCasted = Utils.O.convertToType(end, OffsetDateTime.class.getSimpleName());
+            return extracted.cast(SQLDataType.OFFSETDATETIME).between(startCasted, endCasted);
+        } else {
+            return ((Field<String>) extracted).between(String.valueOf(start), String.valueOf(end));
+        }
     }
 }

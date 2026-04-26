@@ -4,7 +4,6 @@ import com.msm.core.commons.Utils;
 import com.msm.core.validate.LazyObjectProxy;
 import com.msm.core.validate.ReferenceGraph;
 import com.msm.core.validate.domain.AttributeRuleEntry;
-import com.msm.core.validate.domain.AttributeType;
 import lombok.RequiredArgsConstructor;
 import org.jeasy.rules.api.Facts;
 

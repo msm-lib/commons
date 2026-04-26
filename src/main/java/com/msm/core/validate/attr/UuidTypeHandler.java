@@ -1,9 +1,6 @@
 package com.msm.core.validate.attr;
 
-import com.msm.core.commons.ValueConvertFactory;
-import com.msm.core.validate.domain.Attribute;
-
-import java.util.UUID;
+import com.msm.core.metadata.Attribute;
 
 public class UuidTypeHandler implements ValueValidationHandler {
 
@@ -14,7 +11,7 @@ public class UuidTypeHandler implements ValueValidationHandler {
 
     @Override
     public boolean isValid(Attribute attribute, Object o) {
-        UUID val = ValueConvertFactory.convert(UUID.class, o);
+        attribute.cast(o);
         return true;
     }
 }

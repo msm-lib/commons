@@ -1,12 +1,11 @@
 package com.msm.core.filter.utils;
 
 import com.msm.core.exceptions.Errors;
-import com.msm.core.exceptions.InvalidFieldArgumentException;
 import com.msm.core.filter.cache.EntityMetadataFactory;
 import com.msm.core.filter.domain.FieldMetadata;
 import com.msm.core.filter.domain.JoinType;
-import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.msm.core.filter.expressions.json.JsonFieldResolver;
+import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.querydsl.core.types.Expression;
 import com.querydsl.core.types.Path;
 import com.querydsl.core.types.dsl.Expressions;

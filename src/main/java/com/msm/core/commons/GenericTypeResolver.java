@@ -2,23 +2,30 @@ package com.msm.core.commons;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import org.jooq.JSON;
+import org.jooq.JSONB;
+import org.jooq.types.DayToSecond;
+import org.jooq.types.YearToMonth;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class GenericTypeResolver {
     GenericTypeResolver() {}
     private final TypeFactory tf = TypeFactory.defaultInstance();
     private final Map<String, JavaType> cache = new ConcurrentHashMap<>();
 
-    private final Map<String, String> aliases = new HashMap<>();
-    private final List<String> imports = new ArrayList<>() {{
-        add("java.lang.*");
-        add("java.util.*");
-    }};
+    private final Map<String, String> aliases = new ConcurrentHashMap<>();
+    private final Set<String> imports = new CopyOnWriteArraySet<>(Arrays.asList(
+            "java.lang.*", "java.util.*", "java.math.*", "java.text.*", "java.time.*"
+    ));
 
-    private static final Map<String, Class<?>> SIMPLE_TYPES = new HashMap<>();
+
+    private static final Map<String, Class<?>> SIMPLE_TYPES = new ConcurrentHashMap<>();
 
     static {
         // primitives
@@ -31,34 +38,51 @@ public class GenericTypeResolver {
         SIMPLE_TYPES.put("byte", byte.class);
         SIMPLE_TYPES.put("short", short.class);
 
-        // wrappers + common
+        // date and datetime
+        SIMPLE_TYPES.put("Instant", Instant.class);
+        SIMPLE_TYPES.put("LocalDate", LocalDate.class);
+        SIMPLE_TYPES.put("LocalTime", LocalTime.class);
+        SIMPLE_TYPES.put("LocalDateTime", LocalDateTime.class);
+        SIMPLE_TYPES.put("OffsetTime", OffsetTime.class);
+        SIMPLE_TYPES.put("OffsetDateTime", OffsetDateTime.class);
+        SIMPLE_TYPES.put("YearToMonth", YearToMonth.class);
+        SIMPLE_TYPES.put("DayToSecond", DayToSecond.class);
+
+        //Number
+        SIMPLE_TYPES.put("Byte", Byte.class);
+        SIMPLE_TYPES.put("Short", Short.class);
+        SIMPLE_TYPES.put("BigDecimal", BigDecimal.class);
         SIMPLE_TYPES.put("Integer", Integer.class);
         SIMPLE_TYPES.put("Long", Long.class);
         SIMPLE_TYPES.put("Double", Double.class);
         SIMPLE_TYPES.put("Float", Float.class);
-        SIMPLE_TYPES.put("BigDecimal", BigDecimal.class);
+        SIMPLE_TYPES.put("BigInteger", BigInteger.class);
+        SIMPLE_TYPES.put("Number", Number.class);
+
+        //String
+        SIMPLE_TYPES.put("String", String.class);
+        SIMPLE_TYPES.put("byte[]", byte[].class);
+
+        // wrappers + common
         SIMPLE_TYPES.put("Boolean", Boolean.class);
         SIMPLE_TYPES.put("Character", Character.class);
-        SIMPLE_TYPES.put("Byte", Byte.class);
-        SIMPLE_TYPES.put("Short", Short.class);
-
-        SIMPLE_TYPES.put("String", String.class);
+        SIMPLE_TYPES.put("UUID", UUID.class);
         SIMPLE_TYPES.put("Object", Object.class);
 
         // collections
         SIMPLE_TYPES.put("List", List.class);
         SIMPLE_TYPES.put("Set", Set.class);
         SIMPLE_TYPES.put("Map", Map.class);
+        SIMPLE_TYPES.put("JSON", JSON.class);
+        SIMPLE_TYPES.put("JSONB", JSONB.class);
     }
 
-    public GenericTypeResolver addImport(String pkg) {
+    public void addImport(String pkg) {
         imports.add(pkg);
-        return this;
     }
 
-    public GenericTypeResolver addAlias(String simple, String fqcn) {
-        aliases.put(simple, fqcn);
-        return this;
+    public void addAlias(String simple, String fullyQualifiedClassName) {
+        aliases.putIfAbsent(simple, fullyQualifiedClassName);
     }
 
     public JavaType parse(String input) {
@@ -110,27 +134,36 @@ public class GenericTypeResolver {
             return loadClass(name);
         } catch (Exception ignored) {}
 
-        // imports
+        // using imports to parse fully qualified class name
         for (String imp : imports) {
-            if (imp.endsWith(".*")) {
-                String fqcn = imp.replace(".*", "." + name);
+            String fullyQualifiedName = getFullyQualifiedName(imp, name);
+            if (fullyQualifiedName != null) {
                 try {
-                    return loadClass(fqcn);
-                } catch (Exception ignored) {}
-            } else if (imp.endsWith("." + name)) {
-                return loadClass(imp);
+                    Class<?> clazz = Class.forName(fullyQualifiedName);
+                    SIMPLE_TYPES.put(name, clazz);
+                    SIMPLE_TYPES.put(fullyQualifiedName, clazz);
+                    return clazz;
+                } catch (ClassNotFoundException ignored) {}
             }
         }
 
         throw new RuntimeException("Cannot resolve type: " + name);
     }
 
-    private Class<?> loadClass(String fqcn) {
-        try {
-            return Class.forName(fqcn);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException("Class not found: " + fqcn);
-        }
+    private String getFullyQualifiedName(String imp, String name) {
+        return imp.endsWith(".*")
+                ? imp.substring(0, imp.length() - 1) + name
+                : (imp.endsWith("." + name) ? imp : null);
+    }
+
+    private Class<?> loadClass(String name) {
+        return SIMPLE_TYPES.computeIfAbsent(name, fq -> {
+            try {
+                return Class.forName(fq);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Class not found: " + fq);
+            }
+        });
     }
 
     private List<String> split(String input) {
@@ -143,14 +176,14 @@ public class GenericTypeResolver {
             if (c == '>') depth--;
 
             if (c == ',' && depth == 0) {
-                result.add(current.toString());
+                result.add(current.toString().trim());
                 current.setLength(0);
             } else {
                 current.append(c);
             }
         }
 
-        result.add(current.toString());
+        result.add(current.toString().trim());
         return result;
     }
 }

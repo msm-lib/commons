@@ -1,46 +1,55 @@
 package com.msm.core.dynamicquery;
 
-import com.msm.core.commons.Utils;
 import com.msm.core.exceptions.Errors;
+import com.msm.core.metadata.Attribute;
+import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Field;
-import org.jooq.Table;
 import org.jooq.impl.DSL;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class FieldResolver {
 
-    public static Field<?> resolve(Table<?> table, String fieldPath) {
+    public static String resolve(String fieldPath) {
         String[] parts = fieldPath.split("\\.");
+        return parts[0];
+    }
 
-        String columnField = Utils.STR.toSnakeCase(parts[0]);
-        Field<?> base = table.field(columnField);
-
+    public static Field<?> resolve(String fieldPath, ObjectMetadata objectMetadata) {
+        String[] parts = fieldPath.split("\\.");
+        Attribute attribute = objectMetadata.getAttributeByName(parts[0]);
+        if(attribute == null) {
+            throw Errors.fieldNotFoundException(fieldPath + " not found");
+        }
+        Field<?> base = attribute.getField();
         if (parts.length == 1) {
             return base;
         }
-
         // JSON field
-        if (isJsonField(base)) {
-            return buildJsonField(parts);
+        if (attribute.isJsonField()) {
+            return buildJsonField(attribute, parts);
         }
 
         // Unsupported nested relation
         throw Errors.invalid("Invalid nested field: " + base.getName());
     }
 
-    private static boolean isJsonField(Field<?> field) {
-        if (field == null) {
-            return false;
-        }
-        Class<?> type = field.getType();
-        return type.getName().equalsIgnoreCase("org.jooq.JSON")
-                || type.getName().equalsIgnoreCase("org.jooq.JSONB");
-    }
+//    private static boolean isJsonField(Field<?> field) {
+//        if (field == null) {
+//            return false;
+//        }
+//        Class<?> type = field.getType();
+//        return type.getName().equalsIgnoreCase("org.jooq.JSON")
+//                || type.getName().equalsIgnoreCase("org.jooq.JSONB");
+//    }
 
-    private static Field<?> buildJsonField(String[] parts) {
+
+    private static Field<?> buildJsonField(Attribute attribute, String[] parts) {
         // parts[0] = name of column JSON
         // parts[1..n] = path of JSON
-        String columnField = Utils.STR.toSnakeCase(parts[0]);
-        Field<?> result = DSL.field(DSL.name(columnField));
+        Field<?> result = attribute.getField();
 
         for (int i = 1; i < parts.length; i++) {
             boolean isLast = (i == parts.length - 1);
@@ -100,6 +109,13 @@ public class FieldResolver {
 //        );
 //    }
 
+    public static List<String> pathAsArray(String path) {
+        return Arrays.stream(path.split("\\.")).collect(Collectors.toList());
+    }
+
+    public static String pathAsFieldName(String path) {
+        return path.split("\\.")[0];
+    }
 
 }
 

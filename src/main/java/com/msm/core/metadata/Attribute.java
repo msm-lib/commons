@@ -1,0 +1,113 @@
+package com.msm.core.metadata;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.JavaType;
+import com.msm.core.commons.GenericTypeResolverFactory;
+import com.msm.core.commons.Utils;
+import com.msm.core.dynamicquery.mapping.JavaTypeMappingFactory;
+import com.msm.core.exceptions.Errors;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.jooq.DataType;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Attribute {
+    private String fieldType;
+    private String fieldName;
+    private String columnName;
+    private String columnType;
+    private String refField;
+    private Boolean isRequired;
+    private Long maxLength;
+    private Long maxValue;
+    private Long minValue;
+    private Long maxSize;
+    private Boolean isFreeText;
+    private Object defaultValue;
+    private Boolean multiSelect;
+    private String regex;
+    private String formatValue;
+    private String formula;
+    private Boolean isSystem;
+    private String objectType;
+
+    /**
+     * Constructs a field representation for a database column with its associated metadata.
+     * <p>
+     * This method resolves the appropriate data type by mapping the internal {@code fieldType}
+     * through the {@link JavaTypeMappingFactory}. It establishes the link between the
+     * application-level Java type and the corresponding database-level storage format.
+     * </p>
+     * <p>
+     * <b>Implementation Note:</b> By default, common Java types map to their standard SQL
+     * equivalents (e.g., {@code String} maps to {@code VARCHAR}). A future enhancement
+     * will allow overriding this default behavior using a specific {@code columnType}
+     * (e.g., explicitly defining {@code TEXT} for a string field).
+     * </p>
+     *
+     * @return A field object initialized with the column name and the resolved data type.
+     * @see JavaTypeMappingFactory#getDataType(String)
+     */
+    public Field<?> getField() {
+        DataType<?> dataType = JavaTypeMappingFactory.getDataType(fieldType);
+        //dataType.getSQLDataType().getTypeName() != columnType
+        //Exp: String -> VARCHAR: default
+        //if String -> TEXT then columnType = TEXT
+        //Get data type by columnType=TEXT but implement after
+        return DSL.field(DSL.name(columnName), dataType);
+    }
+
+    public JavaType getJavaType() {
+        return GenericTypeResolverFactory.resolve(fieldType);
+    }
+
+    /**
+     * Converts or casts a given value to the target {@code fieldType} defined for this field.
+     * <p>
+     * This method utilizes {@link com.msm.core.commons.ObjectUtils#convertToType(Object, Class)} to perform the conversion at runtime.
+     * It is designed to bridge the gap between raw data (such as database results or request payloads)
+     * and the specific Java types required by the application domain.
+     * </p>
+     *
+     * @param <T>   The expected generic return type.
+     * @param value The object to be converted.
+     * @return      The value successfully cast or converted to type {@code T}.
+     * @throws RuntimeException (via {@link Errors#castException}) if the conversion fails,
+     *                          providing details about the field name, target type, and source type.
+     */
+    public <T> T cast(Object value) {
+        try {
+            return Utils.O.convertToType(value, fieldType);
+        } catch (Exception e) {
+            throw Errors.castException("Cannot cast field '" + fieldName + "' with type " + fieldType + " to type " + value.getClass(), e);
+        }
+    }
+
+    public <T> T castAndAcceptCollectionAsArray(Object value) {
+        try {
+            return Utils.O.convertToType(value, fieldType, true);
+        } catch (Exception e) {
+            throw Errors.castException("Cannot cast field '" + fieldName + "' with type " + fieldType + " to type " + value.getClass(), e);
+        }
+    }
+
+    public boolean isJsonField() {
+        return fieldType.toLowerCase().contains("json")
+                || fieldType.toLowerCase().contains("jsonb")
+                || fieldType.toLowerCase().contains("map")
+                || JavaTypeMappingFactory.isJson(fieldType);
+    }
+
+    public boolean isCollectionField() {
+        return fieldType.toLowerCase().contains("list")
+                || fieldType.toLowerCase().contains("set");
+    }
+}

@@ -1,8 +1,9 @@
 package com.msm.core.validate.attr.rules;
 
-import com.msm.core.validate.domain.Attribute;
+import com.msm.core.metadata.Attribute;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class AttributeSimpleRuleFactory {
     private final static List<AttributeSimpleRule> RULES = new ArrayList<>();

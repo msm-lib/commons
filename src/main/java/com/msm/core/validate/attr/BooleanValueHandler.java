@@ -1,6 +1,6 @@
 package com.msm.core.validate.attr;
 
-import com.msm.core.validate.domain.Attribute;
+import com.msm.core.metadata.Attribute;
 
 import java.util.Objects;
 

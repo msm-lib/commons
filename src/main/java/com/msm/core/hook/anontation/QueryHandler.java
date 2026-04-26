@@ -1,7 +1,6 @@
 package com.msm.core.hook.anontation;
 
 import com.msm.core.commons.Condition;
-import com.msm.core.commons.Constants;
 import com.msm.core.hook.AlwaysTrueCondition;
 
 import java.lang.annotation.ElementType;

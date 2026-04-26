@@ -1,7 +1,5 @@
 package com.msm.core.exceptions;
 
-import lombok.Builder;
-
 public abstract class GenericBaseException extends RuntimeException {
 
     private final String code;
