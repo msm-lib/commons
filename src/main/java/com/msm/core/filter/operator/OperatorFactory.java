@@ -2,7 +2,16 @@ package com.msm.core.filter.operator;
 
 import com.msm.core.exceptions.UnsupportedException;
 import com.msm.core.filter.domain.FilterOperator;
-import com.msm.core.filter.operator.impl.*;
+import com.msm.core.filter.operator.impl.BetweenOperatorHandler;
+import com.msm.core.filter.operator.impl.EqOperatorHandler;
+import com.msm.core.filter.operator.impl.GtOperatorHandler;
+import com.msm.core.filter.operator.impl.GteOperatorHandler;
+import com.msm.core.filter.operator.impl.InOperatorHandler;
+import com.msm.core.filter.operator.impl.LikeOperatorHandler;
+import com.msm.core.filter.operator.impl.LtOperatorHandler;
+import com.msm.core.filter.operator.impl.LteOperatorHandler;
+import com.msm.core.filter.operator.impl.NeOperatorHandler;
+import com.msm.core.filter.operator.impl.NotInOperatorHandler;
 
 import java.util.EnumMap;
 import java.util.Map;

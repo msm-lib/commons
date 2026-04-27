@@ -187,4 +187,97 @@ public class JavaTypeMappingFactory {
 //
 //        return isArray ? SQLDataType.OTHER.array() : SQLDataType.OTHER;
 //    }
+
+    public static String mapType(String dataType, String udtName) {
+
+        if (dataType == null) return "String";
+
+        return switch (dataType.toLowerCase()) {
+
+            // =========================
+            // UUID / ID
+            // =========================
+            case "uuid" -> "UUID";
+
+            // =========================
+            // Integer types
+            // =========================
+            case "smallint", "int2" -> "Short";
+            case "integer", "int", "int4" -> "Integer";
+            case "bigint", "int8" -> "Long";
+
+            // =========================
+            // Decimal / Numeric
+            // =========================
+            case "numeric", "decimal", "money" -> "BigDecimal";
+            case "real", "float4" -> "Float";
+            case "double precision", "float8" -> "Double";
+
+            // =========================
+            // Boolean
+            // =========================
+            case "boolean", "bool" -> "Boolean";
+
+            // =========================
+            // String types
+            // =========================
+            case "character varying", "varchar", "character", "char", "text", "citext"
+                    -> "String";
+
+            // =========================
+            // Date / Time
+            // =========================
+            case "date" -> "LocalDate";
+            case "time", "time without time zone" -> "LocalTime";
+            case "timetz", "time with time zone" -> "OffsetTime";
+            case "timestamp", "timestamp without time zone" -> "LocalDateTime";
+            case "timestamptz", "timestamp with time zone" -> "Instant";
+
+            // =========================
+            // Binary
+            // =========================
+            case "bytea" -> "byte[]";
+
+            // =========================
+            // JSON types
+            // =========================
+            case "json", "jsonb" -> "Map<String,Object>";
+
+            // =========================
+            // Arrays (PostgreSQL)
+            // =========================
+            case "array" -> mapArrayType(udtName);
+
+            // =========================
+            // Network / special types
+            // =========================
+            case "inet" -> "String";
+            case "cidr" -> "String";
+            case "macaddr" -> "String";
+            case "uuid[]" -> "List<UUID>";
+
+            // =========================
+            // Default fallback
+            // =========================
+            default -> "String";
+        };
+    }
+
+    private static String mapArrayType(String udtName) {
+        if (udtName == null) return "Object[]";
+
+        return switch (udtName) {
+
+            case "_uuid" -> "List<UUID>";
+            case "_int4" -> "List<Integer>";
+            case "_int8" -> "List<Long>";
+            case "_text", "_varchar" -> "List<String>";
+            case "_bool" -> "List<Boolean>";
+            case "_numeric" -> "List<BigDecimal>";
+            case "_timestamp" -> "List<LocalDateTime>";
+            case "_timestamptz" -> "List<Instant>";
+
+            default -> "List<Object>";
+        };
+    }
 }

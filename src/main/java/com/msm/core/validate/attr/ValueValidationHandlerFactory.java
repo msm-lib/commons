@@ -13,6 +13,7 @@ public class ValueValidationHandlerFactory {
     private static final Map<String, ValueValidationHandler> HANDLERS = new ConcurrentHashMap<>() ;
 
     static {
+        register(new DefaultNoHandler());
         register(new BooleanValueHandler());
         register(new DateTimeValueHandler());
         register(new DateValueHandler());
@@ -28,7 +29,8 @@ public class ValueValidationHandlerFactory {
     public static ValueValidationHandler getHandler(String type) {
         ValueValidationHandler valueValidationHandler =  HANDLERS.get(type);
         if (valueValidationHandler == null) {
-            throw new IllegalArgumentException("No handler for type: " + type);
+//            throw new IllegalArgumentException("No handler for type: " + type);
+            return HANDLERS.get("default");
         }
 
         return valueValidationHandler;

@@ -1,12 +1,15 @@
 package com.msm.core.metadata;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.jooq.Field;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
@@ -18,19 +21,24 @@ import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ObjectMetadata {
     private String name;
     private String tableName;
     private List<Attribute> attributes;
+    @JsonIgnore
     private Map<String, Attribute> attributeMap = new HashMap<>();
 
+    @JsonIgnore
     public Table<?> getTable() {
         return DSL.table(DSL.name(tableName));
     }
 
+    @JsonIgnore
     public List<Field<?>> getFields() {
         return Utils.CL.emptyIfNull(attributes).stream().map(Attribute::getField).collect(Collectors.toList());
     }
@@ -48,11 +56,17 @@ public class ObjectMetadata {
         });
     }
 
+    @JsonIgnore
     public Attribute getIdAttribute() {
         if (!attributeMap.containsKey(Constants.OBJECT_PK)) {
             fetchAttributesToMap();
         }
         return attributeMap.get(Constants.OBJECT_PK);
+    }
+
+    @JsonIgnore
+    public Attribute getCustomFieldAttribute() {
+        return getAttributeByName(Constants.CUSTOM_VALUE_NAME);
     }
 
 //    public Attribute getCreatedAtAttribute() {

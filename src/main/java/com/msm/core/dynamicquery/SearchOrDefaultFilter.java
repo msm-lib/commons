@@ -2,7 +2,13 @@ package com.msm.core.dynamicquery;
 
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
-import com.msm.core.filter.domain.*;
+import com.msm.core.filter.domain.FilterCondition;
+import com.msm.core.filter.domain.FilterGroup;
+import com.msm.core.filter.domain.FilterObject;
+import com.msm.core.filter.domain.FilterOperator;
+import com.msm.core.filter.domain.LogicalOperator;
+import com.msm.core.filter.domain.ObjectFilterRequest;
+import com.msm.core.filter.domain.SearchRequest;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 

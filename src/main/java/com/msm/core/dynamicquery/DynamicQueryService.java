@@ -1,5 +1,8 @@
 package com.msm.core.dynamicquery;
 
+import com.msm.core.commons.Constants;
+import com.msm.core.dynamicquery.context.ObjectMetadataContextHolder;
+import com.msm.core.dynamicquery.context.UserContextHolder;
 import com.msm.core.exceptions.Errors;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
@@ -8,12 +11,22 @@ import com.msm.core.filter.domain.pageable.SortDirection;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
-import org.jooq.*;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Field;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SortField;
+import org.jooq.Table;
 import org.jooq.impl.DSL;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked"})
@@ -24,8 +37,10 @@ public class DynamicQueryService {
 
     public <T> PageResponse<T> query(ObjectFilterRequest request) {
         SearchOrDefaultFilter.resolveSearchFilter(request);
-        ObjectMetadata objectMetadata = ObjectMetadataFactory.getObjectMetadata(request.getObjectInfo().getName());
-//        SearchOrDefaultFilter.addIsDeletedFilter(objectMetadata, request);
+        Optional<ObjectMetadata> objectMetadataOptional = ObjectMetadataContextHolder.getObjectMetadata(request.getObjectInfo().getName());
+        ObjectMetadata objectMetadata = objectMetadataOptional.orElseThrow(() -> Errors.unsupported("Unsupported object: " + request.getObjectInfo().getName()));
+
+        SearchOrDefaultFilter.addIsDeletedFilter(objectMetadata, request);
         Table<?> table = objectMetadata.getTable();
 
         Condition condition = FilterBuilder.build(request.getFilters(), objectMetadata);
@@ -147,11 +162,12 @@ public class DynamicQueryService {
 
         applyUpdateAudit(objectMetadata, map);
         //Add new version and update where condition
-        applyVersion(objectMetadata, map, where);
+        Condition versionCondition = getVersionCondition(objectMetadata, map);
 
         int affected = dsl.update(objectMetadata.getTable())
                 .set(map)
                 .where(where)
+                .and(versionCondition)
                 .execute();
 
         if (affected == 0) {
@@ -189,7 +205,7 @@ public class DynamicQueryService {
         Map<Field<?>, Object> update = new LinkedHashMap<>();
         applyAuditAndSoftDelete(meta, update);
 
-        Attribute isDeleted = meta.getAttributeByName(com.msm.core.commons.Constants.IS_DELETED);
+        Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
         Field<Object> isDeletedField = (Field<Object>) isDeleted.getField();
 
         return dsl.update(meta.getTable())
@@ -203,77 +219,81 @@ public class DynamicQueryService {
                                   Map<Field<?>, Object> fields) {
 
         Instant now = Instant.now();
-        Attribute createdAt = meta.getAttributeByName(com.msm.core.commons.Constants.CREATED_AT);
+        Attribute createdAt = meta.getAttributeByName(Constants.CREATED_AT);
         if (createdAt != null) {
             fields.put(createdAt.getField(), now);
         }
-        Attribute createdBy = meta.getAttributeByName(com.msm.core.commons.Constants.CREATED_BY);
+        Attribute createdBy = meta.getAttributeByName(Constants.CREATED_BY);
         if (createdBy != null) {
-            fields.put(createdBy.getField(), UserQuerySecurityContext.getUsername());
+            fields.put(createdBy.getField(), UserContextHolder.getUsername());
         }
-        Attribute createdById = meta.getAttributeByName(com.msm.core.commons.Constants.CREATED_BY_ID);
+        Attribute createdById = meta.getAttributeByName(Constants.CREATED_BY_ID);
         if (createdBy != null) {
-            fields.put(createdById.getField(), UserQuerySecurityContext.getUserId());
+            fields.put(createdById.getField(), UserContextHolder.getUserId());
+        }
+        Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
+        if (isDeleted != null) {
+            fields.put(isDeleted.getField(), Boolean.FALSE);
         }
     }
 
     private void applyUpdateAudit(ObjectMetadata meta, Map<Field<?>, Object> fields) {
 
         Instant now = Instant.now();
-        Attribute updatedAt = meta.getAttributeByName(com.msm.core.commons.Constants.UPDATED_AT);
+        Attribute updatedAt = meta.getAttributeByName(Constants.UPDATED_AT);
         if (updatedAt != null) {
             fields.put(updatedAt.getField(), now);
         }
-        Attribute updatedBy = meta.getAttributeByName(com.msm.core.commons.Constants.UPDATED_BY);
+        Attribute updatedBy = meta.getAttributeByName(Constants.UPDATED_BY);
         if (updatedBy != null) {
-            fields.put(updatedBy.getField(), UserQuerySecurityContext.getUsername());
+            fields.put(updatedBy.getField(), UserContextHolder.getUsername());
         }
-        Attribute updatedById = meta.getAttributeByName(com.msm.core.commons.Constants.UPDATED_BY_ID);
+        Attribute updatedById = meta.getAttributeByName(Constants.UPDATED_BY_ID);
         if (updatedById != null) {
-            fields.put(updatedById.getField(), UserQuerySecurityContext.getUserId());
+            fields.put(updatedById.getField(), UserContextHolder.getUserId());
         }
     }
 
     private void applyAuditAndSoftDelete(ObjectMetadata meta, Map<Field<?>, Object> fields) {
 
         Instant now = Instant.now();
-        Attribute deletedAt = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_AT);
+        Attribute deletedAt = meta.getAttributeByName(Constants.DELETED_AT);
         if (deletedAt != null) {
             fields.put(deletedAt.getField(), now);
         }
-        Attribute deletedBy = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY);
+        Attribute deletedBy = meta.getAttributeByName(Constants.DELETED_BY);
         if (deletedBy != null) {
-            fields.put(deletedBy.getField(), UserQuerySecurityContext.getUsername());
+            fields.put(deletedBy.getField(), UserContextHolder.getUsername());
         }
-        Attribute deletedById = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY_ID);
+        Attribute deletedById = meta.getAttributeByName(Constants.DELETED_BY_ID);
         if (deletedById != null) {
-            fields.put(deletedById.getField(), UserQuerySecurityContext.getUserId());
+            fields.put(deletedById.getField(), UserContextHolder.getUserId());
         }
 
-        Attribute isDeleted = meta.getAttributeByName(com.msm.core.commons.Constants.IS_DELETED);
+        Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
         if (isDeleted != null) {
             fields.put(isDeleted.getField(), Boolean.TRUE);
         }
     }
 
-    private void applyVersion(ObjectMetadata meta, Map<Field<?>, Object> fields, Condition condition) {
-
-        Attribute versionAttr = meta.getAttributeByName(com.msm.core.commons.Constants.VERSION);
+    private Condition getVersionCondition(ObjectMetadata meta, Map<Field<?>, Object> fields) {
+        Attribute versionAttr = meta.getAttributeByName(Constants.VERSION);
         if (versionAttr != null) {
             Field<?> versionField = versionAttr.getField();
             Object versionValueObject = fields.get(versionField);
             if(versionValueObject instanceof Number currentVersion) {
-                condition.and(((Field<Object>) versionField).eq(currentVersion.longValue() + 1));
+                fields.put(versionField, currentVersion.longValue() + 1);
+                return ((Field<Object>) versionField).eq(currentVersion.longValue());
             }
         }
-
+        return DSL.noCondition();
     }
 
     private boolean isSoftDeleted(ObjectMetadata meta) {
-        Attribute deletedAt = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_AT);
-        Attribute deletedBy = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY);
-        Attribute deletedById = meta.getAttributeByName(com.msm.core.commons.Constants.DELETED_BY_ID);
-        Attribute isDeleted = meta.getAttributeByName(com.msm.core.commons.Constants.IS_DELETED);
+        Attribute deletedAt = meta.getAttributeByName(Constants.DELETED_AT);
+        Attribute deletedBy = meta.getAttributeByName(Constants.DELETED_BY);
+        Attribute deletedById = meta.getAttributeByName(Constants.DELETED_BY_ID);
+        Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
         return isDeleted != null || deletedAt != null || deletedBy != null || deletedById != null;
     }
 }

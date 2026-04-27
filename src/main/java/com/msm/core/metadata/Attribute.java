@@ -1,6 +1,8 @@
 package com.msm.core.metadata;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.JavaType;
 import com.msm.core.commons.GenericTypeResolverFactory;
 import com.msm.core.commons.Utils;
@@ -14,6 +16,7 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
 @Builder
@@ -24,7 +27,7 @@ public class Attribute {
     private String fieldName;
     private String columnName;
     private String columnType;
-    private String refField;
+    private String attributeRef;
     private Boolean isRequired;
     private Long maxLength;
     private Long maxValue;
@@ -56,6 +59,7 @@ public class Attribute {
      * @return A field object initialized with the column name and the resolved data type.
      * @see JavaTypeMappingFactory#getDataType(String)
      */
+    @JsonIgnore
     public Field<?> getField() {
         DataType<?> dataType = JavaTypeMappingFactory.getDataType(fieldType);
         //dataType.getSQLDataType().getTypeName() != columnType
@@ -65,6 +69,7 @@ public class Attribute {
         return DSL.field(DSL.name(columnName), dataType);
     }
 
+    @JsonIgnore
     public JavaType getJavaType() {
         return GenericTypeResolverFactory.resolve(fieldType);
     }
@@ -99,6 +104,7 @@ public class Attribute {
         }
     }
 
+    @JsonIgnore
     public boolean isJsonField() {
         return fieldType.toLowerCase().contains("json")
                 || fieldType.toLowerCase().contains("jsonb")
@@ -106,8 +112,17 @@ public class Attribute {
                 || JavaTypeMappingFactory.isJson(fieldType);
     }
 
+    @JsonIgnore
     public boolean isCollectionField() {
         return fieldType.toLowerCase().contains("list")
                 || fieldType.toLowerCase().contains("set");
+    }
+
+    @JsonIgnore
+    public Field<?> getFieldRef() {
+        if (attributeRef != null) {
+            return DSL.field(DSL.name(attributeRef));
+        }
+        return null;
     }
 }

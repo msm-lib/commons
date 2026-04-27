@@ -1,4 +1,4 @@
-package com.msm.core.dynamicquery;
+package com.msm.core.dynamicquery.context;
 
 import java.util.UUID;
 

@@ -1,6 +1,17 @@
 package com.msm.core.dynamicquery.operator;
 
-import com.msm.core.dynamicquery.operator.impl.*;
+import com.msm.core.dynamicquery.operator.impl.BetweenOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.ContainsOneOfOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.ContainsOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.EqOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.GtOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.GteOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.InOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.LikeOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.LtOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.LteOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.NeOperatorHandler;
+import com.msm.core.dynamicquery.operator.impl.NotInOperatorHandler;
 import com.msm.core.exceptions.Errors;
 import com.msm.core.filter.domain.FilterOperator;
 

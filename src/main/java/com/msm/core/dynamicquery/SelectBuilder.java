@@ -13,7 +13,7 @@ public final class SelectBuilder {
 
     public static List<SelectField<?>> buildFields(ObjectFilterRequest request, ObjectMetadata objectMetadata) {
         if (request.getReturnFields() == null || request.getReturnFields().isEmpty()) {
-            return objectMetadata.getFields().stream().map(field -> (SelectField<?>) field).collect(Collectors.toList());
+            return objectMetadata.getAttributes().stream().map(attribute -> getSelectField(attribute.getFieldName(), objectMetadata)).collect(Collectors.toList());
         }
 
         return request.getReturnFields()

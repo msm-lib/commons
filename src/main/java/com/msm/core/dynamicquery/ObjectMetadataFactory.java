@@ -1,9 +1,9 @@
 package com.msm.core.dynamicquery;
 
-import com.msm.core.exceptions.Errors;
 import com.msm.core.metadata.ObjectMetadata;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class ObjectMetadataFactory {
@@ -14,11 +14,7 @@ public class ObjectMetadataFactory {
         CACHE_TABLE.put(objectMetadata.getName().toLowerCase(), objectMetadata);
     }
 
-    public static ObjectMetadata getObjectMetadata(String objectName) {
-        ObjectMetadata objectMetadata = CACHE_TABLE.get(objectName);
-        if (objectMetadata == null) {
-            throw Errors.unsupported("Unsupported object: " + objectName);
-        }
-        return objectMetadata;
+    public static Optional<ObjectMetadata> getObjectMetadata(String objectName) {
+        return Optional.ofNullable(CACHE_TABLE.get(objectName));
     }
 }

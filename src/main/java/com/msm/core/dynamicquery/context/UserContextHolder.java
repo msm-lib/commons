@@ -1,8 +1,8 @@
-package com.msm.core.dynamicquery;
+package com.msm.core.dynamicquery.context;
 
 import java.util.UUID;
 
-public class UserQuerySecurityContext {
+public class UserContextHolder {
     private static UserContextProvider provider;
     public static void setProvider(UserContextProvider p) {
         provider = p;

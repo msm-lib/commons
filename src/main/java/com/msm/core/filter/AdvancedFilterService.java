@@ -1,7 +1,16 @@
 package com.msm.core.filter;
 
 import com.msm.core.commons.Utils;
-import com.msm.core.filter.domain.*;
+import com.msm.core.filter.domain.AggregateRequest;
+import com.msm.core.filter.domain.AggregateType;
+import com.msm.core.filter.domain.FilterCondition;
+import com.msm.core.filter.domain.FilterGroup;
+import com.msm.core.filter.domain.FilterObject;
+import com.msm.core.filter.domain.FilterOperator;
+import com.msm.core.filter.domain.LogicalOperator;
+import com.msm.core.filter.domain.ObjectFilterRequest;
+import com.msm.core.filter.domain.PageResponse;
+import com.msm.core.filter.domain.SearchRequest;
 import com.msm.core.filter.join.ReferenceJoinResolver;
 import com.querydsl.core.Tuple;
 import com.querydsl.core.types.Expression;
@@ -17,7 +26,13 @@ import lombok.Data;
 import org.hibernate.metamodel.model.domain.internal.SingularAttributeImpl;
 
 import java.math.BigDecimal;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 
 @Data
 @SuppressWarnings({"unchecked"})

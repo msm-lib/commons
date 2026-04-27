@@ -10,7 +10,8 @@ public final class Constants {
     public static final String GENERIC_OBJECT_RECORD_TYPE = "RecordTypeHook";
     public static final String OBJECT_CONVERSION_ACTION = "conversion";
     public static final String GENERIC_FILTER_ACTION = "filter";
-    public static final String GENERIC_ALL_OBJECT_ACTION = "allObject";
+    public static final String GENERIC_ALL_OBJECT_ACTION = "filterAllObject";
+    public static final String GENERIC_FILTER_BY_ID_ACTION = "filterById";
     public static final String IS_DELETED_FIELD = "isDeleted";
 
     public static final String INVALID_DATA_TYPE = "{0} loại dữ liệu không hợp lệ";
@@ -38,6 +39,7 @@ public final class Constants {
     public static final String DELETED_BY_ID = "deletedById";
     public static final String IS_DELETED = "isDeleted";
     public static final String VERSION = "version";
+    public static final String CUSTOM_VALUE_NAME = "customValues";
 
     private Constants() {}
 }
