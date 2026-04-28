@@ -1,9 +1,12 @@
 package com.msm.core.dynamicquery;
 
 import com.msm.core.commons.Constants;
-import com.msm.core.dynamicquery.context.ObjectMetadataContextHolder;
-import com.msm.core.dynamicquery.context.UserContextHolder;
+import com.msm.core.commons.Utils;
 import com.msm.core.exceptions.Errors;
+import com.msm.core.filter.domain.FilterCondition;
+import com.msm.core.filter.domain.FilterGroup;
+import com.msm.core.filter.domain.FilterOperator;
+import com.msm.core.filter.domain.LogicalOperator;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
 import com.msm.core.filter.domain.pageable.Sort;
@@ -20,13 +23,11 @@ import org.jooq.SortField;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @SuppressWarnings({"unchecked"})
@@ -35,11 +36,8 @@ public class DynamicQueryService {
 
     private final DSLContext dsl;
 
-    public <T> PageResponse<T> query(ObjectFilterRequest request) {
+    public <T> PageResponse<T> filter(ObjectMetadata objectMetadata, ObjectFilterRequest request) {
         SearchOrDefaultFilter.resolveSearchFilter(request);
-        Optional<ObjectMetadata> objectMetadataOptional = ObjectMetadataContextHolder.getObjectMetadata(request.getObjectInfo().getName());
-        ObjectMetadata objectMetadata = objectMetadataOptional.orElseThrow(() -> Errors.unsupported("Unsupported object: " + request.getObjectInfo().getName()));
-
         SearchOrDefaultFilter.addIsDeletedFilter(objectMetadata, request);
         Table<?> table = objectMetadata.getTable();
 
@@ -115,7 +113,6 @@ public class DynamicQueryService {
 
     public int insert(ObjectMetadata objectMetadata, Map<String, Object> values) {
         Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
-        applyInsertAudit(objectMetadata, fieldValues);
         return dsl.insertInto(objectMetadata.getTable())
                 .set(fieldValues)
                 .execute();
@@ -123,7 +120,6 @@ public class DynamicQueryService {
 
     public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values, List<Field<?>> returnField) {
         Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
-        applyInsertAudit(objectMetadata, fieldValues);
         return dsl.insertInto(objectMetadata.getTable())
                 .set(fieldValues)
                 .returning(returnField)
@@ -160,9 +156,8 @@ public class DynamicQueryService {
             }
         });
 
-        applyUpdateAudit(objectMetadata, map);
-        //Add new version and update where condition
-        Condition versionCondition = getVersionCondition(objectMetadata, map);
+        //Update new version and update where condition
+        Condition versionCondition = updateOrGetVersionCondition(objectMetadata, map);
 
         int affected = dsl.update(objectMetadata.getTable())
                 .set(map)
@@ -203,8 +198,6 @@ public class DynamicQueryService {
         }
 
         Map<Field<?>, Object> update = new LinkedHashMap<>();
-        applyAuditAndSoftDelete(meta, update);
-
         Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
         Field<Object> isDeletedField = (Field<Object>) isDeleted.getField();
 
@@ -215,68 +208,26 @@ public class DynamicQueryService {
                 .execute();
     }
 
-    private void applyInsertAudit(ObjectMetadata meta,
-                                  Map<Field<?>, Object> fields) {
+    public Map<String, Object> findById(ObjectMetadata meta, Object id, List<String> returnFields) {
+        if (id == null) {
+            throw Errors.invalid("Id must not be null");
+        }
+        ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
+                .builder()
+                .objectInfo(ObjectFilterRequest.ObjectInfo.of(meta.getName()))
+                .returnFields(returnFields)
+                .filters(FilterGroup
+                        .builder()
+                        .operator(LogicalOperator.AND)
+                        .conditions(Utils.CL.newArrayList(FilterCondition.create(Constants.OBJECT_PK, FilterOperator.EQUALS, id)))
+                        .build())
+                .build();
+        PageResponse<Map<String, Object>> result = filter(meta, objectFilterRequest);
 
-        Instant now = Instant.now();
-        Attribute createdAt = meta.getAttributeByName(Constants.CREATED_AT);
-        if (createdAt != null) {
-            fields.put(createdAt.getField(), now);
-        }
-        Attribute createdBy = meta.getAttributeByName(Constants.CREATED_BY);
-        if (createdBy != null) {
-            fields.put(createdBy.getField(), UserContextHolder.getUsername());
-        }
-        Attribute createdById = meta.getAttributeByName(Constants.CREATED_BY_ID);
-        if (createdBy != null) {
-            fields.put(createdById.getField(), UserContextHolder.getUserId());
-        }
-        Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
-        if (isDeleted != null) {
-            fields.put(isDeleted.getField(), Boolean.FALSE);
-        }
+        return Utils.CL.getFirst(result.getContents());
     }
 
-    private void applyUpdateAudit(ObjectMetadata meta, Map<Field<?>, Object> fields) {
-
-        Instant now = Instant.now();
-        Attribute updatedAt = meta.getAttributeByName(Constants.UPDATED_AT);
-        if (updatedAt != null) {
-            fields.put(updatedAt.getField(), now);
-        }
-        Attribute updatedBy = meta.getAttributeByName(Constants.UPDATED_BY);
-        if (updatedBy != null) {
-            fields.put(updatedBy.getField(), UserContextHolder.getUsername());
-        }
-        Attribute updatedById = meta.getAttributeByName(Constants.UPDATED_BY_ID);
-        if (updatedById != null) {
-            fields.put(updatedById.getField(), UserContextHolder.getUserId());
-        }
-    }
-
-    private void applyAuditAndSoftDelete(ObjectMetadata meta, Map<Field<?>, Object> fields) {
-
-        Instant now = Instant.now();
-        Attribute deletedAt = meta.getAttributeByName(Constants.DELETED_AT);
-        if (deletedAt != null) {
-            fields.put(deletedAt.getField(), now);
-        }
-        Attribute deletedBy = meta.getAttributeByName(Constants.DELETED_BY);
-        if (deletedBy != null) {
-            fields.put(deletedBy.getField(), UserContextHolder.getUsername());
-        }
-        Attribute deletedById = meta.getAttributeByName(Constants.DELETED_BY_ID);
-        if (deletedById != null) {
-            fields.put(deletedById.getField(), UserContextHolder.getUserId());
-        }
-
-        Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
-        if (isDeleted != null) {
-            fields.put(isDeleted.getField(), Boolean.TRUE);
-        }
-    }
-
-    private Condition getVersionCondition(ObjectMetadata meta, Map<Field<?>, Object> fields) {
+    private Condition updateOrGetVersionCondition(ObjectMetadata meta, Map<Field<?>, Object> fields) {
         Attribute versionAttr = meta.getAttributeByName(Constants.VERSION);
         if (versionAttr != null) {
             Field<?> versionField = versionAttr.getField();

@@ -124,5 +124,12 @@ public final class CollectionUtils {
         }};
     }
 
+    public <X> X getFirst(List<X> input) {
+        if(Utils.CL.isNotEmpty(input)) {
+            return input.getFirst();
+        }
+        return null;
+    }
+
     CollectionUtils() {}
 }

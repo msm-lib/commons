@@ -69,24 +69,8 @@ public class ObjectMetadata {
         return getAttributeByName(Constants.CUSTOM_VALUE_NAME);
     }
 
-//    public Attribute getCreatedAtAttribute() {
-//        if (!attributeMap.containsKey(Constants.CREATED_AT)) {
-//            fetchAttributesToMap();
-//        }
-//        return attributeMap.get(Constants.CREATED_AT);
-//    }
-//
-//    public Attribute getCreatedByAttribute() {
-//        if (!attributeMap.containsKey(Constants.CREATED_BY)) {
-//            fetchAttributesToMap();
-//        }
-//        return attributeMap.get(Constants.CREATED_BY);
-//    }
-//
-//    public Attribute getCreatedByAttribute() {
-//        if (!attributeMap.containsKey(Constants.CREATED_BY)) {
-//            fetchAttributesToMap();
-//        }
-//        return attributeMap.get(Constants.CREATED_BY);
-//    }
+    @JsonIgnore
+    public List<Attribute> getAttributeRefs() {
+        return Utils.CL.emptyIfNull(getAttributes()).stream().filter(attribute -> Utils.STR.isNotBlank(attribute.getAttributeRef())).collect(Collectors.toList());
+    }
 }
