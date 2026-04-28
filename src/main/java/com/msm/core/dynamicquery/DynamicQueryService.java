@@ -2,6 +2,7 @@ package com.msm.core.dynamicquery;
 
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
+import com.msm.core.dynamicquery.context.RequestContextHolder;
 import com.msm.core.exceptions.Errors;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterGroup;
@@ -17,12 +18,16 @@ import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
+import org.jooq.InsertValuesStepN;
 import org.jooq.Record;
 import org.jooq.SelectConditionStep;
 import org.jooq.SortField;
 import org.jooq.Table;
+import org.jooq.UpdatableRecord;
 import org.jooq.impl.DSL;
 
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -101,6 +106,7 @@ public class DynamicQueryService {
         List<Attribute> attrs = objectMetadata.getAttributes();
         Map<Field<?>, Object> fieldValues = new HashMap<>();
         for (Attribute attr : attrs) {
+            if (!values.containsKey(attr.getFieldName())) continue;
             Object rawValue = values.get(attr.getFieldName());
             Object casted = attr.cast(rawValue);
             if (casted != null) {
@@ -109,6 +115,29 @@ public class DynamicQueryService {
             }
         }
         return fieldValues;
+    }
+
+    public List<UpdatableRecord<?>> buildRecords(ObjectMetadata meta, List<Map<Field<?>, Object>> rows) {
+        List<UpdatableRecord<?>> records = new ArrayList<>();
+        for (Map<Field<?>, Object> row : rows) {
+            UpdatableRecord<?> record = (UpdatableRecord<?>) dsl.newRecord(meta.getTable());
+            row.forEach((key, value) -> {
+                record.set((Field<Object>)key, value);
+            });
+            records.add(record);
+        }
+
+        return records;
+    }
+
+    public int[] batchInsert(ObjectMetadata objectMetadata, List<Map<String, Object>> values) {
+        List<Map<Field<?>, Object>> fieldValues = values.stream().map(objectMap -> getFieldValues(objectMetadata, objectMap)).collect(Collectors.toList());
+        List<UpdatableRecord<?>> records = buildRecords(objectMetadata, fieldValues);
+        return dsl.batchInsert(records).execute();
+    }
+
+    public int[] insert(ObjectMetadata objectMetadata, List<Map<String, Object>> values) {
+        return batchInsert(objectMetadata, values);
     }
 
     public int insert(ObjectMetadata objectMetadata, Map<String, Object> values) {
@@ -172,7 +201,7 @@ public class DynamicQueryService {
         return affected;
     }
 
-    public int deleteById(ObjectMetadata meta, Object id) {
+    public int deleteById(ObjectMetadata meta, Object id, Map<String, Object> values) {
         if (id == null) {
             throw Errors.invalid("Id must not be null");
         }
@@ -182,10 +211,10 @@ public class DynamicQueryService {
         Object idCasted = attribute.cast(id);
         Condition condition = idField.eq(idCasted);
 
-        return delete(meta, condition);
+        return delete(meta, values, condition);
     }
 
-    public int delete(ObjectMetadata meta, Condition condition) {
+    public int delete(ObjectMetadata meta, Map<String, Object> values, Condition condition) {
 
         if (condition == null || condition.equals(DSL.noCondition())) {
             throw Errors.missingWhereConditionException("DELETE must have WHERE condition");
@@ -197,12 +226,19 @@ public class DynamicQueryService {
                     .execute();
         }
 
-        Map<Field<?>, Object> update = new LinkedHashMap<>();
+        Map<Field<?>, Object> updateFieldMap = new LinkedHashMap<>();
+        Utils.CL.emptyIfNull(values).forEach((k, v) -> {
+            Attribute attribute = meta.getAttributeByName(k);
+            if (attribute != null) {
+                Field<?> field = attribute.getField();
+                updateFieldMap.put(field, attribute.cast(v));
+            }
+        });
         Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
         Field<Object> isDeletedField = (Field<Object>) isDeleted.getField();
 
         return dsl.update(meta.getTable())
-                .set(update)
+                .set(updateFieldMap)
                 .where(condition)
                 .and(isDeletedField.eq(Boolean.FALSE))
                 .execute();
