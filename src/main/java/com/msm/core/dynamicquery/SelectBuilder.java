@@ -1,5 +1,6 @@
 package com.msm.core.dynamicquery;
 
+import com.msm.core.commons.Utils;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Field;
@@ -12,11 +13,15 @@ public final class SelectBuilder {
     private SelectBuilder() {}
 
     public static List<SelectField<?>> buildFields(ObjectFilterRequest request, ObjectMetadata objectMetadata) {
-        if (request.getReturnFields() == null || request.getReturnFields().isEmpty()) {
+        return buildFields(request.getReturnFields(), objectMetadata);
+    }
+
+    public static List<SelectField<?>> buildFields(List<String> returnFields, ObjectMetadata objectMetadata) {
+        if (Utils.CL.isEmpty(returnFields)) {
             return objectMetadata.getAttributes().stream().map(attribute -> getSelectField(attribute.getFieldName(), objectMetadata)).collect(Collectors.toList());
         }
 
-        return request.getReturnFields()
+        return returnFields
                 .stream()
                 .map(f -> getSelectField(f, objectMetadata))
                 .collect(Collectors.toList());

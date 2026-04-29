@@ -156,7 +156,7 @@ public class DynamicQueryService {
     }
 
     public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values) {
-        return insertReturning(objectMetadata, values, objectMetadata.getFields());
+        return insertReturning(objectMetadata, values, objectMetadata.getFieldAlias());
     }
 
     public int updateById(ObjectMetadata meta, Object id, Map<String, Object> values) {
@@ -220,12 +220,6 @@ public class DynamicQueryService {
             throw Errors.missingWhereConditionException("DELETE must have WHERE condition");
         }
 
-        if(!isSoftDeleted(meta)) {
-            return dsl.deleteFrom(meta.getTable())
-                    .where(condition)
-                    .execute();
-        }
-
         Map<Field<?>, Object> updateFieldMap = new LinkedHashMap<>();
         Utils.CL.emptyIfNull(values).forEach((k, v) -> {
             Attribute attribute = meta.getAttributeByName(k);
@@ -241,6 +235,20 @@ public class DynamicQueryService {
                 .set(updateFieldMap)
                 .where(condition)
                 .and(isDeletedField.eq(Boolean.FALSE))
+                .execute();
+    }
+
+    public int forceDeleteById(ObjectMetadata meta, Object id) {
+        if (id == null) {
+            throw Errors.invalid("Id must not be null");
+        }
+
+        Attribute attribute = meta.getIdAttribute();
+        Field<Object> idField = (Field<Object>) attribute.getField();
+        Object idCasted = attribute.cast(id);
+        Condition condition = idField.eq(idCasted);
+        return dsl.deleteFrom(meta.getTable())
+                .where(condition)
                 .execute();
     }
 

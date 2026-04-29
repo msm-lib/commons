@@ -43,6 +43,14 @@ public class ObjectMetadata {
         return Utils.CL.emptyIfNull(attributes).stream().map(Attribute::getField).collect(Collectors.toList());
     }
 
+    @JsonIgnore
+    public List<Field<?>> getFieldAlias() {
+        return Utils.CL.emptyIfNull(attributes)
+                .stream()
+                .map(attribute -> attribute.getField().as(attribute.getFieldName()))
+                .collect(Collectors.toList());
+    }
+
     public Attribute getAttributeByName(String fieldName) {
         if (!attributeMap.containsKey(fieldName)) {
             fetchAttributesToMap();
