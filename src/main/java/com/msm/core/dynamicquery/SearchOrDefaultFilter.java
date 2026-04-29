@@ -14,6 +14,7 @@ import com.msm.core.metadata.ObjectMetadata;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SearchOrDefaultFilter {
     private  SearchOrDefaultFilter() {}
@@ -47,7 +48,7 @@ public class SearchOrDefaultFilter {
                         .field(field)
                         .operator(FilterOperator.LIKE)
                         .value(searchRequest.getKeyword())
-                        .build()).toList();
+                        .build()).collect(Collectors.toList());
 
                 filterGroup.conditions(filterConditionList);
                 return filterGroup.build();
