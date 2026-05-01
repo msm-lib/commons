@@ -99,6 +99,15 @@ public final class KeyDimensionResolver {
         return build(dims.values());
     }
 
+    public static <T> String resolveSystemKey(ActionRequest<T> ctx, HookPhase phase) {
+        return build(List.of(
+                Constants.HOOK_PREFIX,
+                Constants.GENERIC_SYSTEM_OBJECT,
+                ctx.getAction(),
+                phase.name()
+        ));
+    }
+
     private static String build(Collection<String> keys) {
         return keys.stream()
                 .filter(Objects::nonNull)
