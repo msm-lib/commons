@@ -6,7 +6,8 @@ public final class Constants {
     public static final String OBJECT_HOOK_KEY = "{0}:{1}:{2}";
     public static final String ACTION_PREFIX = "Action";
     public static final String HOOK_PREFIX = "Hook";
-    public static final String GENERIC_OBJECT_NAME = "GenericObject";
+    public static final String GENERIC_OBJECT_NAME = "*";
+    public static final String GENERIC_SYSTEM_OBJECT = "SystemObject";
     public static final String GENERIC_OBJECT_RECORD_TYPE = "RecordTypeHook";
     public static final String OBJECT_CONVERSION_ACTION = "conversion";
     public static final String GENERIC_FILTER_ACTION = "filter";

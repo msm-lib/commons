@@ -1,9 +1,9 @@
 package com.msm.core.hook;
 
+import com.msm.core.commons.Utils;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +24,7 @@ public class HookDefinitionHandlerFactory {
     public static List<HookDefinitionExecutor> get(String key) {
         List<HookDefinitionExecutor> service = INSTANCES.get(key);
         if (Objects.isNull(service)) {
-            return Collections.emptyList();
+            return Utils.CL.newArrayList();
         }
 
         return service;

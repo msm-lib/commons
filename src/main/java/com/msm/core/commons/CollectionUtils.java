@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,6 +18,16 @@ public final class CollectionUtils {
 
     public <T> Collection<T> emptyCollection() {
         return Collections.emptyList();
+    }
+
+    @SafeVarargs
+    public final <T> List<T> newLinkedList(final T... elements) {
+        if(Objects.isNull(elements)) {
+            return new LinkedList<>();
+        }
+        List<T> returnList = new LinkedList<>();
+        Collections.addAll(returnList, elements);
+        return returnList;
     }
 
     @SafeVarargs
