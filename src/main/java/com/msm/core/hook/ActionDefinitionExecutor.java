@@ -1,8 +1,8 @@
 package com.msm.core.hook;
 
 import com.msm.core.commons.Condition;
-import com.msm.core.hook.anontation.Handler;
-import com.msm.core.hook.context.ActionRequest;
+import com.msm.core.hook.common.ExecutionContext;
+import com.msm.core.hook.context.ActionContext;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Lombok;
@@ -19,18 +19,18 @@ import java.util.function.Function;
 @Builder
 @RequiredArgsConstructor
 public class ActionDefinitionExecutor {
-    private final Condition<ActionRequest<?>> condition;
-    private final Function<ActionRequest<?>, ?> invoker;
-    public <X, T> X execute(ActionRequest<T> actionRequest) {
+    private final Condition<ActionContext<?>> condition;
+    private final Function<ExecutionContext<?>, ?> invoker;
+    public <X, T> X execute(ExecutionContext<T> actionRequest) {
         return (X) invoker.apply(actionRequest);
     }
 
-    public static ActionDefinitionExecutor create(Object bean, Method method, Handler handler, Condition condition) {
+    public static ActionDefinitionExecutor create(Object bean, Method method, Condition condition) {
         try {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             MethodHandle handle = lookup.unreflect(method).bindTo(bean);
 
-            Function<ActionRequest<?>, ?> invoker = request -> {
+            Function<ExecutionContext<?>, ?> invoker = request -> {
                 try {
                     return handle.invoke(request);
                 } catch (Throwable e) {

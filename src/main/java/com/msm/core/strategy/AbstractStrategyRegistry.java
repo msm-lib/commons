@@ -4,24 +4,24 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class AbstractStrategyRegistry<T> implements StrategyResolver<T> {
+public abstract class AbstractStrategyRegistry<O> implements StrategyResolver<String, O> {
 
-    protected final Map<String, T> cache = new ConcurrentHashMap<>();
-    protected final T defaultStrategy;
+    protected final Map<String, O> cache = new ConcurrentHashMap<>();
+    protected final O defaultStrategy;
 
-    protected AbstractStrategyRegistry(List<T> strategies, T defaultStrategy) {
+    protected AbstractStrategyRegistry(List<O> strategies, O defaultStrategy) {
         this.defaultStrategy = defaultStrategy;
         strategies.forEach(this::register);
     }
 
-    protected abstract String supportObjectType(T strategy);
+    protected abstract String supportObjectType(O strategy);
 
-    private void register(T strategy) {
+    private void register(O strategy) {
         cache.put(supportObjectType(strategy), strategy);
     }
 
     @Override
-    public T resolve(String objectName) {
+    public O resolve(String objectName) {
         return cache.getOrDefault(objectName, defaultStrategy);
     }
 }

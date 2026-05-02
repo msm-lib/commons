@@ -1,17 +1,20 @@
 package com.msm.core.hook.common;
 
+import com.msm.core.commons.Constants;
 import com.msm.core.hook.context.ContextKey;
 
+import java.util.Map;
 import java.util.Optional;
 
-public interface ExecutionContext extends ExecutionMetadata {
+public interface ExecutionContext<I> {
 
-    <T> T getPayload();
-
+    default String getResource() {return Constants.GENERIC_RESOURCE_NAME;}
+    I getPayload();
+    String getAction();
+    Map<ContextKey<?>, Object> getContextKey();
     default  <T> void addContextKey(ContextKey<T> key, T value) {
         getContextKey().put(key, value);
     }
-
     default  <T> T getContextKey(ContextKey<T> key) {
         return (T) getContextKey().get(key);
     }

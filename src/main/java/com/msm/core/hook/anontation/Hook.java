@@ -12,8 +12,9 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@ActionType(type = Constants.HOOK_PREFIX)
 public @interface Hook {
-    String object() default Constants.GENERIC_OBJECT_NAME;
+    String resource() default Constants.GENERIC_RESOURCE_NAME;
     String action() default "";
     HookPhase phase();
     int order() default 0;

@@ -15,8 +15,9 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Documented
 @Hook(phase = HookPhase.AFTER_COMMIT_EVENT)
+//@ActionType(type = "hook", context = ActionRequest.class)
 public @interface HookAfterCommit {
-    String object() default Constants.GENERIC_OBJECT_NAME;
+    String resource() default Constants.GENERIC_RESOURCE_NAME;
     String action();
     int order() default 0;
     ExtendContextKey[] keyContexts() default {};

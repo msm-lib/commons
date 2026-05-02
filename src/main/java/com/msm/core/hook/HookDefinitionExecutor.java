@@ -2,7 +2,7 @@ package com.msm.core.hook;
 
 import com.msm.core.commons.Condition;
 import com.msm.core.hook.anontation.Hook;
-import com.msm.core.hook.context.ActionRequest;
+import com.msm.core.hook.context.ActionContext;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Lombok;
@@ -19,28 +19,28 @@ import java.util.function.Consumer;
 @Builder
 @RequiredArgsConstructor
 public class HookDefinitionExecutor {
-    private final Condition<ActionRequest<?>> condition;
-    private final Consumer<ActionRequest<?>> invoker;
+    private final Condition<ActionContext<?>> condition;
+    private final Consumer<ActionContext<?>> invoker;
     private final int order;
 
     private final boolean stopOnError;
 
-    public <X> void execute(ActionRequest<X> ctx) {
+    public <X> void execute(ActionContext<X> ctx) {
         if (!condition.matches(ctx)) {
             return;
         }
         invoker.accept(ctx);
     }
 
-    public static HookDefinitionExecutor create(Object bean, Method method, Hook hook, Condition<ActionRequest<?>> condition, boolean stopOnError) {
+    public static HookDefinitionExecutor create(Object bean, Method method, Hook hook, Condition<ActionContext<?>> condition, boolean stopOnError) {
         return create(bean, method, hook.order(), condition, stopOnError);
     }
 
-    public static HookDefinitionExecutor create(Object bean, Method method, int order, Condition<ActionRequest<?>> condition, boolean stopOnError) {
+    public static HookDefinitionExecutor create(Object bean, Method method, int order, Condition<ActionContext<?>> condition, boolean stopOnError) {
         try {
             MethodHandles.Lookup lookup = MethodHandles.lookup();
             MethodHandle handle = lookup.unreflect(method).bindTo(bean);
-            Consumer<ActionRequest<?>> invoker = ctx -> {
+            Consumer<ActionContext<?>> invoker = ctx -> {
                 try {
                     handle.invoke(ctx);
                 } catch (Throwable e) {

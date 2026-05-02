@@ -18,7 +18,7 @@ import java.lang.annotation.Target;
 @Documented
 @Hook(action = Constants.Action.DELETE, phase = HookPhase.AFTER_EVENT)
 public @interface HookAfterDelete {
-    String object() default Constants.GENERIC_OBJECT_NAME;
+    String resource() default Constants.GENERIC_RESOURCE_NAME;
     int order() default 0;
     ExtendContextKey[] keyContexts() default {};
     Class<? extends Condition> condition() default AlwaysTrueCondition.class;

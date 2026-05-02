@@ -13,15 +13,15 @@ import java.util.Map;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ActionRequest<T> implements ExecutionContext {
+public class ActionContext<I> implements ExecutionContext<I> {
 
     @Builder.Default
-    private String objectName = "";
+    private String resource = "";
     private String action;
     private Object objectId;
     private Object result;
     private Object additionalParameter;
-    private T payload;
+    private I payload;
     @Builder.Default
     private boolean disableHookEvent = false;
     @Builder.Default

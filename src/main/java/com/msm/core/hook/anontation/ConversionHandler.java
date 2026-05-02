@@ -13,10 +13,11 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD, ElementType.ANNOTATION_TYPE, ElementType.TYPE})
 @Documented
-@ActionType(type = Constants.HANDLER_PREFIX)
-public @interface Handler {
-    String resource() default Constants.GENERIC_RESOURCE_NAME;
-    String action();
+@Handler(action = Constants.OBJECT_CONVERSION_ACTION)
+//@ActionType(type = "Conversion")
+public @interface ConversionHandler {
+    String resource();
+//    String action() default Constants.OBJECT_CONVERSION_ACTION;
     ExtendContextKey[] keyContexts() default {};
     Class<? extends Condition> condition() default AlwaysTrueCondition.class;
 }

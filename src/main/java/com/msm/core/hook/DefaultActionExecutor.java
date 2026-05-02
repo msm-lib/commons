@@ -6,7 +6,7 @@ import com.msm.core.commons.ValueConvertFactory;
 import com.msm.core.exceptions.Errors;
 import com.msm.core.hook.common.ActionExecutor;
 import com.msm.core.hook.common.HookEngine;
-import com.msm.core.hook.context.ActionRequest;
+import com.msm.core.hook.context.ActionContext;
 import com.msm.core.hook.context.KeyDimensionResolver;
 import lombok.RequiredArgsConstructor;
 
@@ -18,7 +18,7 @@ public class DefaultActionExecutor implements ActionExecutor {
     private final HookEngine hookEngine;
 
     @Override
-    public <T, X> T execute(ActionRequest<X> request) {
+    public <T, X> T execute(ActionContext<X> request) {
         Objects.requireNonNull(request.getAction(), "The action cannot be null");
         ActionDefinitionExecutor handler = getActionHandler(request);
         if (Objects.isNull(handler)) {
@@ -36,13 +36,13 @@ public class DefaultActionExecutor implements ActionExecutor {
         return returnObject;
     }
 
-    public <X> ActionDefinitionExecutor getActionHandler(ActionRequest<X> request) {
+    public <X> ActionDefinitionExecutor getActionHandler(ActionContext<X> request) {
 
-        String key = KeyDimensionResolver.resolve(request);
+        String key = KeyDimensionResolver.resolveHandlerKey(request);
         List<ActionDefinitionExecutor> executors = ActionHandlerFactory.getHandler(key);
 
         if (Utils.CL.isEmpty(executors)) {
-            executors = ActionHandlerFactory.getHandler(KeyDimensionResolver.resolveDefaultKey(request));
+            executors = ActionHandlerFactory.getHandler(KeyDimensionResolver.resolveHandlerDefaultKey(request));
         }
 
         if (Utils.CL.isEmpty(executors)) {
@@ -73,11 +73,11 @@ public class DefaultActionExecutor implements ActionExecutor {
     private boolean isMatchDefaultCondition(Condition<?> condition) {
         return (condition instanceof AlwaysTrueCondition);
     }
-    private boolean isMatchExtendCondition(Condition<ActionRequest<?>> condition, ActionRequest<?> request) {
+    private boolean isMatchExtendCondition(Condition<ActionContext<?>> condition, ActionContext<?> request) {
         return !isMatchDefaultCondition(condition) && Objects.nonNull(condition) && condition.matches(request);
     }
 
-    public <O> O execute(ActionRequest<?> request, Class<O> outputType) {
+    public <O> O execute(ActionContext<?> request, Class<O> outputType) {
 
         Objects.requireNonNull(request.getAction(), "The action cannot be null");
         ActionDefinitionExecutor handler = getActionHandler(request);

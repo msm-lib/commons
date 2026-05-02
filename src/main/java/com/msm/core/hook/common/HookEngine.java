@@ -1,7 +1,7 @@
 package com.msm.core.hook.common;
 
 import com.msm.core.hook.HookPhase;
-import com.msm.core.hook.context.ActionRequest;
+import com.msm.core.hook.context.ActionContext;
 
 /**
  * Defines the contract for a hook execution engine.
@@ -27,5 +27,5 @@ public interface HookEngine {
      *   <li>Use {@code ctx} to share data</li>
      * </ul>
      */
-    <X> void execute(ActionRequest<X> ctx, HookPhase phase);
+    <X> void execute(ActionContext<X> ctx, HookPhase phase);
 }

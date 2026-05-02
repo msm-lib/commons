@@ -3,7 +3,7 @@ package com.msm.core.hook;
 import com.msm.core.commons.Utils;
 import com.msm.core.hook.common.AsyncExecutor;
 import com.msm.core.hook.common.HookEngine;
-import com.msm.core.hook.context.ActionRequest;
+import com.msm.core.hook.context.ActionContext;
 import com.msm.core.hook.context.KeyDimensionResolver;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,12 +51,20 @@ public final class DefaultHookEngine implements HookEngine {
     private final AsyncExecutor asyncExecutor;
 
     @Override
-    public <X> void execute(ActionRequest<X> ctx, HookPhase phase) {
-        String key = KeyDimensionResolver.resolve(ctx, phase);
+    public <X> void execute(ActionContext<X> ctx, HookPhase phase) {
+        String key = KeyDimensionResolver.resolveHookKey(ctx, phase);
         List<HookDefinitionExecutor> hooks = HookDefinitionHandlerFactory.get(key);
         if(Utils.CL.isEmpty(hooks)) {
-            key = KeyDimensionResolver.resolveDefaultKey(ctx, phase);
+            key = KeyDimensionResolver.resolveHookDefaultKey(ctx, phase);
             hooks = HookDefinitionHandlerFactory.get(key);
+        }
+
+        //Force load hook system run for any object
+        //No override by any resource
+        String systemKey = KeyDimensionResolver.resolveSystemKey(ctx, phase);
+        List<HookDefinitionExecutor> systemHooks = HookDefinitionHandlerFactory.get(systemKey);
+        if(Utils.CL.isNotEmpty(systemHooks)) {
+            hooks.addAll(systemHooks);
         }
 
         if (HookPhase.AFTER_COMMIT_EVENT.equals(phase)) {

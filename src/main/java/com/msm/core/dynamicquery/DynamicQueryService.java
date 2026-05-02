@@ -105,7 +105,7 @@ public class DynamicQueryService {
      * @param request filter request containing conditions and paging
      * @return paginated or full dataset result
      */
-    public <T> PageResponse<T> filter(ObjectMetadata objectMetadata, ObjectFilterRequest request) {
+    public PageResponse<Map<String, Object>> filter(ObjectMetadata objectMetadata, ObjectFilterRequest request) {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(objectMetadata, request);
         Table<?> table = objectMetadata.getTable();
@@ -130,10 +130,10 @@ public class DynamicQueryService {
             if (total == null) {
                 total = 0L;
             }
-            return PageResponse.of((List<T>) result, total, request.getPageRequest().getPage(), request.getPageRequest().getSize());
+            return PageResponse.of(result, total, request.getPageRequest().getPage(), request.getPageRequest().getSize());
         }
 
-        return (PageResponse<T>) PageResponse.of(result);
+        return PageResponse.of(result);
     }
 
     /**

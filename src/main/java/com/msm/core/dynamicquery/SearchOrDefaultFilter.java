@@ -20,9 +20,14 @@ public class SearchOrDefaultFilter {
     private  SearchOrDefaultFilter() {}
 
     public static void resolveSearchFilter(ObjectFilterRequest filter) {
-        FilterGroup searchFilterGroup = toSearchFilterGroup(filter.getSearch());
+        FilterGroup searchFilterGroup = createSearchFilterGroup(filter.getSearch());
+
         if(Objects.nonNull(searchFilterGroup)) {
             FilterGroup currentFilterGroup = filter.getFilters();
+            FilterGroup newSearchFilterGroup = FilterGroup
+                    .builder()
+                    .operator(LogicalOperator.AND)
+                    .conditions(Utils.CL.newArrayList(searchFilterGroup)).build();
             if(Objects.isNull(currentFilterGroup)) {
                 filter.setFilters(searchFilterGroup);
             } else {
@@ -30,14 +35,14 @@ public class SearchOrDefaultFilter {
                 if(Utils.CL.isEmpty(filterConditionList)) {
                     filter.setFilters(searchFilterGroup);
                 } else {
-                    FilterGroup newSearchFilterGroup = com.msm.core.filter.domain.FilterGroup.builder().operator(LogicalOperator.AND).conditions(Utils.CL.newArrayList(searchFilterGroup)).build();
-                    currentFilterGroup.getConditions().add(newSearchFilterGroup);
+                    newSearchFilterGroup.getConditions().add(currentFilterGroup);
+                    filter.setFilters(newSearchFilterGroup);
                 }
             }
         }
     }
 
-    private static FilterGroup toSearchFilterGroup(SearchRequest searchRequest) {
+    private static FilterGroup createSearchFilterGroup(SearchRequest searchRequest) {
         if(Objects.nonNull(searchRequest)) {
             List<String> fields = searchRequest.getFields();
             if(Utils.CL.isNotEmpty(fields) && Utils.STR.isNotBlank(searchRequest.getKeyword())) {
@@ -64,20 +69,22 @@ public class SearchOrDefaultFilter {
         }
 
         FilterGroup currentFilter = filter.getFilters();
+        FilterGroup newDeletedFilterGroup = FilterGroup
+                .builder()
+                .operator(LogicalOperator.AND)
+                .conditions(Utils.CL.newArrayList(defaultFilterGroup())).build();
+
         if (Objects.isNull(currentFilter)) {
-            filter.setFilters(com.msm.core.filter.domain.FilterGroup.builder()
-                    .operator(LogicalOperator.AND)
-                    .conditions(Utils.CL.newArrayList(defaultFilterGroup()))
-                    .build()
-            );
+            filter.setFilters(newDeletedFilterGroup);
             return;
         }
 
         if (!isDeletedFilter(currentFilter)) {
             if(Utils.CL.isEmpty(currentFilter.getConditions())) {
-                currentFilter.setConditions(Utils.CL.newArrayList(defaultFilterGroup()));
+                filter.setFilters(newDeletedFilterGroup);
             } else {
-                currentFilter.getConditions().add(defaultFilterGroup()); // no extra AND wrapper
+                newDeletedFilterGroup.getConditions().add(currentFilter);
+                filter.setFilters(newDeletedFilterGroup);
             }
         }
     }

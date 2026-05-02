@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Documented
 @Hook(phase = HookPhase.AFTER_EVENT)
 public @interface HookAfter {
-    String object() default Constants.GENERIC_OBJECT_NAME;
+    String resource() default Constants.GENERIC_RESOURCE_NAME;
     String action();
     int order() default 0;
     ExtendContextKey[] keyContexts() default {};

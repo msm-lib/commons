@@ -1,7 +1,7 @@
 package com.msm.core.hook;
 
 import com.msm.core.hook.common.AsyncExecutor;
-import com.msm.core.hook.context.ActionRequest;
+import com.msm.core.hook.context.ActionContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +14,7 @@ public class DefaultAsyncExecutor implements AsyncExecutor {
     private final Executor hookTaskExecutor;
 
     @Override
-    public <X> void executeAsync(List<HookDefinitionExecutor> handlers, ActionRequest<X> ctx) {
+    public <X> void executeAsync(List<HookDefinitionExecutor> handlers, ActionContext<X> ctx) {
         hookTaskExecutor.execute(() -> {
             for (HookDefinitionExecutor h : handlers) {
                 try {

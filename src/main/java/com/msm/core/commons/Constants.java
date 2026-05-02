@@ -3,13 +3,16 @@ package com.msm.core.commons;
 public final class Constants {
 
     public static final String OBJECT_PK = "id";
-    public static final String OBJECT_HOOK_KEY = "{0}:{1}:{2}";
-    public static final String ACTION_PREFIX = "Action";
-    public static final String HOOK_PREFIX = "Hook";
-    public static final String GENERIC_OBJECT_NAME = "*";
-    public static final String GENERIC_SYSTEM_OBJECT = "SystemObject";
+    public static final String HANDLER_KEY_TEMPLATE = "{0}:{1}:{2}";
+    public static final String HOOK_KEY_TEMPLATE = "{0}:{1}:{2}:{3}";
+    public static final String HANDLER_PREFIX = "handler";
+    public static final String HOOK_PREFIX = "hook";
+    public static final String ACTION_CONVERSION_PREFIX = "Conversion";
+    public static final String RESOURCE_QUERY_PREFIX = "query-*";
+    public static final String GENERIC_RESOURCE_NAME = "*";
+    public static final String GENERIC_SYSTEM_OBJECT = "SystemObject-*";
     public static final String GENERIC_OBJECT_RECORD_TYPE = "RecordTypeHook";
-    public static final String OBJECT_CONVERSION_ACTION = "conversion";
+    public static final String OBJECT_CONVERSION_ACTION = "convertObject-*";
     public static final String GENERIC_FILTER_ACTION = "filter";
     public static final String GENERIC_ALL_OBJECT_ACTION = "filterAllObject";
     public static final String GENERIC_FILTER_BY_ID_ACTION = "filterById";
