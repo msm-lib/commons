@@ -27,7 +27,7 @@ public class Attribute {
     private String fieldName;
     private String columnName;
     private String columnType;
-    private String attributeRef;
+    private AttributeRef attributeRef;
     private Boolean isRequired;
     private Long maxLength;
     private Long maxValue;
@@ -121,7 +121,7 @@ public class Attribute {
     @JsonIgnore
     public Field<?> getFieldRef() {
         if (attributeRef != null) {
-            return DSL.field(DSL.name(attributeRef));
+            return DSL.field(DSL.name(attributeRef.getFieldName()));
         }
         return null;
     }

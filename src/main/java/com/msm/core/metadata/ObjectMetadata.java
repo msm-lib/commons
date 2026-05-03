@@ -17,6 +17,7 @@ import org.jooq.impl.DSL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -79,6 +80,9 @@ public class ObjectMetadata {
 
     @JsonIgnore
     public List<Attribute> getAttributeRefs() {
-        return Utils.CL.emptyIfNull(getAttributes()).stream().filter(attribute -> Utils.STR.isNotBlank(attribute.getAttributeRef())).collect(Collectors.toList());
+        return Utils.CL.emptyIfNull(getAttributes())
+                .stream()
+                .filter(attribute -> Objects.nonNull(attribute.getAttributeRef()) && Utils.STR.isNotBlank(attribute.getAttributeRef().getFieldName()))
+                .collect(Collectors.toList());
     }
 }
