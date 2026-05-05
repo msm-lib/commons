@@ -32,6 +32,7 @@ public class ObjectMetadata {
     private String tableName;
     private List<Attribute> attributes;
     @JsonIgnore
+    @Builder.Default
     private Map<String, Attribute> attributeMap = new HashMap<>();
 
     @JsonIgnore
