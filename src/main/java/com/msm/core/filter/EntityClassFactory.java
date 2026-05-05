@@ -1,5 +1,6 @@
 package com.msm.core.filter;
 
+import com.msm.core.metadata.ObjectMetadataBuilder;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
@@ -14,6 +15,7 @@ public class EntityClassFactory {
 
     public EntityClassFactory(EntityManager em) {
         Metamodel metamodel = em.getMetamodel();
+        ObjectMetadataBuilder.buildFromMetamodel(metamodel);
         for (EntityType<?> entity : metamodel.getEntities()) {
             entityTypeMap.put(entity.getName().toLowerCase(), entity);
         }

@@ -73,42 +73,6 @@ public class FieldResolver {
         return result;
     }
 
-//    private Field<?> resolveJoinField(Table<?> root, String[] parts) {
-//        Table<?> currentTable = root;
-//        Field<?> field = null;
-//
-//        for (int i = 0; i < parts.length; i++) {
-//            String part = parts[i];
-//
-//            // Nếu là phần cuối → lấy field
-//            if (i == parts.length - 1) {
-//                field = currentTable.field(part);
-//                break;
-//            }
-//
-//            // Nếu không → join sang table khác
-//            currentTable = resolveRelation(currentTable, part);
-//        }
-//
-//        return field;
-//    }
-//
-//    private Table<?> resolveRelation(Table<?> table, String relationName) {
-//        // Ví dụ hardcode (thực tế nên dùng metadata hoặc jOOQ generated schema)
-//
-//        if (table.getName().equals("orders") && relationName.equals("user")) {
-//            return USERS;
-//        }
-//
-//        if (table.getName().equals("users") && relationName.equals("address")) {
-//            return ADDRESSES;
-//        }
-//
-//        throw new IllegalArgumentException(
-//                "Unknown relation: " + table.getName() + "." + relationName
-//        );
-//    }
-
     public static List<String> pathAsArray(String path) {
         return Arrays.stream(path.split("\\.")).collect(Collectors.toList());
     }

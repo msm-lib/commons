@@ -16,6 +16,19 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
+/**
+ * {
+ *       "fieldType": "UUID",
+ *       "fieldName": "paymentTermId",
+ *       "columnName": "payment_term_id",
+ *       "attributeRef": {
+ *         "fieldName": "paymentTermIdReference",
+ *         "objectRef": "paymentterm",
+ *         "usageType": "Reference"
+ *       },
+ *       "isRequired": true
+ *     }
+ */
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Data
