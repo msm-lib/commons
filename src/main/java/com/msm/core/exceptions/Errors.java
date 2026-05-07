@@ -57,6 +57,14 @@ public class Errors {
         return new UnsafeDeleteException(msg, cause);
     }
 
+//    public static RequestDataValidateException requestDataValidateException(String msg) {
+//        return new RequestDataValidateException(msg);
+//    }
+//
+//    public static RequestDataValidateException requestDataValidateException(String msg, Throwable cause) {
+//        return new RequestDataValidateException(msg, cause);
+//    }
+
 
     public static DuplicateKeyException duplicate(String msg) {
         return new DuplicateKeyException(msg);

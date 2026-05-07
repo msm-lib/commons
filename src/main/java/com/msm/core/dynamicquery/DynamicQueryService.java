@@ -297,14 +297,14 @@ public class DynamicQueryService {
      *
      * @param objectMetadata metadata definition
      * @param values input data
-     * @param returnField fields to return
+     * @param returnFields fields to return
      * @return inserted record result
      */
-    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values, List<Field<?>> returnField) {
+    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values, List<Field<?>> returnFields) {
         Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
         return dsl.insertInto(objectMetadata.getTable())
                 .set(fieldValues)
-                .returning(returnField)
+                .returning(returnFields)
                 .fetchOneMap();
     }
 
@@ -319,61 +319,51 @@ public class DynamicQueryService {
         return insertReturning(objectMetadata, values, objectMetadata.getFieldAlias());
     }
 
-    /**
-     * Updates a record by its identifier.
-     *
-     * <p>This method constructs a condition based on the primary key defined
-     * in metadata and delegates the update operation to
-     * {@link #update(ObjectMetadata, Map, Condition)}.</p>
-     *
-     * <p><b>Behavior:</b></p>
-     * <ul>
-     *   <li>Resolves the primary key field from metadata</li>
-     *   <li>Casts the provided id to the correct type</li>
-     *   <li>Builds an equality condition for update</li>
-     *   <li>Delegates execution to the generic update method</li>
-     * </ul>
-     *
-     * @param meta metadata definition of the object
-     * @param id identifier of the record to update
-     * @param values map of fields and values to update
-     * @return number of affected rows
-     * @throws RuntimeException if update fails due to optimistic locking or invalid input
-     */
-    public int updateById(ObjectMetadata meta, Object id, Map<String, Object> values) {
+    public Map<String, Object> updateById(ObjectMetadata meta, Object id, Map<String, Object> values) {
         Attribute attribute = meta.getIdAttribute();
         Field<Object> fieldId = (Field<Object>) attribute.getField();
         Object idValueCasted = attribute.cast(id);
-
-        return update(meta, values, fieldId.eq(idValueCasted));
+        return updateReturning(meta, values, fieldId.eq(idValueCasted), meta.getFieldAlias());
     }
 
-    /**
-     * Performs a conditional update operation.
-     *
-     * <p>Applies dynamic field mapping and executes update based on condition.</p>
-     *
-     * <p><b>Behavior:</b></p>
-     * <ul>
-     *   <li>Validates WHERE condition (prevents full table update)</li>
-     *   <li>Maps input values using metadata</li>
-     *   <li>Applies type casting</li>
-     *   <li>Supports optimistic locking (if version field exists)</li>
-     * </ul>
-     *
-     * <p><b>Optimistic Locking:</b></p>
-     * <ul>
-     *   <li>Validates current version</li>
-     *   <li>Automatically increments version</li>
-     *   <li>If no rows affected → conflict</li>
-     * </ul>
-     *
-     * @param objectMetadata metadata definition
-     * @param values fields to update
-     * @param where update condition (must not be null)
-     * @return affected rows
-     */
+    public Map<String, Object> updateReturning(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where, List<Field<?>> returnFields) {
+        Map<Field<?>, Object> map = buildMapUpdateFields(objectMetadata, values, where);
+        //Update new version and update where condition
+        Condition versionCondition = updateOrGetVersionCondition(objectMetadata, map);
+
+        Map<String, Object> affected = dsl.update(objectMetadata.getTable())
+                .set(map)
+                .where(where)
+                .and(versionCondition)
+                .returning(returnFields)
+                .fetchOneMap();
+
+        if (Utils.CL.isEmpty(affected)) {
+            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
+        }
+
+        return affected;
+    }
+
     public int update(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where) {
+        Map<Field<?>, Object> map = buildMapUpdateFields(objectMetadata, values, where);
+        //Update new version and update where condition
+        Condition versionCondition = updateOrGetVersionCondition(objectMetadata, map);
+
+        int affected = dsl.update(objectMetadata.getTable())
+                .set(map)
+                .where(where)
+                .and(versionCondition)
+                .execute();
+
+        if (affected == 0) {
+            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
+        }
+
+        return affected;
+    }
+
+    private Map<Field<?>, Object> buildMapUpdateFields(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where) {
         if (where == null) {
             throw Errors.missingWhereConditionException("WHERE condition must not be null");
         }
@@ -391,20 +381,7 @@ public class DynamicQueryService {
             }
         });
 
-        //Update new version and update where condition
-        Condition versionCondition = updateOrGetVersionCondition(objectMetadata, map);
-
-        int affected = dsl.update(objectMetadata.getTable())
-                .set(map)
-                .where(where)
-                .and(versionCondition)
-                .execute();
-
-        if (affected == 0) {
-            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
-        }
-
-        return affected;
+        return map;
     }
 
     /**
