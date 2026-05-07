@@ -25,6 +25,7 @@ public final class ObjectUtils {
             .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
             .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false)
             .registerModule(new JavaTimeModule())
+            .setDefaultMergeable(false)
             .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 
     public <T> T updateValues(T object, Map<String, Object> updates) throws JsonMappingException {
