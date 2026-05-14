@@ -3,7 +3,6 @@ package com.msm.core.validate.attr;
 import com.msm.core.metadata.Attribute;
 import lombok.extern.slf4j.Slf4j;
 
-import java.time.Instant;
 import java.time.format.DateTimeParseException;
 import java.util.Objects;
 
@@ -23,7 +22,7 @@ public final class InstantValueHandler implements ValueValidationHandler {
         }
 
         try {
-            Instant.parse((CharSequence) value);
+            attribute.cast(value);
             return true;
         } catch (DateTimeParseException ignore) {
             return false;

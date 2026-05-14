@@ -319,6 +319,68 @@ public class DynamicQueryService {
         return insertReturning(objectMetadata, values, objectMetadata.getFieldAlias());
     }
 
+    /**
+     * Inserts multiple records into the target table using a single
+     * multi-values INSERT statement and returns the inserted records.
+     *
+     * <p>
+     * This method supports dynamic schemas where insert fields are determined
+     * at runtime from the provided row data.
+     * </p>
+     *
+     * <p>
+     * All rows must contain the same set of fields (same column structure).
+     * The field order from the first row is used as the insert column order
+     * for all subsequent rows.
+     * </p>
+     *
+     * <p>
+     * Example generated SQL:
+     * </p>
+     *
+     * <pre>{@code
+     * INSERT INTO users(name, email)
+     * VALUES
+     *   (?, ?),
+     *   (?, ?)
+     * RETURNING *;
+     * }</pre>
+     *
+     * <p>
+     * This approach supports RETURNING clauses and allows fetching generated IDs
+     * and inserted records.
+     * </p>
+     *
+     * @param objectMetadata
+     *         metadata containing the target table definition
+     *
+     * @param rows
+     *         list of rows to insert where:
+     *         <ul>
+     *             <li>key = field definition</li>
+     *             <li>value = field value</li>
+     *         </ul>
+     *
+     * @return inserted records as a list of {@code Map<String, Object>}
+     *
+     * @throws IllegalArgumentException
+     *         if rows contain different field sets
+     */
+    public List<Map<String, Object>> insertReturning(ObjectMetadata objectMetadata, List<Map<Field<?>, Object>> rows) {
+        if (Utils.CL.isEmpty(rows)) {
+            return Utils.CL.newArrayList();
+        }
+        List<Field<?>> fields = new ArrayList<>(rows.getFirst().keySet());
+        var insert = dsl.insertInto(objectMetadata.getTable()).columns(fields);
+
+        for (Map<Field<?>, Object> row : rows) {
+            Object[] values = fields.stream().map(row::get).toArray();
+            insert = insert.values(values);
+        }
+
+        return insert.returning().fetchMaps();
+    }
+
     public Map<String, Object> updateById(ObjectMetadata meta, Object id, Map<String, Object> values) {
         Attribute attribute = meta.getIdAttribute();
         Field<Object> fieldId = (Field<Object>) attribute.getField();
