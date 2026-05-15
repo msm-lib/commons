@@ -507,14 +507,18 @@ public class DynamicQueryService {
                 updateFieldMap.put(field, attribute.cast(v));
             }
         });
-        Attribute isDeleted = meta.getAttributeByName(Constants.IS_DELETED);
-        Field<Object> isDeletedField = (Field<Object>) isDeleted.getField();
 
-        return dsl.update(meta.getTable())
+        Condition versionCondition = updateOrGetVersionCondition(meta, updateFieldMap);
+
+        int affected = dsl.update(meta.getTable())
                 .set(updateFieldMap)
                 .where(condition)
-                .and(isDeletedField.eq(Boolean.FALSE))
+                .and(versionCondition)
                 .execute();
+        if (affected == 0) {
+            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
+        }
+        return affected;
     }
 
     /**
@@ -582,10 +586,13 @@ public class DynamicQueryService {
      * @return version condition or no-op
      */
     private Condition updateOrGetVersionCondition(ObjectMetadata meta, Map<Field<?>, Object> fields) {
-        Attribute versionAttr = meta.getAttributeByName(Constants.VERSION);
+        Attribute versionAttr = meta.getVersionAttribute();
         if (versionAttr != null) {
             Field<?> versionField = versionAttr.getField();
             Object versionValueObject = fields.get(versionField);
+            if(versionValueObject == null) {
+                throw Errors.invalid("Version must not be null");
+            }
             if(versionValueObject instanceof Number currentVersion) {
                 fields.put(versionField, currentVersion.longValue() + 1);
                 return ((Field<Object>) versionField).eq(currentVersion.longValue());

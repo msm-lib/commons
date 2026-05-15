@@ -68,10 +68,12 @@ public class ObjectMetadata {
 
     @JsonIgnore
     public Attribute getIdAttribute() {
-        if (!attributeMap.containsKey(Constants.OBJECT_PK)) {
-            fetchAttributesToMap();
-        }
-        return attributeMap.get(Constants.OBJECT_PK);
+        return getAttributeByName(Constants.OBJECT_PK);
+    }
+
+    @JsonIgnore
+    public Attribute getVersionAttribute() {
+        return getAttributeByName(Constants.VERSION);
     }
 
     @JsonIgnore
