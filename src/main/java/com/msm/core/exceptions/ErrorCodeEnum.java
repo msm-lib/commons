@@ -1,6 +1,8 @@
 package com.msm.core.exceptions;
 
-public enum ErrorCode {
+import com.msm.core.exceptions.common.ErrorCode;
+
+public enum ErrorCodeEnum implements ErrorCode {
     UNSUPPORTED("UNSUPPORTED"),
     INVALID_ARGUMENT("INVALID_ARGUMENT"),
     INVALID_DATA_TYPE("INVALID_DATA_TYPE"),
@@ -8,6 +10,7 @@ public enum ErrorCode {
     HOOK_ERROR("HOOK_ERROR"),
     OBJECT_CAST_ERROR("OBJECT_CAST_ERROR"),
     FIELD_NOT_FOUND("OBJECT_CAST_ERROR"),
+    FIELD_VALUE_REQUIRED("FIELD_VALUE_REQUIRED"),
     DUPLICATE_KEY("DUPLICATE_KEY"),
     OPTIMISTIC_LOCKING_FAILURE("OPTIMISTIC_LOCKING_FAILURE"),
     MISSING_WHERE_CONDITION("MISSING_WHERE_CONDITION"),
@@ -17,7 +20,7 @@ public enum ErrorCode {
 
     private final String code;
 
-    ErrorCode(String code) {
+    ErrorCodeEnum(String code) {
         this.code = code;
     }
 

@@ -1,11 +1,14 @@
 package com.msm.core.exceptions;
 
+import lombok.ToString;
+
+@ToString
 public class MissingWhereConditionException extends GenericBaseException {
     public MissingWhereConditionException(String message) {
-        super(ErrorCode.MISSING_WHERE_CONDITION.getCode(), message);
+        super(ErrorCodeEnum.MISSING_WHERE_CONDITION, message);
     }
 
     public MissingWhereConditionException(String message, Throwable cause) {
-        super(ErrorCode.MISSING_WHERE_CONDITION.getCode(), message, cause);
+        super(ErrorCodeEnum.MISSING_WHERE_CONDITION, message, cause);
     }
 }

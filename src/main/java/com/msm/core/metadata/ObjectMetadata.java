@@ -41,6 +41,11 @@ public class ObjectMetadata {
     }
 
     @JsonIgnore
+    public List<String> getFieldNames() {
+        return Utils.CL.emptyIfNull(attributes).stream().map(Attribute::getFieldName).collect(Collectors.toList());
+    }
+
+    @JsonIgnore
     public List<Field<?>> getFields() {
         return Utils.CL.emptyIfNull(attributes).stream().map(Attribute::getField).collect(Collectors.toList());
     }

@@ -2,7 +2,7 @@ package com.msm.core.validate.validation;
 
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
-import com.msm.core.exceptions.ErrorCode;
+import com.msm.core.exceptions.ErrorCodeEnum;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import com.msm.core.validate.domain.MessageError;
@@ -39,7 +39,7 @@ public class AttributeTypeValidator implements AttributeValidator {
                 MessageError messageError = MessageError
                         .builder()
                         .attribute(attr.getFieldName())
-                        .code(ErrorCode.INVALID_DATA_TYPE.getCode())
+                        .code(ErrorCodeEnum.INVALID_DATA_TYPE)
                         .message(Utils.STR.format(Constants.INVALID_DATA_TYPE, attr.getFieldName()))
                         .build();
                 errors.add(messageError);

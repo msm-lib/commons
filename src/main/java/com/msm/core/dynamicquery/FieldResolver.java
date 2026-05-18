@@ -1,6 +1,6 @@
 package com.msm.core.dynamicquery;
 
-import com.msm.core.exceptions.Errors;
+import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Field;
@@ -17,11 +17,11 @@ public class FieldResolver {
         return parts[0];
     }
 
-    public static Field<?> resolve(String fieldPath, ObjectMetadata objectMetadata) {
+    public static Field<?> resolve(ObjectMetadata objectMetadata, String fieldPath) {
         String[] parts = fieldPath.split("\\.");
         Attribute attribute = objectMetadata.getAttributeByName(parts[0]);
         if(attribute == null) {
-            throw Errors.fieldNotFoundException(fieldPath + " not found");
+            throw CommonErrors.fieldNotFoundException(fieldPath, fieldPath + " not found");
         }
         Field<?> base = attribute.getField();
         if (parts.length == 1) {
@@ -33,7 +33,7 @@ public class FieldResolver {
         }
 
         // Unsupported nested relation
-        throw Errors.invalid("Invalid nested field: " + base.getName());
+        throw CommonErrors.invalid(base.getName(), "Invalid nested field: " + base.getName());
     }
 
 //    private static boolean isJsonField(Field<?> field) {

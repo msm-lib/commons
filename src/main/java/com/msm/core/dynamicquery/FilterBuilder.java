@@ -2,7 +2,7 @@ package com.msm.core.dynamicquery;
 
 
 import com.msm.core.dynamicquery.operator.OperatorFactory;
-import com.msm.core.exceptions.Errors;
+import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterGroup;
 import com.msm.core.filter.domain.FilterObject;
@@ -27,7 +27,7 @@ public class FilterBuilder {
             return buildGroup(fg, objectMetadata);
         }
 
-        throw Errors.invalid("Unknown filter type");
+        throw CommonErrors.invalid("Unknown", "Unknown filter type");
     }
 
     private static Condition buildGroup(FilterGroup group, ObjectMetadata objectMetadata) {

@@ -12,7 +12,7 @@ import com.msm.core.dynamicquery.operator.impl.LtOperatorHandler;
 import com.msm.core.dynamicquery.operator.impl.LteOperatorHandler;
 import com.msm.core.dynamicquery.operator.impl.NeOperatorHandler;
 import com.msm.core.dynamicquery.operator.impl.NotInOperatorHandler;
-import com.msm.core.exceptions.Errors;
+import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.filter.domain.FilterOperator;
 
 import java.util.EnumMap;
@@ -47,7 +47,7 @@ public class OperatorFactory {
             return handler;
         }
 
-        throw Errors.unsupported("Unsupported operator: " + operator);
+        throw CommonErrors.unsupported(operator.name(), "Unsupported operator: " + operator);
     }
 
 }

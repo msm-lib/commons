@@ -1,5 +1,6 @@
 package com.msm.core.validate.domain;
 
+import com.msm.core.exceptions.common.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -12,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MessageError {
-    private String code;
+    private ErrorCode code;
     private String label;
     private String attribute;
     private String message;

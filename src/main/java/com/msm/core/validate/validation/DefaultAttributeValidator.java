@@ -2,7 +2,7 @@ package com.msm.core.validate.validation;
 
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
-import com.msm.core.exceptions.ErrorCode;
+import com.msm.core.exceptions.ErrorCodeEnum;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import com.msm.core.validate.attr.ValueValidationHandlerFactory;
@@ -31,7 +31,7 @@ public class DefaultAttributeValidator implements AttributeValidator {
                     MessageError messageError = MessageError
                             .builder()
                             .attribute(attr.getFieldName())
-                            .code(ErrorCode.REQUIRE_INPUT_VALUE.getCode())
+                            .code(ErrorCodeEnum.REQUIRE_INPUT_VALUE)
                             .message(Utils.STR.format(Constants.REQUIRE_INPUT_VALUE, attr.getFieldName()))
                             .build();
                     errors.add(messageError);
@@ -42,7 +42,7 @@ public class DefaultAttributeValidator implements AttributeValidator {
                     MessageError messageError = MessageError
                             .builder()
                             .attribute(attr.getFieldName())
-                            .code(ErrorCode.INVALID_ARGUMENT.getCode())
+                            .code(ErrorCodeEnum.INVALID_ARGUMENT)
                             .message(Utils.STR.format(Constants.INVALID_INPUT_VALUE, attr.getFieldName()))
                             .build();
                     errors.add(messageError);

@@ -13,9 +13,13 @@ public final class Constants {
     public static final String GENERIC_SYSTEM_OBJECT = "SystemObject-*";
     public static final String GENERIC_OBJECT_RECORD_TYPE = "RecordTypeHook";
     public static final String OBJECT_CONVERSION_ACTION = "convertObject-*";
-    public static final String GENERIC_FILTER_ACTION = "filter";
-    public static final String GENERIC_ALL_OBJECT_ACTION = "filterAllObject";
-    public static final String GENERIC_FILTER_BY_ID_ACTION = "filterById";
+    public static final class FilterAction {
+        public static final String FILTER_OBJECT = "filterObject";
+        public static final String FILTER_ALL_OBJECT = "filterAllObject";
+        public static final String FILTER_ALL_OBJECT_BY_IDS = "filterAllObjectByIds";
+        public static final String FILTER_OBJECT_BY_ID = "filterById";
+    }
+
     public static final String IS_DELETED_FIELD = "isDeleted";
 
     public static final String INVALID_DATA_TYPE = "{0} loại dữ liệu không hợp lệ";
@@ -28,6 +32,7 @@ public final class Constants {
     public static final String HOOK_HANDLER_AFTER_COMMIT_EVENT_NAME = "objectHandlerAfterCommitEvent";
     public static final class Action {
         public static final String CREATE = "create";
+        public static final String BULK_CREATE = "bulk_create";
         public static final String UPDATE = "update";
         public static final String DELETE = "delete";
     }
@@ -44,6 +49,7 @@ public final class Constants {
     public static final String IS_DELETED = "isDeleted";
     public static final String VERSION = "version";
     public static final String CUSTOM_VALUE_NAME = "customValues";
+    public static final String ATTRIBUTE_REF_TEMPLATE = "{0}Reference";
 
     private Constants() {}
 }

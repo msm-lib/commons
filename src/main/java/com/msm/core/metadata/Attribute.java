@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.msm.core.commons.GenericTypeResolverFactory;
 import com.msm.core.commons.Utils;
 import com.msm.core.dynamicquery.mapping.JavaTypeMappingFactory;
-import com.msm.core.exceptions.Errors;
+import com.msm.core.exceptions.CommonErrors;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -98,14 +98,14 @@ public class Attribute {
      * @param <T>   The expected generic return type.
      * @param value The object to be converted.
      * @return      The value successfully cast or converted to type {@code T}.
-     * @throws RuntimeException (via {@link Errors#castException}) if the conversion fails,
+     * @throws RuntimeException (via {@link CommonErrors#castException}) if the conversion fails,
      *                          providing details about the field name, target type, and source type.
      */
     public <T> T cast(Object value) {
         try {
             return Utils.O.convertToType(value, fieldType);
         } catch (Exception e) {
-            throw Errors.castException("Cannot cast field '" + fieldName + "' with type " + fieldType + " to type " + value.getClass(), e);
+            throw CommonErrors.castException(fieldName, "Cannot cast field '" + fieldName + "' with type " + fieldType + " to type " + value.getClass(), e);
         }
     }
 
@@ -113,7 +113,7 @@ public class Attribute {
         try {
             return Utils.O.convertToType(value, fieldType, true);
         } catch (Exception e) {
-            throw Errors.castException("Cannot cast field '" + fieldName + "' with type " + fieldType + " to type " + value.getClass(), e);
+            throw CommonErrors.castException(fieldName, "Cannot cast field '" + fieldName + "' with type " + fieldType + " to type " + value.getClass(), e);
         }
     }
 

@@ -12,11 +12,11 @@ import java.util.stream.Collectors;
 public final class SelectBuilder {
     private SelectBuilder() {}
 
-    public static List<SelectField<?>> buildFields(ObjectFilterRequest request, ObjectMetadata objectMetadata) {
-        return buildFields(request.getReturnFields(), objectMetadata);
+    public static List<SelectField<?>> buildFields(ObjectMetadata objectMetadata, ObjectFilterRequest request) {
+        return buildFields(objectMetadata, request.getReturnFields());
     }
 
-    public static List<SelectField<?>> buildFields(List<String> returnFields, ObjectMetadata objectMetadata) {
+    public static List<SelectField<?>> buildFields(ObjectMetadata objectMetadata, List<String> returnFields) {
         if (Utils.CL.isEmpty(returnFields)) {
             return objectMetadata.getAttributes().stream().map(attribute -> getSelectField(attribute.getFieldName(), objectMetadata)).collect(Collectors.toList());
         }
@@ -34,7 +34,7 @@ public final class SelectBuilder {
             alias = String.join(".", parts);
         }
 
-        Field<?> field = FieldResolver.resolve(fieldPath, objectMetadata);
+        Field<?> field = FieldResolver.resolve(objectMetadata, fieldPath);
         return field.as(alias);
     }
 }

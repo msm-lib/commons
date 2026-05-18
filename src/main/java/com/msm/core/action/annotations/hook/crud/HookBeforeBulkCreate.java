@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
-@Hook(action = Constants.Action.CREATE, phase = HookPhase.AFTER_EVENT)
-public @interface HookAfterCreate {
+@Hook(action = Constants.Action.BULK_CREATE, phase = HookPhase.BEFORE_EVENT)
+public @interface HookBeforeBulkCreate {
     String resource() default Constants.GENERIC_RESOURCE_NAME;
     int order() default 0;
     ExtendContextKey[] keyContexts() default {};

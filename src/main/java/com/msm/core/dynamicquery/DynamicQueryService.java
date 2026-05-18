@@ -2,7 +2,7 @@ package com.msm.core.dynamicquery;
 
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
-import com.msm.core.exceptions.Errors;
+import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.filter.domain.FilterGroup;
 import com.msm.core.filter.domain.FilterOperator;
@@ -25,7 +25,6 @@ import org.jooq.UpdatableRecord;
 import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +111,7 @@ public class DynamicQueryService {
 
         Condition condition = FilterBuilder.build(request.getFilters(), objectMetadata);
         SelectConditionStep<Record> query = dsl
-                .select(SelectBuilder.buildFields(request, objectMetadata))
+                .select(SelectBuilder.buildFields(objectMetadata, request))
                 .from(table)
                 .where(condition);
 
@@ -155,7 +154,7 @@ public class DynamicQueryService {
 
         List<SortField<?>> sortFields = sorts.stream()
                 .map(s -> {
-                    Field<?> field = FieldResolver.resolve(s.getAttribute(), objectMetadata);
+                    Field<?> field = FieldResolver.resolve(objectMetadata, s.getAttribute());
                     return SortDirection.ASC.name().equalsIgnoreCase(s.getDirection().name())
                             ? field.asc()
                             : field.desc();
@@ -197,7 +196,7 @@ public class DynamicQueryService {
      */
     private Map<Field<?>, Object> getFieldValues(ObjectMetadata objectMetadata, Map<String, Object> values) {
         List<Attribute> attrs = objectMetadata.getAttributes();
-        Map<Field<?>, Object> fieldValues = new HashMap<>();
+        Map<Field<?>, Object> fieldValues = new LinkedHashMap<>();
         for (Attribute attr : attrs) {
             if (!values.containsKey(attr.getFieldName())) continue;
             Object rawValue = values.get(attr.getFieldName());
@@ -211,13 +210,65 @@ public class DynamicQueryService {
     }
 
     /**
+     * Inserts a single record.
+     *
+     * @param objectMetadata metadata definition
+     * @param values input data
+     * @return number of affected rows
+     */
+    public int insert(ObjectMetadata objectMetadata, Map<String, Object> values) {
+        Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
+        return dsl.insertInto(objectMetadata.getTable())
+                .set(fieldValues)
+                .execute();
+    }
+
+    /**
+     * Inserts a record and returns selected fields.
+     *
+     * @param objectMetadata metadata definition
+     * @param values input data
+     * @param returnFields fields to return
+     * @return inserted record result
+     */
+    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values, List<Field<?>> returnFields) {
+        Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
+        return dsl.insertInto(objectMetadata.getTable())
+                .set(fieldValues)
+                .returning(returnFields)
+                .fetchOneMap();
+    }
+
+    /**
+     * Inserts a record and returns all fields.
+     *
+     * @param objectMetadata metadata definition
+     * @param values input data
+     * @return inserted record result
+     */
+    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values) {
+        return insertReturning(objectMetadata, values, objectMetadata.getFieldAlias());
+    }
+
+    public Map<String, Object> insertReturningInsertedRow(ObjectMetadata objectMetadata, Map<String, Object> values, String conflictOnConstraintName) {
+        Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
+        return dsl.insertInto(objectMetadata.getTable())
+                .set(fieldValues)
+                .onConflictOnConstraint(DSL.name(conflictOnConstraintName))
+                .doNothing()
+                .returning(objectMetadata.getFieldAlias())
+                .fetchOneMap();
+    }
+
+
+    /**
      * Builds record structures for batch processing.
      *
      * @param meta object metadata
      * @param rows list of field-value mappings
      * @return list of prepared records
      */
-    public List<UpdatableRecord<?>> buildRecords(ObjectMetadata meta, List<Map<Field<?>, Object>> rows) {
+    private List<UpdatableRecord<?>> buildRecords(ObjectMetadata meta, List<Map<Field<?>, Object>> rows) {
         List<UpdatableRecord<?>> records = new ArrayList<>();
         for (Map<Field<?>, Object> row : rows) {
             UpdatableRecord<?> record = (UpdatableRecord<?>) dsl.newRecord(meta.getTable());
@@ -279,47 +330,6 @@ public class DynamicQueryService {
     }
 
     /**
-     * Inserts a single record.
-     *
-     * @param objectMetadata metadata definition
-     * @param values input data
-     * @return number of affected rows
-     */
-    public int insert(ObjectMetadata objectMetadata, Map<String, Object> values) {
-        Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
-        return dsl.insertInto(objectMetadata.getTable())
-                .set(fieldValues)
-                .execute();
-    }
-
-    /**
-     * Inserts a record and returns selected fields.
-     *
-     * @param objectMetadata metadata definition
-     * @param values input data
-     * @param returnFields fields to return
-     * @return inserted record result
-     */
-    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values, List<Field<?>> returnFields) {
-        Map<Field<?>, Object> fieldValues = getFieldValues(objectMetadata, values);
-        return dsl.insertInto(objectMetadata.getTable())
-                .set(fieldValues)
-                .returning(returnFields)
-                .fetchOneMap();
-    }
-
-    /**
-     * Inserts a record and returns all fields.
-     *
-     * @param objectMetadata metadata definition
-     * @param values input data
-     * @return inserted record result
-     */
-    public Map<String, Object> insertReturning(ObjectMetadata objectMetadata, Map<String, Object> values) {
-        return insertReturning(objectMetadata, values, objectMetadata.getFieldAlias());
-    }
-
-    /**
      * Inserts multiple records into the target table using a single
      * multi-values INSERT statement and returns the inserted records.
      *
@@ -366,7 +376,7 @@ public class DynamicQueryService {
      * @throws IllegalArgumentException
      *         if rows contain different field sets
      */
-    public List<Map<String, Object>> insertReturning(ObjectMetadata objectMetadata, List<Map<Field<?>, Object>> rows) {
+    public List<Map<String, Object>> insertReturning(ObjectMetadata objectMetadata, List<Map<Field<?>, Object>> rows, List<Field<?>> returnFields) {
         if (Utils.CL.isEmpty(rows)) {
             return Utils.CL.newArrayList();
         }
@@ -378,7 +388,31 @@ public class DynamicQueryService {
             insert = insert.values(values);
         }
 
-        return insert.returning().fetchMaps();
+        return insert.returning(returnFields).fetchMaps();
+    }
+
+    public List<Map<String, Object>> insertReturning(ObjectMetadata objectMetadata, List<Map<String, Object>> values) {
+        List<Map<Field<?>, Object>> fieldValues = values.stream().map(objectMap -> getFieldValues(objectMetadata, objectMap)).collect(Collectors.toList());
+        return insertReturning(objectMetadata, fieldValues, objectMetadata.getFieldAlias());
+    }
+
+    public List<Map<String, Object>> insertReturningInsertedRows(ObjectMetadata objectMetadata, List<Map<String, Object>> values, String conflictOnConstraintName) {
+        List<Map<Field<?>, Object>> rows = values.stream().map(objectMap -> getFieldValues(objectMetadata, objectMap)).collect(Collectors.toList());
+        if (rows.isEmpty()) {
+            return Utils.CL.newArrayList();
+        }
+        List<Field<?>> fields = new ArrayList<>(rows.getFirst().keySet());
+        var insert = dsl.insertInto(objectMetadata.getTable()).columns(fields);
+
+        for (Map<Field<?>, Object> row : rows) {
+            Object[] insertValues = fields.stream().map(row::get).toArray();
+            insert = insert.values(insertValues);
+        }
+
+        return insert.onConflictOnConstraint(DSL.name(conflictOnConstraintName))
+                .doNothing()
+                .returning(objectMetadata.getFieldAlias())
+                .fetchMaps();
     }
 
     public Map<String, Object> updateById(ObjectMetadata meta, Object id, Map<String, Object> values) {
@@ -401,7 +435,7 @@ public class DynamicQueryService {
                 .fetchOneMap();
 
         if (Utils.CL.isEmpty(affected)) {
-            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
+            throw CommonErrors.optimisticLockingFailureException(objectMetadata.getName(), "Version conflict or record not found");
         }
 
         return affected;
@@ -419,7 +453,7 @@ public class DynamicQueryService {
                 .execute();
 
         if (affected == 0) {
-            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
+            throw CommonErrors.optimisticLockingFailureException(objectMetadata.getName(), "Version conflict or record not found");
         }
 
         return affected;
@@ -427,11 +461,11 @@ public class DynamicQueryService {
 
     private Map<Field<?>, Object> buildMapUpdateFields(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where) {
         if (where == null) {
-            throw Errors.missingWhereConditionException("WHERE condition must not be null");
+            throw CommonErrors.missingWhereConditionException("WHERE condition must not be null");
         }
 
         if (where.equals(org.jooq.impl.DSL.noCondition())) {
-            throw Errors.missingWhereConditionException("WHERE condition must not be empty");
+            throw CommonErrors.missingWhereConditionException("WHERE condition must not be empty");
         }
 
         Map<Field<?>, Object> map = new LinkedHashMap<>();
@@ -458,7 +492,7 @@ public class DynamicQueryService {
      */
     public int deleteById(ObjectMetadata meta, Object id, Map<String, Object> values) {
         if (id == null) {
-            throw Errors.invalid("Id must not be null");
+            throw CommonErrors.required("id", "Id must not be null");
         }
 
         Attribute attribute = meta.getIdAttribute();
@@ -496,7 +530,7 @@ public class DynamicQueryService {
     public int delete(ObjectMetadata meta, Map<String, Object> values, Condition condition) {
 
         if (condition == null || condition.equals(DSL.noCondition())) {
-            throw Errors.missingWhereConditionException("DELETE must have WHERE condition");
+            throw CommonErrors.missingWhereConditionException("DELETE must have WHERE condition");
         }
 
         Map<Field<?>, Object> updateFieldMap = new LinkedHashMap<>();
@@ -516,7 +550,7 @@ public class DynamicQueryService {
                 .and(versionCondition)
                 .execute();
         if (affected == 0) {
-            throw Errors.optimisticLockingFailureException("Version conflict or record not found");
+            throw CommonErrors.optimisticLockingFailureException(meta.getName(), "Version conflict or record not found");
         }
         return affected;
     }
@@ -532,7 +566,7 @@ public class DynamicQueryService {
      */
     public int forceDeleteById(ObjectMetadata meta, Object id) {
         if (id == null) {
-            throw Errors.invalid("Id must not be null");
+            throw CommonErrors.required("id", "Id must not be null");
         }
 
         Attribute attribute = meta.getIdAttribute();
@@ -554,7 +588,7 @@ public class DynamicQueryService {
      */
     public Map<String, Object> findById(ObjectMetadata meta, Object id, List<String> returnFields) {
         if (id == null) {
-            throw Errors.invalid("Id must not be null");
+            throw CommonErrors.required("id", "Id must not be null");
         }
         ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
                 .builder()
@@ -569,6 +603,63 @@ public class DynamicQueryService {
         PageResponse<Map<String, Object>> result = filter(meta, objectFilterRequest);
 
         return Utils.CL.getFirst(result.getContents());
+    }
+
+    public Map<String, Object> findById(ObjectMetadata meta, Object id) {
+        if (id == null) {
+            throw CommonErrors.required("id", "Id must not be null");
+        }
+        ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
+                .builder()
+                .objectInfo(ObjectFilterRequest.ObjectInfo.of(meta.getName()))
+                .returnFields(meta.getFieldNames())
+                .filters(FilterGroup
+                        .builder()
+                        .operator(LogicalOperator.AND)
+                        .conditions(Utils.CL.newArrayList(FilterCondition.create(Constants.OBJECT_PK, FilterOperator.EQUALS, id)))
+                        .build())
+                .build();
+        PageResponse<Map<String, Object>> result = filter(meta, objectFilterRequest);
+
+        return Utils.CL.getFirst(result.getContents());
+    }
+
+    public List<Map<String, Object>> findAllById(ObjectMetadata meta, List<Object> ids, List<String> returnFields) {
+        if (Utils.CL.isEmpty(ids)) {
+            throw CommonErrors.required("ids", "Ids must not be empty");
+        }
+        ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
+                .builder()
+                .objectInfo(ObjectFilterRequest.ObjectInfo.of(meta.getName()))
+                .returnFields(returnFields)
+                .filters(FilterGroup
+                        .builder()
+                        .operator(LogicalOperator.AND)
+                        .conditions(Utils.CL.newArrayList(FilterCondition.create(Constants.OBJECT_PK, FilterOperator.IN, ids)))
+                        .build())
+                .build();
+        PageResponse<Map<String, Object>> result = filter(meta, objectFilterRequest);
+
+        return result.getContents();
+    }
+
+    public List<Map<String, Object>> findAllById(ObjectMetadata meta, List<Object> ids) {
+        if (Utils.CL.isEmpty(ids)) {
+            throw CommonErrors.required("ids", "Ids must not be empty");
+        }
+        ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
+                .builder()
+                .objectInfo(ObjectFilterRequest.ObjectInfo.of(meta.getName()))
+                .returnFields(meta.getFieldNames())
+                .filters(FilterGroup
+                        .builder()
+                        .operator(LogicalOperator.AND)
+                        .conditions(Utils.CL.newArrayList(FilterCondition.create(Constants.OBJECT_PK, FilterOperator.IN, ids)))
+                        .build())
+                .build();
+        PageResponse<Map<String, Object>> result = filter(meta, objectFilterRequest);
+
+        return result.getContents();
     }
 
     /**
@@ -591,7 +682,7 @@ public class DynamicQueryService {
             Field<?> versionField = versionAttr.getField();
             Object versionValueObject = fields.get(versionField);
             if(versionValueObject == null) {
-                throw Errors.invalid("Version must not be null");
+                throw CommonErrors.required("version", "Version must not be null");
             }
             if(versionValueObject instanceof Number currentVersion) {
                 fields.put(versionField, currentVersion.longValue() + 1);

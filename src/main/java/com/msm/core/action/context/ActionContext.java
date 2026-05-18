@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -29,5 +30,15 @@ public class ActionContext<I> implements ExecutionContext<I> {
     @Override
     public Map<ContextKey<?>, Object> getContextKey() {
         return contextKey;
+    }
+
+    @SuppressWarnings("unchecked")
+    public Map<String, Object> getResultAsMap() {
+        return (Map<String, Object>) result;
+    }
+
+    @SuppressWarnings("unchecked")
+    public List<Map<String, Object>> getResultAsListMap() {
+        return (List<Map<String, Object>>) result;
     }
 }

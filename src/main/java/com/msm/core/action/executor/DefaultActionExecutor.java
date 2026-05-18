@@ -1,16 +1,15 @@
 package com.msm.core.action.executor;
 
-import com.msm.core.action.ActionHandlerFactory;
-import com.msm.core.commons.Condition;
-import com.msm.core.commons.Utils;
-import com.msm.core.commons.ValueConvertFactory;
-import com.msm.core.exceptions.Errors;
 import com.msm.core.action.ActionDefinitionExecutor;
+import com.msm.core.action.ActionHandlerFactory;
 import com.msm.core.action.condition.AlwaysTrueCondition;
-import com.msm.core.action.hook.HookPhase;
-import com.msm.core.action.hook.HookEngine;
 import com.msm.core.action.context.ActionContext;
 import com.msm.core.action.context.KeyDimensionResolver;
+import com.msm.core.action.hook.HookEngine;
+import com.msm.core.action.hook.HookPhase;
+import com.msm.core.commons.Condition;
+import com.msm.core.commons.Utils;
+import com.msm.core.exceptions.CommonErrors;
 import lombok.RequiredArgsConstructor;
 
 import java.util.List;
@@ -25,7 +24,7 @@ public class DefaultActionExecutor implements ActionExecutor {
         Objects.requireNonNull(request.getAction(), "The action cannot be null");
         ActionDefinitionExecutor handler = getActionHandler(request);
         if (Objects.isNull(handler)) {
-            throw Errors.unsupported("Unsupported action: " + request.getAction());
+            throw CommonErrors.unsupported(request.getAction(), "Unsupported action: " + request.getAction());
         }
         if(request.isDisableHookEvent()) {
             return handler.execute(request);
@@ -49,7 +48,7 @@ public class DefaultActionExecutor implements ActionExecutor {
         }
 
         if (Utils.CL.isEmpty(executors)) {
-            throw Errors.unsupported("No handler found for: " + key);
+            throw CommonErrors.unsupported(key, "No handler found for: " + key);
         }
 
         List<ActionDefinitionExecutor> defaultMatched = executors.stream()
@@ -61,7 +60,7 @@ public class DefaultActionExecutor implements ActionExecutor {
 
         if (extendMatched.isEmpty()) {
             if (defaultMatched.isEmpty()) {
-                throw Errors.unsupported("No handler matched condition for: " + key);
+                throw CommonErrors.unsupported(key, "No handler matched condition for: " + key);
             }
             return defaultMatched.getFirst();
         }
@@ -78,22 +77,5 @@ public class DefaultActionExecutor implements ActionExecutor {
     }
     private boolean isMatchExtendCondition(Condition<ActionContext<?>> condition, ActionContext<?> request) {
         return !isMatchDefaultCondition(condition) && Objects.nonNull(condition) && condition.matches(request);
-    }
-
-    public <O> O execute(ActionContext<?> request, Class<O> outputType) {
-
-        Objects.requireNonNull(request.getAction(), "The action cannot be null");
-        ActionDefinitionExecutor handler = getActionHandler(request);
-
-        if (handler == null) {
-            throw Errors.unsupported("No handler found");
-        }
-        O returnObject = handler.execute(request);
-        //Runtime type-safe check
-        if (!ValueConvertFactory.normalizeDataType(outputType).isInstance(returnObject)) {
-            throw Errors.invalid("Invalid return type. Expected " + outputType.getSimpleName());
-        }
-
-        return outputType.cast(returnObject);
     }
 }

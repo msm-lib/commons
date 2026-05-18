@@ -2,7 +2,7 @@ package com.msm.core.dynamicquery.mapping.converter;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.msm.core.commons.Utils;
-import com.msm.core.exceptions.Errors;
+import com.msm.core.exceptions.CommonErrors;
 import org.jooq.JSONB;
 import org.jooq.impl.AbstractConverter;
 
@@ -17,13 +17,14 @@ public class GenericPostgresJsonConverter<U> extends AbstractConverter<Object, U
 
     @Override
     public U from(Object databaseObject) {
+
         if (databaseObject == null || databaseObject.toString() == null) {
             return null;
         }
         try {
             return Utils.O.toObject(databaseObject.toString(), targetType);
         } catch (Exception e) {
-            throw Errors.castException("Cannot convert JSONB to " + targetType.getTypeName(), e);
+            throw CommonErrors.castException("JSON", "Cannot convert JSONB to " + targetType.getTypeName(), e);
         }
     }
 

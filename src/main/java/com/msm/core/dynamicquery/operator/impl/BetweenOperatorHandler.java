@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.msm.core.commons.Utils;
 import com.msm.core.dynamicquery.FieldResolver;
 import com.msm.core.dynamicquery.operator.OperatorHandler;
-import com.msm.core.exceptions.Errors;
+import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
@@ -27,15 +27,15 @@ public class BetweenOperatorHandler implements OperatorHandler {
         String fieldName = FieldResolver.pathAsFieldName(condition.getField());
         Attribute attribute = objectMetadata.getAttributeByName(fieldName);
         if(attribute == null) {
-            throw Errors.fieldNotFoundException(fieldName + " not found");
+            throw CommonErrors.fieldNotFoundException(fieldName, fieldName + " not found");
         }
         Object value = condition.getValue();
         if (!(value instanceof List<?> values) || values.size() != 2) {
-            throw Errors.invalid("BETWEEN requires exactly 2 values");
+            throw CommonErrors.unsupported("BETWEEN", "BETWEEN requires exactly 2 values");
         }
 
         if(attribute.isJsonField()) {
-            Field<Object> field = (Field<Object>) FieldResolver.resolve(condition.getField(), objectMetadata);
+            Field<Object> field = (Field<Object>) FieldResolver.resolve(objectMetadata, condition.getField());
             return buildJsonbBetween(field, values.getFirst(), values.getLast());
         }
 
@@ -84,7 +84,7 @@ public class BetweenOperatorHandler implements OperatorHandler {
             );
         }
 
-        throw Errors.unsupported("BETWEEN operator unsupported for the field '"
+        throw CommonErrors.unsupported("BETWEEN", "BETWEEN operator unsupported for the field '"
                 + condition.getField() + "' with values[" + from + ", " + to + "]");
     }
 
