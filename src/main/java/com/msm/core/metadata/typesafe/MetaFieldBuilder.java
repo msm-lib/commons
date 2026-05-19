@@ -26,4 +26,11 @@ public final class MetaFieldBuilder {
                 field
         );
     }
+
+    public static <T> TypedAttribute<T> attr(String fieldName, Class<T> type) {
+        return new TypedAttribute<>(
+                fieldName,
+                type
+        );
+    }
 }

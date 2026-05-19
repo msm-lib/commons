@@ -17,11 +17,19 @@ public class TypedAttribute<T> {
         this.field = field;
     }
 
+    public TypedAttribute(String fieldName, Class<T> javaType) {
+        this.fieldName = fieldName;
+        this.javaType = javaType;
+        this.field = null;
+    }
+
     public Field<T> as(String alias) {
+        if (field == null) return null;
         return field.as(alias);
     }
 
     public Field<T> as() {
+        if (field == null) return null;
         return field.as(getFieldName());
     }
 

@@ -22,6 +22,14 @@ public final class DataRecord {
         return values.get(getRefName(field));
     }
 
+    public <X> X getRef(TypedAttribute<?> field, Class<X> type) {
+        return Utils.O.convertToType(values.get(getRefName(field)), type);
+    }
+
+    public Map<String, Object> getRefAsMap(TypedAttribute<?> field) {
+        return Utils.O.convertToMap(values.get(getRefName(field)), String.class, Object.class);
+    }
+
     public <T> Optional<T> getOptional(TypedAttribute<T> field) {
         return Optional.ofNullable(get(field));
     }

@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionType;
+import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
@@ -161,6 +162,23 @@ public final class ObjectUtils {
             if (value instanceof String) {
                 try {
                     return MAPPER.readValue((String) value, clazz);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <K, V> Map<K, V> convertToMap(Object value, Class<K> keyClass, Class<V> valueClass) {
+        if (value == null) return null;
+        MapType mapType = MAPPER.getTypeFactory().constructMapType(Map.class, keyClass, valueClass);
+        try {
+            return MAPPER.convertValue(value, mapType);
+        } catch (IllegalArgumentException e) {
+            if (value instanceof String) {
+                try {
+                    return MAPPER.readValue((String) value, mapType);
                 } catch (Exception ex) {
                     throw new RuntimeException(ex);
                 }
