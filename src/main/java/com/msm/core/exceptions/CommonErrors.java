@@ -61,4 +61,20 @@ public class CommonErrors {
         return new OptimisticLockingFailureException(msg, cause);
     }
 
+    public static ObjectNotFoundException objectNotFound(String objectName) {
+        return new ObjectNotFoundException(objectName);
+    }
+
+    public static ObjectNotFoundException objectNotFound(String objectName, String msg) {
+        return new ObjectNotFoundException(objectName, msg);
+    }
+
+    public static ObjectNotFoundException objectNotFound(String msg, Throwable cause) {
+        return new ObjectNotFoundException(msg, cause);
+    }
+
+    public static ObjectNotFoundException objectNotFound(String objectName, String msg, Throwable cause) {
+        return new ObjectNotFoundException(objectName, msg, cause);
+    }
+
 }

@@ -1,5 +1,6 @@
 package com.msm.core.dynamicquery;
 
+import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.metadata.ObjectMetadata;
 
 import java.util.Map;
@@ -16,5 +17,13 @@ public class ObjectMetadataFactory {
 
     public static Optional<ObjectMetadata> getObjectMetadata(String objectName) {
         return Optional.ofNullable(CACHE_TABLE.get(objectName));
+    }
+
+    public static ObjectMetadata getObjectMetadataByName(String objectName) {
+        ObjectMetadata objectMetadata = CACHE_TABLE.get(objectName);
+        if(objectMetadata == null) {
+            throw CommonErrors.objectNotFound(objectName);
+        }
+        return objectMetadata;
     }
 }
