@@ -624,9 +624,9 @@ public class DynamicQueryService {
         return Utils.CL.getFirst(result.getContents());
     }
 
-    public List<Map<String, Object>> findAllById(ObjectMetadata meta, List<Object> ids, List<String> returnFields) {
+    public List<Map<String, Object>> findAllByIds(ObjectMetadata meta, List<Object> ids, List<String> returnFields) {
         if (Utils.CL.isEmpty(ids)) {
-            throw CommonErrors.required("ids", "Ids must not be empty");
+            return Utils.CL.newArrayList();
         }
         ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
                 .builder()
@@ -643,9 +643,9 @@ public class DynamicQueryService {
         return result.getContents();
     }
 
-    public List<Map<String, Object>> findAllById(ObjectMetadata meta, List<Object> ids) {
+    public List<Map<String, Object>> findAllByIds(ObjectMetadata meta, List<Object> ids) {
         if (Utils.CL.isEmpty(ids)) {
-            throw CommonErrors.required("ids", "Ids must not be empty");
+            return Utils.CL.newArrayList();
         }
         ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
                 .builder()
