@@ -1,16 +1,18 @@
 package com.msm.core.dynamicquery.operator;
 
+import com.fasterxml.jackson.databind.JavaType;
 import com.msm.core.dynamicquery.mapping.JavaTypeMappingFactory;
 import com.msm.core.metadata.Attribute;
+import lombok.extern.slf4j.Slf4j;
 import org.jooq.Condition;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
-import org.jooq.util.postgres.PostgresDSL;
 
 import java.util.List;
 import java.util.Set;
 
+@Slf4j
 public class ConditionUtils {
 
     public static Condition buildArrayContainsCondition(Attribute attribute, Object inputValue) {
@@ -27,14 +29,30 @@ public class ConditionUtils {
                 arrayValue = ((List<?>) normalizedValue).toArray();
             } else if (normalizedValue instanceof Set) {
                 arrayValue = ((Set<?>) normalizedValue).toArray();
-            } else {
+            } else if (normalizedValue != null && normalizedValue.getClass().isArray()) {
                 arrayValue = (Object[]) normalizedValue;
+            } else {
+                arrayValue = new Object[]{normalizedValue};
             }
 
-            Field<Object> valueField = (Field<Object>) DSL.value(arrayValue, jooqType);
-            return PostgresDSL.arrayContains(
+//            Field<Object> valueField = (Field<Object>) DSL.value(arrayValue, jooqType);
+//            return PostgresDSL.arrayContains(
+//                    field,
+//                    valueField);
+
+            JavaType contentType = attribute.getJavaType().getContentType();
+            if (contentType != null && contentType.getRawClass().equals(String.class)) {
+                return DSL.condition(
+                        "{0} @> {1}::text[]",
+                        field,
+                        DSL.val(arrayValue)
+                );
+            }
+            return DSL.condition(
+                    "{0} @> {1}",
                     field,
-                    valueField);
+                    DSL.val(arrayValue)
+            );
         } else {
             Field<Object> field = (Field<Object>) attribute.getField();
             return field.eq(normalizedValue);
@@ -54,13 +72,26 @@ public class ConditionUtils {
                 arrayValue = ((List<?>) normalizedValue).toArray();
             } else if (normalizedValue instanceof Set) {
                 arrayValue = ((Set<?>) normalizedValue).toArray();
-            } else {
+            } else if (normalizedValue != null && normalizedValue.getClass().isArray()) {
                 arrayValue = (Object[]) normalizedValue;
+            } else {
+                arrayValue = new Object[]{normalizedValue};
             }
 
-            return PostgresDSL.arrayOverlap(
+            JavaType contentType = attribute.getJavaType().getContentType();
+            if (contentType != null && contentType.getRawClass().equals(String.class)) {
+                return DSL.condition(
+                        "{0} && {1}::text[]",
+                        field,
+                        DSL.val(arrayValue)
+                );
+            }
+
+            return DSL.condition(
+                    "{0} && {1}",
                     field,
-                    DSL.value(arrayValue, (DataType<Object[]>) jooqType));
+                    DSL.val(arrayValue)
+            );
         } else {
             Field<Object> field = (Field<Object>) attribute.getField();
             return field.eq(normalizedValue);

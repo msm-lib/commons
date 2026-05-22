@@ -133,7 +133,8 @@ public final class ObjectUtils {
         if (value == null) return null;
         JavaType targetType = GenericTypeResolverFactory.resolve(typeName);
         try {
-            if (acceptCollectionAsArray && targetType.isCollectionLikeType() || targetType.isArrayType()) {
+            boolean isArrayLike = targetType.isCollectionLikeType() || targetType.isArrayType();
+            if (acceptCollectionAsArray && isArrayLike) {
                 // Get type of Collection (exp: UUID, String, Instant)
                 JavaType contentType = targetType.getContentType();
                 // Create JavaType array to convert

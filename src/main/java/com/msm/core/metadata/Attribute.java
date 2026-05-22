@@ -46,6 +46,7 @@ public class Attribute {
     private Long maxValue;
     private Long minValue;
     private Long maxSize;
+    private Boolean isJson = false;
     private Boolean isFreeText;
     private Object defaultValue;
     private Boolean multiSelect;
@@ -119,10 +120,14 @@ public class Attribute {
 
     @JsonIgnore
     public boolean isJsonField() {
-        return fieldType.toLowerCase().contains("json")
-                || fieldType.toLowerCase().contains("jsonb")
-                || fieldType.toLowerCase().contains("map")
-                || JavaTypeMappingFactory.isJson(fieldType);
+        if (isJson == null) {
+            return fieldType.toLowerCase().contains("json")
+                    || fieldType.toLowerCase().contains("jsonb")
+                    || fieldType.toLowerCase().contains("map")
+                    || JavaTypeMappingFactory.isJson(fieldType);
+        }
+
+        return isJson;
     }
 
     @JsonIgnore

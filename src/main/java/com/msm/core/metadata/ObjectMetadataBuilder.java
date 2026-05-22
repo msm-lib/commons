@@ -8,6 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
 import org.hibernate.annotations.ColumnDefault;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
@@ -121,6 +123,13 @@ public class ObjectMetadataBuilder {
 
         if (field.isAnnotationPresent(jakarta.validation.constraints.Max.class)) {
             result.setMaxValue(field.getAnnotation(jakarta.validation.constraints.Max.class).value());
+        }
+
+        if (field.isAnnotationPresent(JdbcTypeCode.class)) {
+            int value = field.getAnnotation(JdbcTypeCode.class).value();
+            if(SqlTypes.JSON == value) {
+                result.setIsJson(Boolean.TRUE);
+            }
         }
 
         // 4. Default for ColumnName if empty
