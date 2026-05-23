@@ -24,8 +24,11 @@ public class EqOperatorHandler implements OperatorHandler {
             Field<Object> field = (Field<Object>) FieldResolver.resolve(objectMetadata, condition.getField());
             return field.eq(value);
         }
-        Object objectCasted = attribute.cast(value);
         Field<Object> field = (Field<Object>) attribute.getField();
+        if(value == null) {
+            return field.isNull();
+        }
+        Object objectCasted = attribute.cast(value);
         return field.eq(objectCasted);
     }
 }
