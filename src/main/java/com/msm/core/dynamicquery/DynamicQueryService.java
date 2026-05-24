@@ -419,10 +419,10 @@ public class DynamicQueryService {
         Attribute attribute = meta.getIdAttribute();
         Field<Object> fieldId = (Field<Object>) attribute.getField();
         Object idValueCasted = attribute.cast(id);
-        return updateReturning(meta, values, fieldId.eq(idValueCasted), meta.getFieldAlias());
+        return updateReturnByFields(meta, values, fieldId.eq(idValueCasted), meta.getFieldAlias());
     }
 
-    public Map<String, Object> updateReturning(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where, List<Field<?>> returnFields) {
+    public Map<String, Object> updateReturnByFields(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where, List<Field<?>> returnFields) {
         Map<Field<?>, Object> map = buildMapUpdateFields(objectMetadata, values, where);
         //Update new version and update where condition
         Condition versionCondition = updateOrGetVersionCondition(objectMetadata, map);
@@ -432,6 +432,25 @@ public class DynamicQueryService {
                 .where(where)
                 .and(versionCondition)
                 .returning(returnFields)
+                .fetchOneMap();
+
+        if (Utils.CL.isEmpty(affected)) {
+            throw CommonErrors.optimisticLockingFailureException(objectMetadata.getName(), "Version conflict or record not found");
+        }
+
+        return affected;
+    }
+
+    public Map<String, Object> updateReturning(ObjectMetadata objectMetadata, Map<String, Object> values, Condition where, List<String> returnFields) {
+        Map<Field<?>, Object> map = buildMapUpdateFields(objectMetadata, values, where);
+        //Update new version and update where condition
+        Condition versionCondition = updateOrGetVersionCondition(objectMetadata, map);
+
+        Map<String, Object> affected = dsl.update(objectMetadata.getTable())
+                .set(map)
+                .where(where)
+                .and(versionCondition)
+                .returning(SelectBuilder.buildFields(objectMetadata, returnFields))
                 .fetchOneMap();
 
         if (Utils.CL.isEmpty(affected)) {
@@ -644,22 +663,7 @@ public class DynamicQueryService {
     }
 
     public List<Map<String, Object>> findAllByIds(ObjectMetadata meta, List<Object> ids) {
-        if (Utils.CL.isEmpty(ids)) {
-            return Utils.CL.newArrayList();
-        }
-        ObjectFilterRequest objectFilterRequest = ObjectFilterRequest
-                .builder()
-                .objectInfo(ObjectFilterRequest.ObjectInfo.of(meta.getName()))
-                .returnFields(meta.getFieldNames())
-                .filters(FilterGroup
-                        .builder()
-                        .operator(LogicalOperator.AND)
-                        .conditions(Utils.CL.newArrayList(FilterCondition.create(Constants.OBJECT_PK, FilterOperator.IN, ids)))
-                        .build())
-                .build();
-        PageResponse<Map<String, Object>> result = filter(meta, objectFilterRequest);
-
-        return result.getContents();
+        return findAllByIds(meta, ids, meta.getFieldNames());
     }
 
     /**
