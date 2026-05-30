@@ -1,11 +1,10 @@
-package com.msm.core.dynamicquery.operator;
+package com.msm.core.dynamicquery;
 
 import com.fasterxml.jackson.databind.JavaType;
-import com.msm.core.dynamicquery.mapping.JavaTypeMappingFactory;
+import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.metadata.Attribute;
 import lombok.extern.slf4j.Slf4j;
 import org.jooq.Condition;
-import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
@@ -16,7 +15,6 @@ import java.util.Set;
 public class ConditionUtils {
 
     public static Condition buildArrayContainsCondition(Attribute attribute, Object inputValue) {
-        DataType<?> jooqType = JavaTypeMappingFactory.getDataType(attribute.getFieldType());
         Object normalizedValue = attribute.castAndAcceptCollectionAsArray(inputValue);
 
         if (attribute.getFieldType().contains("[]")
@@ -34,11 +32,6 @@ public class ConditionUtils {
             } else {
                 arrayValue = new Object[]{normalizedValue};
             }
-
-//            Field<Object> valueField = (Field<Object>) DSL.value(arrayValue, jooqType);
-//            return PostgresDSL.arrayContains(
-//                    field,
-//                    valueField);
 
             JavaType contentType = attribute.getJavaType().getContentType();
             if (contentType != null && contentType.getRawClass().equals(String.class)) {
@@ -60,7 +53,6 @@ public class ConditionUtils {
     }
 
     public static Condition buildArrayOverlapCondition(Attribute attribute, Object inputValue) {
-        DataType<?> jooqType = JavaTypeMappingFactory.getDataType(attribute.getFieldType());
         Object normalizedValue = attribute.castAndAcceptCollectionAsArray(inputValue);
         if (attribute.getFieldType().contains("[]")
                 || attribute.getFieldType().contains("List")
@@ -99,12 +91,21 @@ public class ConditionUtils {
     }
 
     public static Condition unaccentLike(Field<String> field, String keyword) {
-
         String pattern = "%" + keyword.toLowerCase() + "%";
         Field<String> left = DSL.function("unaccent", String.class, DSL.lower(field));
         Field<String> right = DSL.function("unaccent", String.class, DSL.inline(pattern));
 
         return left.like(right);
+    }
+
+    public static void requireWhereCondition(Condition condition) {
+        if (condition == null) {
+            throw CommonErrors.missingWhereConditionException("WHERE condition must not be null");
+        }
+
+        if (condition.equals(DSL.noCondition())) {
+            throw CommonErrors.missingWhereConditionException("WHERE condition must not be empty");
+        }
     }
 
 //    public static DataType<?> resolveJooqDataType(String typeName) {

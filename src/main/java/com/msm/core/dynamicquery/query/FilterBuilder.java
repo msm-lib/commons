@@ -1,4 +1,4 @@
-package com.msm.core.dynamicquery;
+package com.msm.core.dynamicquery.query;
 
 
 import com.msm.core.dynamicquery.operator.OperatorFactory;
@@ -14,27 +14,27 @@ import java.util.List;
 
 public class FilterBuilder {
 
-    public static Condition build(FilterObject filter, ObjectMetadata objectMetadata) {
+    public static Condition build(FilterObject filter, ObjectMetadata meta) {
         if (filter == null) {
             return DSL.noCondition();
         }
 
         if (filter instanceof FilterCondition fc) {
-            return buildCondition(fc, objectMetadata);
+            return buildCondition(fc, meta);
         }
 
         if (filter instanceof FilterGroup fg) {
-            return buildGroup(fg, objectMetadata);
+            return buildGroup(fg, meta);
         }
 
         throw CommonErrors.invalid("Unknown", "Unknown filter type");
     }
 
-    private static Condition buildGroup(FilterGroup group, ObjectMetadata objectMetadata) {
+    private static Condition buildGroup(FilterGroup group, ObjectMetadata meta) {
         List<Condition> conditions = group
                 .getConditions()
                 .stream()
-                .map(f -> build(f, objectMetadata))
+                .map(f -> build(f, meta))
                 .toList();
 
         if (conditions.isEmpty()) {
@@ -47,7 +47,7 @@ public class FilterBuilder {
         };
     }
 
-    private static Condition buildCondition(FilterCondition condition, ObjectMetadata objectMetadata) {
-        return OperatorFactory.get(condition.getOperator()).handle(objectMetadata, condition);
+    private static Condition buildCondition(FilterCondition condition, ObjectMetadata meta) {
+        return OperatorFactory.get(condition.getOperator()).handle(meta, condition);
     }
 }

@@ -1,4 +1,4 @@
-package com.msm.core.dynamicquery;
+package com.msm.core.dynamicquery.query;
 
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;

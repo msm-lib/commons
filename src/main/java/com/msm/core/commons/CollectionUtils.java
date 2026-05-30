@@ -142,5 +142,17 @@ public final class CollectionUtils {
         return null;
     }
 
+//    public Map<String, Map<String, Object>> toMap(List<Map<String, Object>> input) {
+//        if(Utils.CL.isNotEmpty(input)) {
+//            return newHashMap();
+//        }
+//        return input
+//                .stream()
+//                .collect(Collectors.toMap(data -> {
+//                    return data.get(objectMetadata.getIdAttribute().getFieldName());
+//                }, Function.identity()));
+//
+//    }
+
     CollectionUtils() {}
 }

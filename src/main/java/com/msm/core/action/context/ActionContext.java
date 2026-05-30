@@ -1,5 +1,6 @@
 package com.msm.core.action.context;
 
+import com.msm.core.commons.Utils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -40,5 +41,9 @@ public class ActionContext<I> implements ExecutionContext<I> {
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> getResultAsListMap() {
         return (List<Map<String, Object>>) result;
+    }
+
+    public <X> X getObjectIdAs(Class<X> clazz) {
+        return Utils.O.convertToType(objectId, clazz);
     }
 }

@@ -1,7 +1,7 @@
 package com.msm.core.dynamicquery.operator.impl;
 
+import com.msm.core.dynamicquery.ConditionUtils;
 import com.msm.core.dynamicquery.FieldResolver;
-import com.msm.core.dynamicquery.operator.ConditionUtils;
 import com.msm.core.dynamicquery.operator.OperatorHandler;
 import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.filter.domain.FilterCondition;

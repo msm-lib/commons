@@ -34,7 +34,9 @@ public final class Constants {
         public static final String CREATE = "create";
         public static final String BULK_CREATE = "bulk_create";
         public static final String UPDATE = "update";
+        public static final String BULK_UPDATE = "bulk_update";
         public static final String DELETE = "delete";
+        public static final String BULK_DELETE = "bulk_delete";
     }
     //For audit
     public static final String CREATED_AT = "createdAt";

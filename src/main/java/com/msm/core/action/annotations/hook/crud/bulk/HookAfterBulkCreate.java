@@ -1,4 +1,4 @@
-package com.msm.core.action.annotations.hook.crud;
+package com.msm.core.action.annotations.hook.crud.bulk;
 
 import com.msm.core.action.annotations.ExtendContextKey;
 import com.msm.core.action.annotations.hook.Hook;
@@ -16,8 +16,8 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 @Documented
-@Hook(action = Constants.Action.BULK_CREATE, phase = HookPhase.BEFORE_EVENT)
-public @interface HookBeforeBulkCreate {
+@Hook(action = Constants.Action.BULK_CREATE, phase = HookPhase.AFTER_EVENT)
+public @interface HookAfterBulkCreate {
     String resource() default Constants.GENERIC_RESOURCE_NAME;
     int order() default 0;
     ExtendContextKey[] keyContexts() default {};
