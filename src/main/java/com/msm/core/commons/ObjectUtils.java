@@ -11,6 +11,7 @@ import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import org.jooq.JSONB;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -151,6 +152,14 @@ public final class ObjectUtils {
                     throw new RuntimeException(ex);
                 }
             }
+            if (value instanceof JSONB) {
+                String jsonString = ((JSONB) value).data();
+                try {
+                    return MAPPER.readValue(jsonString, targetType);
+                } catch (JsonProcessingException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
             throw new RuntimeException(e);
         }
     }
@@ -164,6 +173,14 @@ public final class ObjectUtils {
                 try {
                     return MAPPER.readValue((String) value, clazz);
                 } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            if (value instanceof JSONB) {
+                String jsonString = ((JSONB) value).data();
+                try {
+                    return MAPPER.readValue(jsonString, clazz);
+                } catch (JsonProcessingException ex) {
                     throw new RuntimeException(ex);
                 }
             }
@@ -181,6 +198,14 @@ public final class ObjectUtils {
                 try {
                     return MAPPER.readValue((String) value, mapType);
                 } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            if (value instanceof JSONB) {
+                String jsonString = ((JSONB) value).data();
+                try {
+                    return MAPPER.readValue(jsonString, mapType);
+                } catch (JsonProcessingException ex) {
                     throw new RuntimeException(ex);
                 }
             }
