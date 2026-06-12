@@ -132,8 +132,7 @@ public class Attribute {
 
     @JsonIgnore
     public boolean isCollectionField() {
-        return fieldType.toLowerCase().contains("list")
-                || fieldType.toLowerCase().contains("set");
+        return getJavaType().isCollectionLikeType();
     }
 
     @JsonIgnore

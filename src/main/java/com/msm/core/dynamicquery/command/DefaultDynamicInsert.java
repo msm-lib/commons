@@ -11,6 +11,7 @@ import org.jooq.UpdatableRecord;
 import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -91,7 +92,16 @@ public class DefaultDynamicInsert implements DynamicInsert{
             insert = insert.values(insertValues);
         }
 
-        return insert.onConflictOnConstraint(DSL.name(conflictOnConstraintName))
+        if(Utils.STR.isBlank(conflictOnConstraintName)) {
+            return insert
+                    .onConflict()
+                    .doNothing()
+                    .returning(meta.getFieldAlias())
+                    .fetchMaps();
+        }
+
+        return insert
+                .onConflictOnConstraint(DSL.name(conflictOnConstraintName))
                 .doNothing()
                 .returning(meta.getFieldAlias())
                 .fetchMaps();
@@ -101,6 +111,14 @@ public class DefaultDynamicInsert implements DynamicInsert{
     public Map<String, Object> insertReturningInsertedRow(ObjectMetadata objectMetadata, Map<String, Object> values, String conflictOnConstraintName) {
 
         Map<Field<?>, Object> fieldValues = DynamicQueryFieldValueMapper.toInsertMap(objectMetadata, values);
+        if(Utils.STR.isBlank(conflictOnConstraintName)) {
+            return dsl.insertInto(objectMetadata.getTable())
+                    .set(fieldValues)
+                    .onConflict()
+                    .doNothing()
+                    .returning(objectMetadata.getFieldAlias())
+                    .fetchOneMap();
+        }
         return dsl.insertInto(objectMetadata.getTable())
                 .set(fieldValues)
                 .onConflictOnConstraint(DSL.name(conflictOnConstraintName))
@@ -108,4 +126,74 @@ public class DefaultDynamicInsert implements DynamicInsert{
                 .returning(objectMetadata.getFieldAlias())
                 .fetchOneMap();
     }
+
+    public int upsert(ObjectMetadata meta, Map<String, Object> values, String conflictOnConstraintName) {
+        if (values == null || values.isEmpty()) {
+            return 0;
+        }
+
+        Map<Field<?>, Object> fieldValues = DynamicQueryFieldValueMapper.toInsertMap(meta, values);
+        Map<Field<?>, Object> updateSetMap = new LinkedHashMap<>();
+        for (Field<?> field : fieldValues.keySet()) {
+            updateSetMap.put(field, DSL.excluded(field));
+        }
+        if(Utils.STR.isBlank(conflictOnConstraintName)) {
+            return dsl.insertInto(meta.getTable())
+                    .set(fieldValues)
+                    .onConflict()
+                    .doUpdate()
+                    .set(updateSetMap)
+                    .execute();
+        }
+        return dsl.insertInto(meta.getTable())
+                .set(fieldValues)
+                .onConflictOnConstraint(DSL.name(conflictOnConstraintName))
+                .doUpdate()
+                .set(updateSetMap)
+                .execute();
+    }
+
+    public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName) {
+        return upsertReturning(meta, items, conflictOnConstraintName, meta.getFieldNames());
+    }
+
+    public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName, List<String> returnFields) {
+        if (Utils.CL.isEmpty(items)) {
+            return Utils.CL.newArrayList();
+        }
+
+        List<Map<Field<?>, Object>> fieldValues = items.stream()
+                .map(itemMap -> DynamicQueryFieldValueMapper.toInsertMap(meta, itemMap))
+                .collect(Collectors.toList());
+
+        List<Field<?>> fields = new ArrayList<>(fieldValues.getFirst().keySet());
+        var insert = dsl.insertInto(meta.getTable()).columns(fields);
+
+        for (Map<Field<?>, Object> row : fieldValues) {
+            Object[] values = fields.stream().map(row::get).toArray();
+            insert = insert.values(values);
+        }
+
+        Map<Field<?>, Object> updateSetMap = new LinkedHashMap<>();
+        for (Field<?> field : fields) {
+            updateSetMap.put(field, DSL.excluded(field));
+        }
+
+        if(Utils.STR.isBlank(conflictOnConstraintName)) {
+            return insert
+                    .onConflict()
+                    .doUpdate()
+                    .set(updateSetMap)
+                    .returning(SelectBuilder.buildFields(meta, returnFields))
+                    .fetchMaps();
+        }
+
+        return insert.onConflictOnConstraint(DSL.name(conflictOnConstraintName))
+                .doUpdate()
+                .set(updateSetMap)
+                .returning(SelectBuilder.buildFields(meta, returnFields))
+                .fetchMaps();
+    }
+
+
 }

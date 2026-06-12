@@ -188,6 +188,21 @@ public class DynamicQueryService implements DynamicObjectQuery {
     }
 
     @Override
+    public int upsert(ObjectMetadata meta, Map<String, Object> values, String conflictOnConstraintName) {
+        return insert.upsert(meta, values, conflictOnConstraintName);
+    }
+
+    @Override
+    public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName) {
+        return insert.upsertReturning(meta, items, conflictOnConstraintName);
+    }
+
+    @Override
+    public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName, List<String> returnFields) {
+        return insert.upsertReturning(meta, items, conflictOnConstraintName, returnFields);
+    }
+
+    @Override
     public List<Map<String, Object>> updateReturning(ObjectMetadata meta, List<Map<String, Object>> items) {
         return update.updateReturning(meta, items);
     }

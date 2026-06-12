@@ -37,6 +37,8 @@ public final class Constants {
         public static final String BULK_UPDATE = "bulk_update";
         public static final String DELETE = "delete";
         public static final String BULK_DELETE = "bulk_delete";
+        public static final String IMPORT_OBJECT = "import_object";
+        public static final String IMPORT_FILE_OBJECT = "import_file_object";
     }
     //For audit
     public static final String CREATED_AT = "createdAt";
@@ -52,6 +54,7 @@ public final class Constants {
     public static final String VERSION = "version";
     public static final String CUSTOM_VALUE_NAME = "customValues";
     public static final String ATTRIBUTE_REF_TEMPLATE = "{0}Reference";
+    public static final String CONSTRAINT_KEY = "{0}_{1}_{2}";
 
     private Constants() {}
 }
