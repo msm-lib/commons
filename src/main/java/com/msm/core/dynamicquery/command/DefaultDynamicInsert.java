@@ -3,6 +3,8 @@ package com.msm.core.dynamicquery.command;
 import com.msm.core.commons.Utils;
 import com.msm.core.dynamicquery.SelectBuilder;
 import com.msm.core.dynamicquery.mapping.DynamicQueryFieldValueMapper;
+import com.msm.core.exceptions.CommonErrors;
+import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
@@ -14,6 +16,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -77,6 +80,9 @@ public class DefaultDynamicInsert implements DynamicInsert{
     }
 
     public List<Map<String, Object>> insertReturningInsertedRows(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName) {
+        if(Utils.STR.isBlank(conflictOnConstraintName)) {
+            throw CommonErrors.required(conflictOnConstraintName, "conflictOnConstraintName must not be null or empty");
+        }
         List<Map<Field<?>, Object>> fieldValues = items
                 .stream()
                 .map(objectMap -> DynamicQueryFieldValueMapper.toInsertMap(meta, objectMap))
@@ -92,14 +98,6 @@ public class DefaultDynamicInsert implements DynamicInsert{
             insert = insert.values(insertValues);
         }
 
-        if(Utils.STR.isBlank(conflictOnConstraintName)) {
-            return insert
-                    .onConflict()
-                    .doNothing()
-                    .returning(meta.getFieldAlias())
-                    .fetchMaps();
-        }
-
         return insert
                 .onConflictOnConstraint(DSL.name(conflictOnConstraintName))
                 .doNothing()
@@ -109,16 +107,10 @@ public class DefaultDynamicInsert implements DynamicInsert{
 
 
     public Map<String, Object> insertReturningInsertedRow(ObjectMetadata objectMetadata, Map<String, Object> values, String conflictOnConstraintName) {
-
-        Map<Field<?>, Object> fieldValues = DynamicQueryFieldValueMapper.toInsertMap(objectMetadata, values);
         if(Utils.STR.isBlank(conflictOnConstraintName)) {
-            return dsl.insertInto(objectMetadata.getTable())
-                    .set(fieldValues)
-                    .onConflict()
-                    .doNothing()
-                    .returning(objectMetadata.getFieldAlias())
-                    .fetchOneMap();
+            throw CommonErrors.required(conflictOnConstraintName, "conflictOnConstraintName must not be null or empty");
         }
+        Map<Field<?>, Object> fieldValues = DynamicQueryFieldValueMapper.toInsertMap(objectMetadata, values);
         return dsl.insertInto(objectMetadata.getTable())
                 .set(fieldValues)
                 .onConflictOnConstraint(DSL.name(conflictOnConstraintName))
@@ -132,19 +124,16 @@ public class DefaultDynamicInsert implements DynamicInsert{
             return 0;
         }
 
+        if(Utils.STR.isBlank(conflictOnConstraintName)) {
+            throw CommonErrors.required(conflictOnConstraintName, "conflictOnConstraintName must not be null or empty");
+        }
+
         Map<Field<?>, Object> fieldValues = DynamicQueryFieldValueMapper.toInsertMap(meta, values);
         Map<Field<?>, Object> updateSetMap = new LinkedHashMap<>();
         for (Field<?> field : fieldValues.keySet()) {
             updateSetMap.put(field, DSL.excluded(field));
         }
-        if(Utils.STR.isBlank(conflictOnConstraintName)) {
-            return dsl.insertInto(meta.getTable())
-                    .set(fieldValues)
-                    .onConflict()
-                    .doUpdate()
-                    .set(updateSetMap)
-                    .execute();
-        }
+
         return dsl.insertInto(meta.getTable())
                 .set(fieldValues)
                 .onConflictOnConstraint(DSL.name(conflictOnConstraintName))
@@ -160,6 +149,57 @@ public class DefaultDynamicInsert implements DynamicInsert{
     public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName, List<String> returnFields) {
         if (Utils.CL.isEmpty(items)) {
             return Utils.CL.newArrayList();
+        }
+
+        if(Utils.STR.isBlank(conflictOnConstraintName)) {
+            throw CommonErrors.required(conflictOnConstraintName, "conflictOnConstraintName must not be null or empty");
+        }
+
+
+        List<Map<Field<?>, Object>> fieldValues = items.stream()
+                .map(itemMap -> DynamicQueryFieldValueMapper.toInsertMap(meta, itemMap))
+                .collect(Collectors.toList());
+
+        List<Field<?>> fields = new ArrayList<>(fieldValues.getFirst().keySet());
+        var insert = dsl.insertInto(meta.getTable()).columns(fields);
+
+        for (Map<Field<?>, Object> row : fieldValues) {
+            Object[] values = fields.stream().map(row::get).toArray();
+            insert = insert.values(values);
+        }
+
+        Map<Field<?>, Object> updateSetMap = new LinkedHashMap<>();
+        for (Field<?> field : fields) {
+            updateSetMap.put(field, DSL.excluded(field));
+        }
+
+        return insert.onConflictOnConstraint(DSL.name(conflictOnConstraintName))
+                .doUpdate()
+                .set(updateSetMap)
+                .returning(SelectBuilder.buildFields(meta, returnFields))
+                .fetchMaps();
+    }
+
+    public List<Map<String, Object>> upsertReturning(
+            ObjectMetadata meta,
+            List<Map<String, Object>> items,
+            List<String> conflictFields) {
+
+        return upsertReturning(meta, items, conflictFields, meta.getFieldNames());
+    }
+
+    public List<Map<String, Object>> upsertReturning(
+            ObjectMetadata meta,
+            List<Map<String, Object>> items,
+            List<String> conflictFields,
+            List<String> returnFields) {
+
+        if (Utils.CL.isEmpty(items)) {
+            return Utils.CL.newArrayList();
+        }
+
+        if(Utils.CL.isEmpty(conflictFields)) {
+            throw CommonErrors.required("conflictFields", "conflictFields must not be null or empty");
         }
 
         List<Map<Field<?>, Object>> fieldValues = items.stream()
@@ -179,21 +219,22 @@ public class DefaultDynamicInsert implements DynamicInsert{
             updateSetMap.put(field, DSL.excluded(field));
         }
 
-        if(Utils.STR.isBlank(conflictOnConstraintName)) {
-            return insert
-                    .onConflict()
-                    .doUpdate()
-                    .set(updateSetMap)
-                    .returning(SelectBuilder.buildFields(meta, returnFields))
-                    .fetchMaps();
-        }
+        List<Field<?>> targetFields = conflictFields.stream()
+                .map(fieldName -> {
+                    Attribute attribute = meta.getAttributeByName(fieldName);
+                    if(attribute != null) {
+                        return attribute.getField();
+                    }
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
 
-        return insert.onConflictOnConstraint(DSL.name(conflictOnConstraintName))
+        return insert.onConflict(targetFields)
                 .doUpdate()
                 .set(updateSetMap)
                 .returning(SelectBuilder.buildFields(meta, returnFields))
                 .fetchMaps();
     }
-
 
 }

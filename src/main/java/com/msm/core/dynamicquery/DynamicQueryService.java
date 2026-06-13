@@ -203,6 +203,16 @@ public class DynamicQueryService implements DynamicObjectQuery {
     }
 
     @Override
+    public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, List<String> conflictFields) {
+        return insert.upsertReturning(meta, items, conflictFields);
+    }
+
+    @Override
+    public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, List<String> conflictFields, List<String> returnFields) {
+        return insert.upsertReturning(meta, items, conflictFields, returnFields);
+    }
+
+    @Override
     public List<Map<String, Object>> updateReturning(ObjectMetadata meta, List<Map<String, Object>> items) {
         return update.updateReturning(meta, items);
     }

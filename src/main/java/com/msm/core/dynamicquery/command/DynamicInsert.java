@@ -121,4 +121,14 @@ public interface DynamicInsert {
 
     List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName, List<String> returnFields);
 
+    List<Map<String, Object>> upsertReturning(
+            ObjectMetadata meta,
+            List<Map<String, Object>> items,
+            List<String> conflictFields);
+
+    List<Map<String, Object>> upsertReturning(
+            ObjectMetadata meta,
+            List<Map<String, Object>> items,
+            List<String> conflictFields,
+            List<String> returnFields);
 }
