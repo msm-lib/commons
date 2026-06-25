@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 public final class CollectionUtils {
 
     public <T> Collection<T> emptyCollection() {
-        return Collections.emptyList();
+        return newArrayList();
     }
 
     @SafeVarargs
