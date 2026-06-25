@@ -12,6 +12,7 @@ import com.msm.core.filter.domain.LogicalOperator;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
 import com.msm.core.metadata.ObjectMetadata;
+import com.msm.core.security.SecurityConditionProvider;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -26,18 +27,21 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
     private final DSLContext dsl;
+    private final SecurityConditionProvider securityConditionProvider;
 
     @Override
     public PageResponse<Map<String, Object>> filter(ObjectMetadata meta, ObjectFilterRequest request) {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
         Table<?> table = meta.getTable();
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
 
         Condition condition = FilterBuilder.build(request.getFilters(), meta);
         SelectConditionStep<Record> query = dsl
                 .select(SelectBuilder.buildFields(meta, request))
                 .from(table)
-                .where(condition);
+                .where(condition)
+                .and(securityCondition);
 
         SortingApplier.apply(query, request, meta);
         PagingApplier.apply(query, request);
@@ -47,6 +51,7 @@ public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
                     .selectCount()
                     .from(table)
                     .where(condition)
+                    .and(securityCondition)
                     .fetchOne(0, Long.class);
 
             if (total == null) {
@@ -125,10 +130,13 @@ public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
 
     public List<Map<String, Object>> findByCondition(ObjectMetadata meta, Condition condition, List<String> returnFields) {
         ConditionUtils.requireWhereCondition(condition);
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
+
         return dsl
                 .select(SelectBuilder.buildFields(meta, returnFields))
                 .from(meta.getTable())
                 .where(condition)
+                .and(securityCondition)
                 .fetchMaps();
     }
 
@@ -138,10 +146,12 @@ public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
 
     public Map<String, Object> findOneByCondition(ObjectMetadata meta, Condition condition, List<String> returnFields) {
         ConditionUtils.requireWhereCondition(condition);
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
         return dsl
                 .select(SelectBuilder.buildFields(meta, returnFields))
                 .from(meta.getTable())
                 .where(condition)
+                .and(securityCondition)
                 .fetchOneMap();
     }
 }

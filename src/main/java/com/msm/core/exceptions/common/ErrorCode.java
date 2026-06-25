@@ -1,5 +1,5 @@
 package com.msm.core.exceptions.common;
 
-public interface ErrorCode {
-    String getCode();
-}
+import com.msm.core.security.IdentifiableCode;
+
+public interface ErrorCode extends IdentifiableCode {}

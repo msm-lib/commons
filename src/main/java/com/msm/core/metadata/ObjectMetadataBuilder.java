@@ -4,6 +4,9 @@ import com.msm.core.commons.Utils;
 import com.msm.core.dynamicquery.ObjectMetadataFactory;
 import com.msm.core.metadata.annotation.AttributeDefinition;
 import com.msm.core.metadata.annotation.AttributeDefinitionRef;
+import com.msm.core.metadata.annotation.ObjectDefinitionRef;
+import com.msm.core.security.annotations.SecuredField;
+import com.msm.core.security.enums.SecurityDataScopeType;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.metamodel.EntityType;
 import jakarta.persistence.metamodel.Metamodel;
@@ -13,21 +16,43 @@ import org.hibernate.type.SqlTypes;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class ObjectMetadataBuilder {
 
     public static void buildFromMetamodel(Metamodel metamodel) {
         for (EntityType<?> entity : metamodel.getEntities()) {
+            Map<SecurityDataScopeType, Attribute> securedAttributeMap = new HashMap<>();
+            List<Attribute> attributeList = getAllAttributes(entity, securedAttributeMap);
+
             ObjectMetadata objectMetadata = ObjectMetadata
                     .builder()
                     .name(entity.getName().toLowerCase())
                     .tableName(getTableName(entity))
-                    .attributes(getAllAttributes(entity))
+                    .attributes(attributeList)
+                    .securedAttributes(securedAttributeMap)
+                    .objectRelation(getObjectRelation(entity))
                     .build();
             ObjectMetadataFactory.registerObjectMetadata(objectMetadata);
         }
+    }
+
+    private static ObjectRelation getObjectRelation(EntityType<?> entity) {
+        Class<?> javaClass = entity.getJavaType();
+        if (javaClass.isAnnotationPresent(ObjectDefinitionRef.class)) {
+            ObjectDefinitionRef objectDefinitionRef = javaClass.getAnnotation(ObjectDefinitionRef.class);
+            return ObjectRelation
+                    .builder()
+                    .relationType(objectDefinitionRef.relationType())
+                    .targetObject(objectDefinitionRef.targetObject())
+                    .foreignKeyAttribute(objectDefinitionRef.foreignKeyAttribute())
+                    .targetAttribute(objectDefinitionRef.targetAttribute())
+                    .build();
+        }
+        return ObjectRelation.builder().build();
     }
 
     private static String getTableName(EntityType<?> entity) {
@@ -39,19 +64,19 @@ public class ObjectMetadataBuilder {
         return javaClass.getSimpleName();
     }
 
-    private static List<Attribute> getAllAttributes(EntityType<?> entityType) {
+    private static List<Attribute> getAllAttributes(EntityType<?> entityType, Map<SecurityDataScopeType, Attribute> securedAttributeMap) {
         return entityType.getAttributes().stream()
-                .filter(a -> a.getJavaMember() instanceof Field) // Chỉ lấy các field thực tế
-                .map(ObjectMetadataBuilder::buildFromJpaAttribute)
+                .filter(a -> a.getJavaMember() instanceof Field)
+                .map(attribute -> buildFromJpaAttribute(attribute, securedAttributeMap))
                 .collect(Collectors.toList());
     }
 
-    private static Attribute buildFromJpaAttribute(jakarta.persistence.metamodel.Attribute<?, ?> jpaAttr) {
+    private static Attribute buildFromJpaAttribute(jakarta.persistence.metamodel.Attribute<?, ?> jpaAttr, Map<SecurityDataScopeType, Attribute> securedAttributeMap) {
         Field field = (Field) jpaAttr.getJavaMember();
-        return buildAttributeFromField(field);
+        return buildAttributeFromField(field, securedAttributeMap);
     }
 
-    private static Attribute buildAttributeFromField(Field field) {
+    private static Attribute buildAttributeFromField(Field field, Map<SecurityDataScopeType, Attribute> securedAttributeMap) {
         Attribute result = new Attribute();
 
         result.setFieldName(field.getName());
@@ -91,6 +116,14 @@ public class ObjectMetadataBuilder {
             result.setAttributeRef(AttributeRef.of(attributeDefinitionRef.fieldName(), attributeDefinitionRef.objectRef(), attributeDefinitionRef.usageType()));
         }
 
+        if (field.isAnnotationPresent(SecuredField.class)) {
+            var securedField = field.getAnnotation(SecuredField.class);
+            SecurityDataScopeType[] securityDataScopeTypes = securedField.value();
+            for (SecurityDataScopeType securityDataScopeType : securityDataScopeTypes) {
+                securedAttributeMap.put(securityDataScopeType, result);
+            }
+        }
+
         // Check @Column (JPA)
         if (field.isAnnotationPresent(jakarta.persistence.Column.class)) {
             var col = field.getAnnotation(jakarta.persistence.Column.class);
@@ -100,12 +133,6 @@ public class ObjectMetadataBuilder {
 
         // Check @Id
         if (field.isAnnotationPresent(jakarta.persistence.Id.class)) {
-//            var col = field.getAnnotation(jakarta.persistence.GeneratedValue.class);
-//            if(col != null) {
-//                result.setIsRequired(!GenerationType.AUTO.equals(col.strategy()));
-//            } else {
-//                result.setIsRequired(true);
-//            }
             result.setIsRequired(!isIdAutoGenerated(field));
             result.setIsSystem(true);
         }

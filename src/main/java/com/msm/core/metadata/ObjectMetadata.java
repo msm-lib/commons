@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
+import com.msm.core.security.enums.SecurityDataScopeType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,6 +32,9 @@ public class ObjectMetadata {
     private String name;
     private String tableName;
     private List<Attribute> attributes;
+    private ObjectRelation objectRelation;
+    private Map<SecurityDataScopeType, Attribute> securedAttributes;
+
     @JsonIgnore
     @Builder.Default
     private Map<String, Attribute> attributeMap = new HashMap<>();
@@ -92,5 +96,9 @@ public class ObjectMetadata {
                 .stream()
                 .filter(attribute -> Objects.nonNull(attribute.getAttributeRef()) && Utils.STR.isNotBlank(attribute.getAttributeRef().getFieldName()))
                 .collect(Collectors.toList());
+    }
+
+    public Attribute getSecuredAttribute(SecurityDataScopeType type) {
+        return securedAttributes.get(type);
     }
 }

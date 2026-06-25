@@ -50,6 +50,14 @@ public final class ObjectUtils {
         return MAPPER.convertValue(object,clazz);
     }
 
+    public <T> T convertObject(Object object, TypeReference<T> typeReference) {
+        if (Objects.isNull(object)) {
+            return null;
+        }
+
+        return MAPPER.convertValue(object, typeReference);
+    }
+
     public <T> T toObject(Map<String, Object> attributeMap, Class<T> clazz) {
         if (Objects.isNull(attributeMap)) {
             return null;
@@ -165,6 +173,30 @@ public final class ObjectUtils {
     }
 
     public <T> T convertToType(Object value, Class<T> clazz) {
+        if (value == null) return null;
+        try {
+            return MAPPER.convertValue(value, clazz);
+        } catch (IllegalArgumentException e) {
+            if (value instanceof String) {
+                try {
+                    return MAPPER.readValue((String) value, clazz);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            if (value instanceof JSONB) {
+                String jsonString = ((JSONB) value).data();
+                try {
+                    return MAPPER.readValue(jsonString, clazz);
+                } catch (JsonProcessingException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+            throw new RuntimeException(e);
+        }
+    }
+
+    public <T> T convertToType(Object value, TypeReference<T> clazz) {
         if (value == null) return null;
         try {
             return MAPPER.convertValue(value, clazz);

@@ -1,5 +1,6 @@
 package com.msm.core.action.context;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.msm.core.commons.Utils;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -35,15 +36,41 @@ public class ActionContext<I> implements ExecutionContext<I> {
 
     @SuppressWarnings("unchecked")
     public Map<String, Object> getResultAsMap() {
-        return (Map<String, Object>) result;
+        if(result instanceof Map){
+            return (Map<String, Object>) result;
+        }
+        return getResultAs(new TypeReference<>() {});
     }
 
     @SuppressWarnings("unchecked")
     public List<Map<String, Object>> getResultAsListMap() {
-        return (List<Map<String, Object>>) result;
+        if(result instanceof List<?>){
+            return (List<Map<String, Object>>) result;
+        }
+        return getResultAs(new TypeReference<>() {});
+    }
+
+    public <X> X getResultAs(Class<X> clazz) {
+        return Utils.O.convertToType(result, clazz);
+    }
+
+    public <X> X getResultAs(TypeReference<X> typeReference) {
+        return Utils.O.convertToType(result, typeReference);
     }
 
     public <X> X getObjectIdAs(Class<X> clazz) {
         return Utils.O.convertToType(objectId, clazz);
+    }
+
+    public <X> X getObjectIdAs(TypeReference<X> typeReference) {
+        return Utils.O.convertToType(objectId, typeReference);
+    }
+
+    public <X> X getAdditionalParameterAs(Class<X> clazz) {
+        return Utils.O.convertToType(additionalParameter, clazz);
+    }
+
+    public <X> X getAdditionalParameterAs(TypeReference<X> clazz) {
+        return Utils.O.convertToType(additionalParameter, clazz);
     }
 }

@@ -1,9 +1,11 @@
 package com.msm.core.metadata.typesafe;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -24,6 +26,10 @@ public final class DataRecord {
 
     public <X> X getRef(TypedAttribute<?> field, Class<X> type) {
         return Utils.O.convertToType(values.get(getRefName(field)), type);
+    }
+
+    public <X> X getRef(TypedAttribute<?> field, TypeReference<X> typeReference) {
+        return Utils.O.convertToType(values.get(getRefName(field)), typeReference);
     }
 
     public Map<String, Object> getRefAsMap(TypedAttribute<?> field) {
@@ -72,6 +78,9 @@ public final class DataRecord {
 
     public static DataRecord of(Map<String, Object> map) {
         return new DataRecord(map);
+    }
+    public static DataRecord of() {
+        return new DataRecord(new HashMap<>());
     }
 
     private String getRefName(TypedAttribute<?> field) {

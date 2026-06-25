@@ -12,6 +12,7 @@ public class AttributeRef {
         this.fieldName = fieldName;
         this.objectRef = objectRef;
     }
+
     public AttributeRef(String fieldName, String objectRef, String usageType) {
         this.fieldName = fieldName;
         this.objectRef = objectRef;
