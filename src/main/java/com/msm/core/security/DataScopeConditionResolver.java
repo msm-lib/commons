@@ -18,23 +18,23 @@ import java.util.UUID;
 
 public class DataScopeConditionResolver implements DataScopeResolver {
 
-    @Override
-    public Condition resolve(
-            AccessScope scope,
-            RequestContext ctx,
-            Field<Object> ownerField,
-            Field<Object> orgField,
-            Field<Object> teamField) {
-
-        return switch (scope) {
-            case OWNER -> ownerField.eq(ctx.getDataScopeContext().getOwnerId());
-            case TEAM -> teamField.in(ctx.getDataScopeContext().getTeamIds());
-            case BUSINESS_UNIT -> orgField.in(ctx.getDataScopeContext().getOrgIds());
-            case PARENT_CHILD -> orgField.in(ctx.getDataScopeContext().getParentChildOrgIds());
-            case ORGANIZATION -> DSL.trueCondition();
-            case NONE -> DSL.falseCondition();
-        };
-    }
+//    @Override
+//    public Condition resolve(
+//            AccessScope scope,
+//            RequestContext ctx,
+//            Field<Object> ownerField,
+//            Field<Object> orgField,
+//            Field<Object> teamField) {
+//
+//        return switch (scope) {
+//            case OWNER -> ownerField.eq(ctx.getDataScopeContext().getOwnerId());
+//            case TEAM -> teamField.in(ctx.getDataScopeContext().getTeamIds());
+//            case BUSINESS_UNIT -> orgField.in(ctx.getDataScopeContext().getOrgIds());
+//            case PARENT_CHILD -> orgField.in(ctx.getDataScopeContext().getParentChildOrgIds());
+//            case ORGANIZATION -> DSL.trueCondition();
+//            case NONE -> DSL.falseCondition();
+//        };
+//    }
 
     @Override
     public Condition resolve(ObjectMetadata metadata, AccessScope scope, RequestContext context) {
@@ -53,6 +53,7 @@ public class DataScopeConditionResolver implements DataScopeResolver {
 
     @Override
     public Condition resolve(ObjectMetadata metadata, Set<AccessScope> scopes, RequestContext context) {
+        if(context.isSupperAdmin()) return DSL.trueCondition();
         String objectName = ObjectAccessScopeResolver.resolveObjectAccessScope(metadata);
         ObjectMetadata objectMetadataResolved = ObjectMetadataFactory.getObjectMetadataByName(objectName);
         return scopes.stream()
@@ -135,7 +136,7 @@ public class DataScopeConditionResolver implements DataScopeResolver {
 
     @Override
     public boolean resolve(ObjectMetadata metadata, Set<AccessScope> scopes, RequestContext context, Map<String, Object> dataContext) {
-
+        if(context.isSupperAdmin()) return Boolean.TRUE;
         String objectName = ObjectAccessScopeResolver.resolveObjectAccessScope(metadata);
         ObjectMetadata objectMetadataResolved = ObjectMetadataFactory.getObjectMetadataByName(objectName);
         return scopes.stream()

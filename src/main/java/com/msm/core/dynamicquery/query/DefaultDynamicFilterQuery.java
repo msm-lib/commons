@@ -34,14 +34,14 @@ public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
         Table<?> table = meta.getTable();
-//        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
 
         Condition condition = FilterBuilder.build(request.getFilters(), meta);
         SelectConditionStep<Record> query = dsl
                 .select(SelectBuilder.buildFields(meta, request))
                 .from(table)
-                .where(condition);
-//                .and(securityCondition);
+                .where(condition)
+                .and(securityCondition);
 
         SortingApplier.apply(query, request, meta);
         PagingApplier.apply(query, request);
@@ -51,7 +51,7 @@ public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
                     .selectCount()
                     .from(table)
                     .where(condition)
-//                    .and(securityCondition)
+                    .and(securityCondition)
                     .fetchOne(0, Long.class);
 
             if (total == null) {

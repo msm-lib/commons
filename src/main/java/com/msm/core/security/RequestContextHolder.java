@@ -24,6 +24,11 @@ public class RequestContextHolder {
         }
 
         @Override
+        public boolean isSupperAdmin() {
+            return false;
+        }
+
+        @Override
         public AuthorizationContext getAuthorization() {
             return AuthorizationContext.DEFAULT_AUTHORIZATION_CONTEXT;
         }

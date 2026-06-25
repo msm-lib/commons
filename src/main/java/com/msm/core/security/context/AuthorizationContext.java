@@ -1,11 +1,11 @@
 package com.msm.core.security.context;
 
+import com.msm.core.commons.Utils;
 import com.msm.core.security.IdentifiableCode;
 import com.msm.core.security.context.impl.DefaultAuthorizationContext;
 import com.msm.core.security.enums.AccessScope;
 import com.msm.core.security.enums.PermissionAction;
 
-import java.util.Map;
 import java.util.Set;
 
 public interface AuthorizationContext {
@@ -30,5 +30,5 @@ public interface AuthorizationContext {
         return hasPermission(objectName, PermissionAction.DELETE);
     }
 
-    AuthorizationContext DEFAULT_AUTHORIZATION_CONTEXT = new DefaultAuthorizationContext(Map.of());
+    AuthorizationContext DEFAULT_AUTHORIZATION_CONTEXT = new DefaultAuthorizationContext(Utils.CL.newHashMap());
 }
