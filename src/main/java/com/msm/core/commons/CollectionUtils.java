@@ -59,15 +59,15 @@ public final class CollectionUtils {
     }
 
     public <T> List<T> emptyIfNull(final List<T> input) {
-        return Objects.isNull(input) ? Collections.emptyList() : input;
+        return Objects.isNull(input) ? newArrayList() : input;
     }
 
     public <T> Set<T> emptyIfNull(final Set<T> input) {
-        return Objects.isNull(input) ? Collections.emptySet() : input;
+        return Objects.isNull(input) ? newHashSet() : input;
     }
 
     public <K, V> Map<K, V> emptyIfNull(final Map<K, V> input) {
-        return Objects.isNull(input) ? Collections.emptyMap() : input;
+        return Objects.isNull(input) ? newHashMap() : input;
     }
 
     @SafeVarargs
