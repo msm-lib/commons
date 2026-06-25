@@ -57,4 +57,8 @@ public class SecurityConditionProvider {
         return buildDataScopeCondition(meta, PermissionAction.DELETE);
     }
 
+    public Condition buildLookupDataScopeCondition(ObjectMetadata meta) {
+        return buildDataScopeCondition(meta, PermissionAction.LOOKUP);
+    }
+
 }

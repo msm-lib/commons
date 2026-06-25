@@ -34,7 +34,7 @@ public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
         Table<?> table = meta.getTable();
-        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
+        Condition securityCondition = securityConditionProvider.buildLookupDataScopeCondition(meta);
 
         Condition condition = FilterBuilder.build(request.getFilters(), meta);
         SelectConditionStep<Record> query = dsl
