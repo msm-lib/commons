@@ -18,6 +18,7 @@ public final class Constants {
         public static final String FILTER_ALL_OBJECT = "filterAllObject";
         public static final String FILTER_ALL_OBJECT_BY_IDS = "filterAllObjectByIds";
         public static final String FILTER_OBJECT_BY_ID = "filterById";
+        public static final String LOOKUP_OBJECT = "lookupObject";
     }
 
     public static final String IS_DELETED_FIELD = "isDeleted";

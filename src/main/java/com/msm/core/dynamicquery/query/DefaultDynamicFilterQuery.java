@@ -30,6 +30,41 @@ public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
     private final SecurityConditionProvider securityConditionProvider;
 
     @Override
+    public PageResponse<Map<String, Object>> lookup(ObjectMetadata meta, ObjectFilterRequest request) {
+        SearchOrDefaultFilter.resolveSearchFilter(request);
+        SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
+        Table<?> table = meta.getTable();
+//        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
+
+        Condition condition = FilterBuilder.build(request.getFilters(), meta);
+        SelectConditionStep<Record> query = dsl
+                .select(SelectBuilder.buildFields(meta, request))
+                .from(table)
+                .where(condition);
+//                .and(securityCondition);
+
+        SortingApplier.apply(query, request, meta);
+        PagingApplier.apply(query, request);
+        List<Map<String, Object>> result = query.fetchMaps();
+        if(Objects.nonNull(request.getPageRequest())) {
+            Long total = dsl
+                    .selectCount()
+                    .from(table)
+                    .where(condition)
+//                    .and(securityCondition)
+                    .fetchOne(0, Long.class);
+
+            if (total == null) {
+                total = 0L;
+            }
+            return PageResponse.of(result, total, request.getPageRequest().getPage(), request.getPageRequest().getSize());
+        }
+
+        return PageResponse.of(result);
+    }
+
+
+    @Override
     public PageResponse<Map<String, Object>> filter(ObjectMetadata meta, ObjectFilterRequest request) {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(meta, request);

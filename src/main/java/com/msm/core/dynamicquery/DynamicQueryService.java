@@ -46,6 +46,10 @@ public class DynamicQueryService implements DynamicObjectQuery {
     private final DynamicUpdate update;
     private final DynamicDelete delete;
 
+    @Override
+    public PageResponse<Map<String, Object>> lookup(ObjectMetadata objectMetadata, ObjectFilterRequest request) {
+        return query.lookup(objectMetadata, request);
+    }
 
     @Override
     public PageResponse<Map<String, Object>> filter(ObjectMetadata objectMetadata, ObjectFilterRequest request) {

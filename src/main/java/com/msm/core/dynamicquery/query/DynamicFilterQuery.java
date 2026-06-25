@@ -39,6 +39,13 @@ public interface DynamicFilterQuery {
             ObjectFilterRequest request);
 
     /**
+     * @see #filter(ObjectMetadata, ObjectFilterRequest)
+     */
+    PageResponse<Map<String, Object>> lookup(
+            ObjectMetadata objectMetadata,
+            ObjectFilterRequest request);
+
+    /**
      * Finds a record by primary key and returns selected fields.
      *
      * @param meta entity metadata
