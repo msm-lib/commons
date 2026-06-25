@@ -73,7 +73,7 @@ public final class CollectionUtils {
     @SafeVarargs
     public final <T> Set<T> newHashSet(final T... elements) {
         if (Objects.isNull(elements)) {
-            return Collections.emptySet();
+            return new HashSet<>();
         }
         Set<T> returnSet = new HashSet<>(elements.length);
         Collections.addAll(returnSet, elements);
