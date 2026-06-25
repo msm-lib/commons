@@ -1,5 +1,6 @@
 package com.msm.core.security.context.impl;
 
+import com.msm.core.commons.Utils;
 import com.msm.core.security.context.DataScopeContext;
 import lombok.Data;
 
@@ -22,9 +23,9 @@ public class DefaultDataScopeContext implements DataScopeContext {
     }
 
     public DefaultDataScopeContext() {
-        this.teamIds = Set.of();
-        this.orgIds = Set.of();
-        this.parentChildOrgIds = Set.of();
+        this.teamIds = Utils.CL.newHashSet();
+        this.orgIds = Utils.CL.newHashSet();
+        this.parentChildOrgIds = Utils.CL.newHashSet();
         this.ownerId = null;
     }
 }
