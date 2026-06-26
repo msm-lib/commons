@@ -18,6 +18,8 @@ import java.util.Map;
 public class ActionContext<I> implements ExecutionContext<I> {
 
     @Builder.Default
+    private boolean internalExecution = false;
+    @Builder.Default
     private String resource = "";
     private String action;
     private Object objectId;
@@ -28,6 +30,11 @@ public class ActionContext<I> implements ExecutionContext<I> {
     private boolean disableHookEvent = false;
     @Builder.Default
     private Map<ContextKey<?>, Object> contextKey = new HashMap<>();
+
+    @Override
+    public boolean isInternalExecution() {
+        return internalExecution;
+    }
 
     @Override
     public Map<ContextKey<?>, Object> getContextKey() {

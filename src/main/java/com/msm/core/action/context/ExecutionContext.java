@@ -6,7 +6,7 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface ExecutionContext<I> {
-
+    boolean isInternalExecution();
     default String getResource() {return Constants.GENERIC_RESOURCE_NAME;}
     I getPayload();
     String getAction();

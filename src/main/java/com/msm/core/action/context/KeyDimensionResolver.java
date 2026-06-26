@@ -15,7 +15,7 @@ public final class KeyDimensionResolver {
 
     public static String resolveHandlerKey(AnnotationUtility annotationConfig) {
         Map<ContextKey<?>, String> dims = new LinkedHashMap<>();
-        dims.put(ContextKeys.HOOK_PREFIX, annotationConfig.getType());
+        dims.put(ContextKeys.ACTION_PREFIX, annotationConfig.getType());
         dims.put(ContextKeys.RESOURCE_NAME, annotationConfig.getResource());
         dims.put(ContextKeys.ACTION, annotationConfig.getAction());
 

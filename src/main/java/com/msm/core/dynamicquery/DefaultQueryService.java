@@ -3,7 +3,7 @@ package com.msm.core.dynamicquery;
 import com.msm.core.dynamicquery.command.DynamicDelete;
 import com.msm.core.dynamicquery.command.DynamicInsert;
 import com.msm.core.dynamicquery.command.DynamicUpdate;
-import com.msm.core.dynamicquery.query.DynamicFilterQuery;
+import com.msm.core.dynamicquery.query.FilterQuery;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
 import com.msm.core.metadata.ObjectMetadata;
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Default implementation of {@link DynamicObjectQuery}.
+ * Default implementation of {@link ObjectQuery}.
  *
  * <p>This service acts as a facade over the dynamic persistence layer by
  * aggregating query, insert, update, and delete operations into a single
@@ -23,7 +23,7 @@ import java.util.Map;
  * <p>All operations are delegated to their corresponding specialized
  * components:
  * <ul>
- *     <li>{@link DynamicFilterQuery} for query and filtering operations</li>
+ *     <li>{@link FilterQuery} for query and filtering operations</li>
  *     <li>{@link DynamicInsert} for insert operations</li>
  *     <li>{@link DynamicUpdate} for update operations</li>
  *     <li>{@link DynamicDelete} for delete operations</li>
@@ -33,15 +33,15 @@ import java.util.Map;
  * is to expose a unified API for metadata-driven CRUD operations while
  * delegating execution to the appropriate implementation.
  *
- * <p>Consumers should prefer using {@link DynamicObjectQuery} or
- * {@code DynamicQueryService} instead of interacting directly with the
+ * <p>Consumers should prefer using {@link ObjectQuery} or
+ * {@code DefaultQueryService} instead of interacting directly with the
  * underlying operation-specific services.
  *
  */
 @RequiredArgsConstructor
-public class DynamicQueryService implements DynamicObjectQuery {
+public class DefaultQueryService implements ObjectQuery {
 
-    private final DynamicFilterQuery query;
+    private final FilterQuery query;
     private final DynamicInsert insert;
     private final DynamicUpdate update;
     private final DynamicDelete delete;

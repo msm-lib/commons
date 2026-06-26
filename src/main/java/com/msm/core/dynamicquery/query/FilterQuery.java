@@ -21,7 +21,7 @@ import java.util.Map;
  *     <li>Custom field projection</li>
  * </ul>
  */
-public interface DynamicFilterQuery {
+public interface FilterQuery {
 
     /**
      * Executes a paginated query using the provided filter request.

@@ -3,14 +3,14 @@ package com.msm.core.dynamicquery;
 import com.msm.core.dynamicquery.command.DynamicDelete;
 import com.msm.core.dynamicquery.command.DynamicInsert;
 import com.msm.core.dynamicquery.command.DynamicUpdate;
-import com.msm.core.dynamicquery.query.DynamicFilterQuery;
+import com.msm.core.dynamicquery.query.FilterQuery;
 
 /**
  * Unified dynamic data access API for metadata-driven entities.
  *
  * <p>Combines all supported CRUD operations:
  * <ul>
- *     <li>Query and filtering ({@link DynamicFilterQuery})</li>
+ *     <li>Query and filtering ({@link FilterQuery})</li>
  *     <li>Insert operations ({@link DynamicInsert})</li>
  *     <li>Update operations ({@link DynamicUpdate})</li>
  *     <li>Delete operations ({@link DynamicDelete})</li>
@@ -21,8 +21,8 @@ import com.msm.core.dynamicquery.query.DynamicFilterQuery;
  * to perform metadata-driven CRUD operations without requiring
  * compile-time entity classes.
  */
-public interface DynamicObjectQuery
-        extends DynamicFilterQuery,
+public interface ObjectQuery
+        extends FilterQuery,
         DynamicInsert,
         DynamicUpdate,
         DynamicDelete {

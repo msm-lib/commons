@@ -25,7 +25,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @RequiredArgsConstructor
-public class DefaultDynamicFilterQuery implements DynamicFilterQuery {
+public class DefaultFilterQuery implements FilterQuery {
     private final DSLContext dsl;
     private final SecurityConditionProvider securityConditionProvider;
 
