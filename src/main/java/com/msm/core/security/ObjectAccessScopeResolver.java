@@ -5,6 +5,8 @@ import com.msm.core.metadata.ObjectMetadata;
 import com.msm.core.metadata.ObjectRelation;
 import com.msm.core.metadata.RelationalTypeEnum;
 
+import java.util.Optional;
+
 public final class ObjectAccessScopeResolver {
     private ObjectAccessScopeResolver() {}
     public static String resolveObjectAccessScope(ObjectMetadata metadata) {
@@ -22,7 +24,10 @@ public final class ObjectAccessScopeResolver {
     }
 
     public static String resolveObjectAccessScope(String objectName) {
-        ObjectMetadata objectMetadata = ObjectMetadataFactory.getObjectMetadataByName(objectName);
-        return resolveObjectAccessScope(objectMetadata);
+        Optional<ObjectMetadata> objectMetadataOptional = ObjectMetadataFactory.getObjectMetadata(objectName);
+        if (objectMetadataOptional.isPresent()) {
+            return resolveObjectAccessScope(objectMetadataOptional.get());
+        }
+        return objectName;
     }
 }
