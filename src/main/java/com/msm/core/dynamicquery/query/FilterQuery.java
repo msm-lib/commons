@@ -1,12 +1,17 @@
 package com.msm.core.dynamicquery.query;
 
+import com.msm.core.commons.Constants;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
+import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Condition;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 /**
  * Dynamic query operations for metadata-driven entities.
@@ -142,4 +147,19 @@ public interface FilterQuery {
             ObjectMetadata meta,
             Condition condition,
             List<String> returnFields);
+
+    default Condition isDeleteCondition(ObjectMetadata meta) {
+        Attribute isDeleteAttr = meta.getAttributeByName(Constants.IS_DELETED_FIELD);
+        if (Objects.isNull(isDeleteAttr)) {
+            return DSL.noCondition();
+        }
+
+        @SuppressWarnings("unchecked")
+        Field<Boolean> isDeleteField = (Field<Boolean>) isDeleteAttr.getField();
+
+        return DSL.or(
+                isDeleteField.isNull(),
+                isDeleteField.isFalse()
+        );
+    }
 }

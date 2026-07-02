@@ -172,6 +172,7 @@ public class DefaultFilterQuery implements FilterQuery {
                 .from(meta.getTable())
                 .where(condition)
                 .and(securityCondition)
+                .and(isDeleteCondition(meta))
                 .fetchMaps();
     }
 
@@ -187,6 +188,7 @@ public class DefaultFilterQuery implements FilterQuery {
                 .from(meta.getTable())
                 .where(condition)
                 .and(securityCondition)
+                .and(isDeleteCondition(meta))
                 .fetchOneMap();
     }
 }

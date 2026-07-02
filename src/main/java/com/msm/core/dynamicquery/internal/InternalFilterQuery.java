@@ -166,6 +166,7 @@ public class InternalFilterQuery implements FilterQuery {
                 .select(SelectBuilder.buildFields(meta, returnFields))
                 .from(meta.getTable())
                 .where(condition)
+                .and(isDeleteCondition(meta))
                 .fetchMaps();
     }
 
@@ -179,6 +180,7 @@ public class InternalFilterQuery implements FilterQuery {
                 .select(SelectBuilder.buildFields(meta, returnFields))
                 .from(meta.getTable())
                 .where(condition)
+                .and(isDeleteCondition(meta))
                 .fetchOneMap();
     }
 }
