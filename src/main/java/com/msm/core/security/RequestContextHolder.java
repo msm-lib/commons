@@ -14,6 +14,11 @@ public class RequestContextHolder {
     private static RequestContextProvider requestContextProvider = () ->  new RequestContext() {
 
         @Override
+        public String getTenantCode() {
+            return "default";
+        }
+
+        @Override
         public UUID getUserId() {
             return UUID.fromString("00000000-0000-0000-0000-000000000000");
         }
