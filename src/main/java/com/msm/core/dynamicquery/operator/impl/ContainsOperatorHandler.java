@@ -8,6 +8,9 @@ import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Condition;
+import org.jooq.Field;
+
+import java.util.Collection;
 
 public class ContainsOperatorHandler implements OperatorHandler {
 
@@ -18,6 +21,10 @@ public class ContainsOperatorHandler implements OperatorHandler {
         if(attribute == null) {
             throw CommonErrors.fieldNotFoundException(fieldName, fieldName + " not found");
         }
-        return ConditionUtils.buildArrayContainsCondition(attribute, condition.getValue());
+        Object value = condition.getValue();
+        if(!(value instanceof Collection<?>)) {
+            return ConditionUtils.unaccentLike((Field<String>) attribute.getField(), value == null ? "" : value.toString());
+        }
+        return ConditionUtils.buildArrayContainsCondition(attribute, value);
     }
 }

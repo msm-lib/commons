@@ -6,7 +6,7 @@ public final class Utils {
     public static final int DEFAULT_LENGTH_CODE = 7;
     private static final String ALPHA_NUMERIC_STRING = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     public static final StringUtils STR = new StringUtils();
-    public static final NumberUtils NUMBER = new NumberUtils();
+    public static final NumberUtils N = new NumberUtils();
     public static final DateUtils DATES = new DateUtils();
     public static final CollectionUtils CL = new CollectionUtils();
     public static final ObjectUtils O = new ObjectUtils();
