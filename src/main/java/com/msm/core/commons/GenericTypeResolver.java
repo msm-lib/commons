@@ -128,7 +128,7 @@ public class GenericTypeResolver {
         return tf.constructType(resolveClass(str));
     }
 
-    private Class<?> resolveClass(String name) {
+    Class<?> resolveClass(String name) {
         // alias
         if (aliases.containsKey(name)) {
             return loadClass(aliases.get(name));
@@ -196,4 +196,17 @@ public class GenericTypeResolver {
         result.add(current.toString().trim());
         return result;
     }
+
+    JavaType construct(Class<?> rawClass, JavaType... params) {
+        if (params == null || params.length == 0) {
+            return tf.constructType(rawClass);
+        }
+
+        return tf.constructParametricType(rawClass, params);
+    }
+
+    JavaType constructType(Class<?> clazz) {
+        return tf.constructType(clazz);
+    }
+
 }

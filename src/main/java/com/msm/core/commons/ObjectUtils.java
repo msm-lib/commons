@@ -196,6 +196,33 @@ public final class ObjectUtils {
         }
     }
 
+    public <T> T convertToType(Object value, JavaType targetType) {
+        if (value == null) return null;
+
+        try {
+            return MAPPER.convertValue(value, targetType);
+        } catch (IllegalArgumentException e) {
+            if (value instanceof String) {
+                try {
+                    return MAPPER.readValue((String) value, targetType);
+                } catch (Exception ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            if (value instanceof JSONB) {
+                String jsonString = ((JSONB) value).data();
+                try {
+                    return MAPPER.readValue(jsonString, targetType);
+                } catch (JsonProcessingException ex) {
+                    throw new RuntimeException(ex);
+                }
+            }
+
+            throw new RuntimeException(e);
+        }
+    }
+
     public <T> T convertToType(Object value, TypeReference<T> clazz) {
         if (value == null) return null;
         try {

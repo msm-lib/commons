@@ -15,6 +15,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @SuppressWarnings("unchecked")
 public class JavaTypeMappingFactory {
+    public static final GenericPostgresJsonConverter<Object> DEFAULT_JSONB_CONVERTER = new GenericPostgresJsonConverter<>(
+            Object.class, GenericTypeResolverFactory.resolve("Map<String, Object>")
+    );
+
+    public static final GenericPostgresJsonConverter<Object> DEFAULT_JSONB_TO_LIST_CONVERTER = new GenericPostgresJsonConverter<>(
+            Object.class, GenericTypeResolverFactory.resolve("List<Object>")
+    );
 
     private static final Map<String, DataType<?>> DATA_TYPE_MAPPING = new LinkedHashMap<>();
     private static final Map<String, DataType<?>> CUSTOM_DATA_TYPE_MAPPING = new ConcurrentHashMap<>();
@@ -95,7 +102,7 @@ public class JavaTypeMappingFactory {
 
     private static <T> DataType<T> getOrRegisterCustomConverter(String typeName) {
         JavaType targetType = GenericTypeResolverFactory.resolve(typeName);
-        Converter<Object, ?> customConverter =  new GenericPostgresJsonConverter<>(targetType.getRawClass(), targetType);
+        Converter<Object, ?> customConverter = new GenericPostgresJsonConverter<>(targetType.getRawClass(), targetType);
         if (targetType.isMapLikeType()) {
             DataType<T> dataType = (DataType<T>) SQLDataType.JSONB.asConvertedDataType(customConverter);
             CUSTOM_DATA_TYPE_MAPPING.put(typeName, dataType);
@@ -137,6 +144,31 @@ public class JavaTypeMappingFactory {
         }
 
         return !DATA_TYPE_MAPPING.containsKey(typeName);
+    }
+
+    public static GenericPostgresJsonConverter<Object> createConverter(JavaType javaType) {
+        return new GenericPostgresJsonConverter<>(
+                Object.class, javaType
+        );
+    }
+
+
+    public static GenericPostgresJsonConverter<Object> createConverter(String rawClass) {
+        return new GenericPostgresJsonConverter<>(
+                Object.class, GenericTypeResolverFactory.resolve(rawClass)
+        );
+    }
+
+    public static GenericPostgresJsonConverter<Object> createConverter(Class<?> rawClass) {
+        return new GenericPostgresJsonConverter<>(
+                Object.class, GenericTypeResolverFactory.resolve(rawClass)
+        );
+    }
+
+    public static GenericPostgresJsonConverter<Object> createConverter(Class<?> rawClass, JavaType... params) {
+        return new GenericPostgresJsonConverter<>(
+                Object.class, GenericTypeResolverFactory.resolve(rawClass, params)
+        );
     }
 
 //    public static void registerArrayType(String typeName) {

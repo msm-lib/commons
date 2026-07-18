@@ -86,4 +86,33 @@ public final class DataRecord {
     private String getRefName(TypedAttribute<?> field) {
         return Utils.STR.format(Constants.ATTRIBUTE_REF_TEMPLATE, field.getFieldName());
     }
+
+
+    //static helper method
+    public <T> T get(String name, Class<T> clazz) {
+        return Utils.O.convertToType(values.get(name), clazz);
+    }
+
+    public <T> T get(String name, TypeReference<T> clazz) {
+        return Utils.O.convertToType(values.get(name), clazz);
+    }
+
+    public <T> Optional<T> getOptional(String name, Class<T> clazz) {
+        return Optional.ofNullable(get(name, clazz));
+    }
+
+    public <T> Optional<T> getOptional(String name, TypeReference<T> clazz) {
+        return Optional.ofNullable(get(name, clazz));
+    }
+
+    public boolean contains(String name) {
+        return values.containsKey(name);
+    }
+
+    public void remove(String name) {
+        values.remove(name);
+    }
+
+
+
 }
