@@ -3,6 +3,7 @@ package com.msm.core.commons;
 import java.nio.ByteBuffer;
 import java.text.MessageFormat;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -203,6 +204,61 @@ public final class StringUtils {
         }
 
         return result.toString();
+    }
+
+    public boolean contains(String str, String searchStr) {
+        if (str == null || searchStr == null) {
+            return false;
+        }
+
+        return str.contains(searchStr);
+    }
+
+    public boolean containsIgnoreCase(String str, String searchStr) {
+        if (str == null || searchStr == null) {
+            return false;
+        }
+
+        return str.toLowerCase(Locale.ROOT).contains(searchStr.toLowerCase(Locale.ROOT));
+    }
+
+    public boolean startsWith(String str, String prefix) {
+        if (str == null || prefix == null) {
+            return false;
+        }
+
+        return str.startsWith(prefix);
+    }
+
+    public boolean startsWithIgnoreCase(String str, String prefix) {
+        if (str == null || prefix == null) {
+            return false;
+        }
+        if (str.length() < prefix.length()) {
+            return false;
+        }
+
+        return str.regionMatches(true, 0, prefix, 0, prefix.length());
+    }
+
+    public boolean endsWith(String str, String suffix) {
+        if (str == null || suffix == null) {
+            return false;
+        }
+
+        return str.endsWith(suffix);
+    }
+
+    public boolean endsWithIgnoreCase(String str, String suffix) {
+        if (str == null || suffix == null) {
+            return false;
+        }
+        if (str.length() < suffix.length()) {
+            return false;
+        }
+
+        int strStart = str.length() - suffix.length();
+        return str.regionMatches(true, strStart, suffix, 0, suffix.length());
     }
 
     StringUtils() {}
