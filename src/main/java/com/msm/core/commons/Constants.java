@@ -55,6 +55,7 @@ public final class Constants {
     public static final String VERSION = "version";
     public static final String CUSTOM_VALUE_NAME = "customValues";
     public static final String ATTRIBUTE_REF_TEMPLATE = "{0}Reference";
+    public static final String REFERENCE_SUFFIX = "Reference";
     public static final String CONSTRAINT_KEY = "{0}_{1}_{2}";
 
     private Constants() {}

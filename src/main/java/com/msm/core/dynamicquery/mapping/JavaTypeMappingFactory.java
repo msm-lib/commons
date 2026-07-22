@@ -2,6 +2,7 @@ package com.msm.core.dynamicquery.mapping;
 
 import com.fasterxml.jackson.databind.JavaType;
 import com.msm.core.commons.GenericTypeResolverFactory;
+import com.msm.core.dynamicquery.mapping.converter.GenericJsonValueConverter;
 import com.msm.core.dynamicquery.mapping.converter.GenericPostgresArrayConverter;
 import com.msm.core.dynamicquery.mapping.converter.GenericPostgresJsonConverter;
 import org.jooq.Converter;
@@ -22,6 +23,8 @@ public class JavaTypeMappingFactory {
     public static final GenericPostgresJsonConverter<Object> DEFAULT_JSONB_TO_LIST_CONVERTER = new GenericPostgresJsonConverter<>(
             Object.class, GenericTypeResolverFactory.resolve("List<Object>")
     );
+
+    public static final GenericJsonValueConverter DYNAMIC_JSON_CONVERTER = new GenericJsonValueConverter();
 
     private static final Map<String, DataType<?>> DATA_TYPE_MAPPING = new LinkedHashMap<>();
     private static final Map<String, DataType<?>> CUSTOM_DATA_TYPE_MAPPING = new ConcurrentHashMap<>();

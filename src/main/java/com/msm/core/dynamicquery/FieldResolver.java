@@ -1,5 +1,8 @@
 package com.msm.core.dynamicquery;
 
+import com.msm.core.commons.Constants;
+import com.msm.core.commons.Utils;
+import com.msm.core.dynamicquery.mapping.JavaTypeMappingFactory;
 import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
@@ -20,6 +23,18 @@ public class FieldResolver {
     public static Field<?> resolve(ObjectMetadata objectMetadata, String fieldPath) {
         String[] parts = fieldPath.split("\\.");
         Attribute attribute = objectMetadata.getAttributeByName(parts[0]);
+
+        // ===== Support lookup reference =====
+        if (attribute == null && parts[0].endsWith(Constants.REFERENCE_SUFFIX)) {
+            Attribute customValues = objectMetadata.getAttributeByName(Constants.CUSTOM_VALUE_NAME);
+            if (customValues != null && customValues.isJsonField()) {
+                return buildJsonField(customValues, Utils.ARRAYS.concat(
+                        new String[]{Constants.CUSTOM_VALUE_NAME},
+                        parts
+                ));
+            }
+        }
+
         if(attribute == null) {
             throw CommonErrors.fieldNotFoundException(fieldPath, fieldPath + " not found");
         }
@@ -56,7 +71,7 @@ public class FieldResolver {
             if (isLast) {
                 result = DSL.field(
                         "({0} ->> {1})",
-                        String.class,
+                        Object.class,
                         result,
                         DSL.inline(parts[i])
                 );
@@ -70,7 +85,7 @@ public class FieldResolver {
             }
         }
 
-        return result;
+        return result.convertFrom(JavaTypeMappingFactory.DYNAMIC_JSON_CONVERTER::from);
     }
 
     public static List<String> pathAsArray(String path) {

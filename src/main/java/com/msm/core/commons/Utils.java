@@ -9,6 +9,7 @@ public final class Utils {
     public static final NumberUtils N = new NumberUtils();
     public static final DateUtils DATES = new DateUtils();
     public static final CollectionUtils CL = new CollectionUtils();
+    public static final ArrayUtils ARRAYS = new ArrayUtils();
     public static final ObjectUtils O = new ObjectUtils();
     public static final RequestUtils REQ = new RequestUtils();
 
