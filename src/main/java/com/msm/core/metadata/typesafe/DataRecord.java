@@ -64,6 +64,14 @@ public final class DataRecord {
         return values.containsKey(field.getFieldName());
     }
 
+    public boolean isEmpty() {
+        return Utils.CL.isEmpty(values);
+    }
+
+    public boolean isNotEmpty() {
+        return !isEmpty();
+    }
+
     public void remove(TypedAttribute<?> field) {
         values.remove(field.getFieldName());
     }
