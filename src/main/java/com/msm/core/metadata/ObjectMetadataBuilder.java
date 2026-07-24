@@ -19,6 +19,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ObjectMetadataBuilder {
@@ -52,7 +53,8 @@ public class ObjectMetadataBuilder {
                     .targetAttribute(objectDefinitionRef.targetAttribute())
                     .build();
         }
-        return ObjectRelation.builder().build();
+
+        return null;
     }
 
     private static String getTableName(EntityType<?> entity) {
