@@ -38,7 +38,11 @@ public enum PermissionAction implements IdentifiableCode {
     QUALIFY("Q"),
     DISQUALIFY("DQ"),
 
-    SHARE("SH");
+    SHARE("SH"),
+    CLOSED("CL"),
+    INACTIVE("IA"),
+    DIGITAL_SIGNATURE("DS"),
+    ;
 
     private final String code;
 

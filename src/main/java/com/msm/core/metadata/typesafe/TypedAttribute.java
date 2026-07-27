@@ -5,6 +5,7 @@ import com.msm.core.commons.GenericTypeResolverFactory;
 import com.msm.core.commons.Utils;
 import lombok.Getter;
 import org.jooq.Field;
+import org.jooq.Table;
 
 @Getter
 public class TypedAttribute<T> {
@@ -50,6 +51,17 @@ public class TypedAttribute<T> {
     public Field<T> as() {
         if (field == null) return null;
         return field.as(getFieldName());
+    }
+
+    public Field<T> as(Table<?> table) {
+        if (field == null) return null;
+        return table.field(field.getName(), field.getDataType());
+    }
+
+    public Field<T> as(Table<?> table, String alias) {
+        Field<T> field = as(table);
+        if (field == null) return null;
+        return field.as(alias);
     }
 
     public T cast(Object value) {
