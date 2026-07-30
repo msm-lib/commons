@@ -11,6 +11,7 @@ public enum AccessScope implements IdentifiableCode {
     TEAM("T"),
     BUSINESS_UNIT("B"),
     PARENT_CHILD("P"),
+    PARENT_CHILD_PARENT("L"),
     ORGANIZATION("OG");
 
 

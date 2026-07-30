@@ -8,6 +8,7 @@ import java.util.UUID;
 public interface DataScopeContext {
     Set<UUID> getOrgIds();
     Set<UUID> getParentChildOrgIds();
+    Set<UUID> getParentChildParentOrgIds();
     Set<UUID> getTeamIds();
     UUID getOwnerId();
 

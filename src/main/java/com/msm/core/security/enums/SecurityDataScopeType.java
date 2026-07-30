@@ -5,5 +5,6 @@ public enum SecurityDataScopeType {
     TEAM,
     BUSINESS_UNIT,
     PARENT_CHILD,
+    PARENT_CHILD_PARENT,
     ORGANIZATION
 }

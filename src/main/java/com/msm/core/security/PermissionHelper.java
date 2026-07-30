@@ -39,10 +39,10 @@ public final class PermissionHelper {
             Set<UUID> teamIds,
             Set<UUID> orgIds,
             Set<UUID> parentChildOrgIds,
-            UUID ownerId
-    ) {
+            Set<UUID> parentChildParentOrgIds,
+            UUID ownerId) {
 
-        return new DefaultDataScopeContext(teamIds, orgIds, parentChildOrgIds, ownerId);
+        return new DefaultDataScopeContext(teamIds, orgIds, parentChildOrgIds, parentChildParentOrgIds, ownerId);
     }
 
 

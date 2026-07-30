@@ -16,6 +16,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
+@SuppressWarnings("unchecked")
 public class DataScopeConditionResolver implements DataScopeResolver {
 
 //    @Override
@@ -45,6 +46,7 @@ public class DataScopeConditionResolver implements DataScopeResolver {
             case OWNER -> ownerCondition(objectMetadataResolved, context);
             case TEAM -> teamCondition(objectMetadataResolved, context);
             case PARENT_CHILD -> parentChildCondition(objectMetadataResolved, context);
+            case PARENT_CHILD_PARENT -> parentChildParentCondition(objectMetadataResolved, context);
             case BUSINESS_UNIT -> businessUnitCondition(objectMetadataResolved, context);
             case ORGANIZATION -> DSL.trueCondition();
             default -> DSL.falseCondition();
@@ -66,12 +68,12 @@ public class DataScopeConditionResolver implements DataScopeResolver {
 
         String objectName = ObjectAccessScopeResolver.resolveObjectAccessScope(metadata);
         ObjectMetadata objectMetadataResolved = ObjectMetadataFactory.getObjectMetadataByName(objectName);
-
         return switch (scope) {
             case OWNER -> ownerCondition(objectMetadataResolved, context, dataContext);
             case TEAM -> teamCondition(objectMetadataResolved, context, dataContext);
             case BUSINESS_UNIT -> businessUnitCondition(objectMetadataResolved, context, dataContext);
             case PARENT_CHILD -> parentChildCondition(objectMetadataResolved, context, dataContext);
+            case PARENT_CHILD_PARENT -> parentChildParentCondition(objectMetadataResolved, context, dataContext);
             case ORGANIZATION -> Boolean.TRUE;
             default -> Boolean.FALSE;
         };
@@ -120,8 +122,16 @@ public class DataScopeConditionResolver implements DataScopeResolver {
     }
 
     private boolean parentChildCondition(ObjectMetadata metadata, RequestContext context, Map<String, Object> dataContext) {
+        return orgCondition(metadata, context, dataContext, SecurityDataScopeType.PARENT_CHILD);
+    }
 
-        Attribute attr = metadata.getSecuredAttribute(SecurityDataScopeType.PARENT_CHILD);
+    private boolean parentChildParentCondition(ObjectMetadata metadata, RequestContext context, Map<String, Object> dataContext) {
+        return orgCondition(metadata, context, dataContext, SecurityDataScopeType.PARENT_CHILD_PARENT);
+    }
+
+    private boolean orgCondition(ObjectMetadata metadata, RequestContext context, Map<String, Object> dataContext, SecurityDataScopeType scopeType) {
+
+        Attribute attr = metadata.getSecuredAttribute(scopeType);
         if (attr == null) {
             return false;
         }
@@ -129,8 +139,10 @@ public class DataScopeConditionResolver implements DataScopeResolver {
         if (data == null) {
             return false;
         }
-
-        return Utils.CL.emptyIfNull(context.getDataScopeContext().getParentChildOrgIds()).contains(UUID.fromString(data.toString()));
+        Set<UUID> orgIdsData = SecurityDataScopeType.PARENT_CHILD.equals(scopeType) ?
+                Utils.CL.emptyIfNull(context.getDataScopeContext().getParentChildOrgIds())
+                : Utils.CL.emptyIfNull(context.getDataScopeContext().getParentChildParentOrgIds());
+        return orgIdsData.contains(UUID.fromString(data.toString()));
     }
 
 
@@ -180,25 +192,27 @@ public class DataScopeConditionResolver implements DataScopeResolver {
     }
 
     private Condition parentChildCondition(ObjectMetadata metadata, RequestContext context) {
-
-        Attribute attr = metadata.getSecuredAttribute(SecurityDataScopeType.PARENT_CHILD);
-
-        if (attr == null) {
-            return DSL.falseCondition();
-        }
-        Field<Object> field = (Field<Object>) attr.getField();
-        return field.in(context.getDataScopeContext().getParentChildOrgIds());
+        return ogrCondition(metadata, context, SecurityDataScopeType.PARENT_CHILD);
     }
 
-    private Condition ogCondition(ObjectMetadata metadata) {
+    private Condition parentChildParentCondition(ObjectMetadata metadata, RequestContext context) {
+        return ogrCondition(metadata, context, SecurityDataScopeType.PARENT_CHILD_PARENT);
+    }
 
-        Attribute attr = metadata.getSecuredAttribute(SecurityDataScopeType.ORGANIZATION);
+    private Condition ogrCondition(ObjectMetadata metadata, RequestContext context, SecurityDataScopeType scopeType) {
+
+        Attribute attr = metadata.getSecuredAttribute(scopeType);
 
         if (attr == null) {
             return DSL.falseCondition();
         }
 
-        return DSL.trueCondition();
+        Field<Object> field = (Field<Object>) attr.getField();
+        Set<UUID> orgIdsData = SecurityDataScopeType.PARENT_CHILD.equals(scopeType) ?
+                Utils.CL.emptyIfNull(context.getDataScopeContext().getParentChildOrgIds())
+                : Utils.CL.emptyIfNull(context.getDataScopeContext().getParentChildParentOrgIds());
+
+        return field.in(orgIdsData);
     }
 
 }

@@ -13,12 +13,14 @@ public class DefaultDataScopeContext implements DataScopeContext {
     private final Set<UUID> teamIds;
     private final Set<UUID> orgIds;
     private final Set<UUID> parentChildOrgIds;
+    private final Set<UUID> parentChildParentOrgIds;
     private final UUID ownerId;
 
-    public DefaultDataScopeContext(Set<UUID> teamIds, Set<UUID> orgIds, Set<UUID> parentChildOrgIds, UUID ownerId) {
+    public DefaultDataScopeContext(Set<UUID> teamIds, Set<UUID> orgIds, Set<UUID> parentChildOrgIds, Set<UUID> parentChildParentOrgIds, UUID ownerId) {
         this.teamIds = teamIds;
         this.orgIds = orgIds;
         this.parentChildOrgIds = parentChildOrgIds;
+        this.parentChildParentOrgIds = parentChildParentOrgIds;
         this.ownerId = ownerId;
     }
 
@@ -26,6 +28,7 @@ public class DefaultDataScopeContext implements DataScopeContext {
         this.teamIds = Utils.CL.newHashSet();
         this.orgIds = Utils.CL.newHashSet();
         this.parentChildOrgIds = Utils.CL.newHashSet();
+        this.parentChildParentOrgIds = Utils.CL.newHashSet();
         this.ownerId = null;
     }
 }
