@@ -23,7 +23,7 @@ public class AggregateBuilder {
                         exps.add(root.get(a.getField()).count());
                 case SUM ->
                         exps.add(
-                                root.getNumber(a.getField(), BigDecimal.class).sum()
+                                root.getNumber(a.getField(), BigDecimal.class).sumBigDecimal()
                         );
             }
         }

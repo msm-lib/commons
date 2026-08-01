@@ -30,41 +30,64 @@ repositories {
 	mavenCentral()
 }
 
-val lombokVersion = "1.18.30"
-val guavaVersion = "33.4.8-jre"
 val jooqVersion = "3.21.1"
+var jacksonVersion = "2.22.1"
+var logbackVersion = "1.5.37"
+val lombokVersion = "1.18.30"
+val guavaVersion = "33.5.0-jre"
+val queryDslVersion = "6.10.1"
+
 dependencies {
 
-//	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    implementation("com.google.guava:guava:${guavaVersion}")
 
-	implementation("com.google.guava:guava:${guavaVersion}")
-
-	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.18.4")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
 
     implementation("org.slf4j:slf4j-api:2.0.13")
-    implementation("ch.qos.logback:logback-classic:1.4.14")
-
-
-    //apache common lang
-//	implementation("org.apache.commons:commons-lang3:3.18.0")
+    implementation("ch.qos.logback:logback-classic:${logbackVersion}")
 
     //lombok
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
     testCompileOnly("org.projectlombok:lombok:$lombokVersion")
     testAnnotationProcessor("org.projectlombok:lombok:$lombokVersion")
-    implementation("org.apache.commons:commons-collections4:4.5.0")
-    implementation("com.querydsl:querydsl-core:5.1.0")
-    implementation("com.querydsl:querydsl-jpa:5.1.0:jakarta")
-    annotationProcessor("com.querydsl:querydsl-apt:5.0.0:jakarta")
-//    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+
+
+    // =======================================================================
+    // QueryDsl
+    // =======================================================================
+    implementation("io.github.openfeign.querydsl:querydsl-core:${queryDslVersion}")
+    implementation("io.github.openfeign.querydsl:querydsl-jpa:${queryDslVersion}")
+    annotationProcessor("io.github.openfeign.querydsl:querydsl-apt:${queryDslVersion}:jpa")
+    // Persistence API processor
+    annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+    // =======================================================================
+
     implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
     implementation("org.hibernate.validator:hibernate-validator:8.0.2.Final")
     implementation("org.hibernate.orm:hibernate-core:6.6.22.Final")
 
-    //jeasy rules
+
+
+    // =======================================================================
+    // Easy rules
+    // =======================================================================
     implementation("org.jeasy:easy-rules-core:4.1.0")
-    implementation("org.jeasy:easy-rules-mvel:4.1.0")
+    implementation("org.mvel:mvel2:2.5.2.Final")
+    constraints {
+        implementation("com.thoughtworks.xstream:xstream:1.4.21") {
+            because("Fix RCE of XStream")
+        }
+        implementation("org.json:json:20240303") {
+            because("Fix Denial of Service CVE-2023-5072")
+        }
+        implementation("org.apache.commons:commons-lang3:3.18.0") {
+            because("Fix Uncontrolled Recursion CVE-2025-48924")
+        }
+    }
+    // =======================================================================
+
+
 
     implementation("org.jooq:jooq:${jooqVersion}")
 }

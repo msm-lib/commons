@@ -97,7 +97,7 @@ public class AdvancedFilterService {
             validateAggregate(a);
             Expression<?> exp = switch (a.getType()) {
                 case COUNT -> root.get(a.getField()).count();
-                case SUM -> root.getNumber(a.getField(), BigDecimal.class).sum();
+                case SUM -> root.getNumber(a.getField(), BigDecimal.class).sumBigDecimal();
             };
 
             expressions.add(exp);

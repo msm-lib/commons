@@ -34,6 +34,15 @@ public class ObjectMetadata {
     private List<Attribute> attributes;
     private ObjectRelation objectRelation;
     private Map<SecurityDataScopeType, Attribute> securedAttributes;
+    @Builder.Default
+    private boolean securityEnabled = true;
+    /**
+     * <pre>
+     * Object share permission
+     * Exp: Contact use permission of Account
+     * </pre>
+     */
+    private Object accessScopeObject;
 
     @JsonIgnore
     @Builder.Default
