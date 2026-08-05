@@ -1,13 +1,15 @@
 package com.msm.core.exceptions;
 
+import com.msm.core.commons.Utils;
+
 import java.util.Map;
 
 public class ObjectNotFoundException extends GenericBaseException {
     public static final String FIELD_PARAM = "resource";
-    private static final String DEFAULT_MESSAGE = "Object not found";
+    private static final String DEFAULT_MESSAGE = "Object[{0}] not found";
 
     public ObjectNotFoundException(String objectName, Throwable cause) {
-        super(ErrorCodeEnum.OBJECT_NOT_FOUND, DEFAULT_MESSAGE, Map.of(FIELD_PARAM, objectName), cause);
+        super(ErrorCodeEnum.OBJECT_NOT_FOUND, Utils.STR.format(DEFAULT_MESSAGE, objectName), Map.of(FIELD_PARAM, objectName), cause);
     }
 
     public ObjectNotFoundException(String objectName, String message, Throwable cause) {
@@ -15,7 +17,7 @@ public class ObjectNotFoundException extends GenericBaseException {
     }
 
     public ObjectNotFoundException(String objectName) {
-        super(ErrorCodeEnum.OBJECT_NOT_FOUND, DEFAULT_MESSAGE, Map.of(FIELD_PARAM, objectName));
+        super(ErrorCodeEnum.OBJECT_NOT_FOUND, Utils.STR.format(DEFAULT_MESSAGE, objectName), Map.of(FIELD_PARAM, objectName));
     }
 
     public ObjectNotFoundException(String objectName, String msg) {

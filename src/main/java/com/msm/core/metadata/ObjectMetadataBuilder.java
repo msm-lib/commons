@@ -5,6 +5,7 @@ import com.msm.core.dynamicquery.ObjectMetadataFactory;
 import com.msm.core.metadata.annotation.AttributeDefinition;
 import com.msm.core.metadata.annotation.AttributeDefinitionRef;
 import com.msm.core.metadata.annotation.ObjectDefinitionRef;
+import com.msm.core.security.annotations.IgnorePermission;
 import com.msm.core.security.annotations.SecuredField;
 import com.msm.core.security.enums.SecurityDataScopeType;
 import jakarta.persistence.GenerationType;
@@ -35,9 +36,15 @@ public class ObjectMetadataBuilder {
                     .attributes(attributeList)
                     .securedAttributes(securedAttributeMap)
                     .objectRelation(getObjectRelation(entity))
+                    .securityEnabled(isSecurityEnabled(entity))
                     .build();
             ObjectMetadataFactory.registerObjectMetadata(objectMetadata);
         }
+    }
+
+    private static boolean isSecurityEnabled(EntityType<?> entity) {
+        Class<?> javaClass = entity.getJavaType();
+        return !javaClass.isAnnotationPresent(IgnorePermission.class);
     }
 
     private static ObjectRelation getObjectRelation(EntityType<?> entity) {

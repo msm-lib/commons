@@ -39,8 +39,13 @@ public class DataScopeConditionResolver implements DataScopeResolver {
 
     @Override
     public Condition resolve(ObjectMetadata metadata, AccessScope scope, RequestContext context) {
+        if(context.isSupperAdmin()) return DSL.trueCondition();
         String objectName = ObjectAccessScopeResolver.resolveObjectAccessScope(metadata);
         ObjectMetadata objectMetadataResolved = ObjectMetadataFactory.getObjectMetadataByName(objectName);
+
+        if(!objectMetadataResolved.isSecurityEnabled()){
+            return DSL.trueCondition();
+        }
 
         return switch (scope) {
             case OWNER -> ownerCondition(objectMetadataResolved, context);
@@ -56,8 +61,13 @@ public class DataScopeConditionResolver implements DataScopeResolver {
     @Override
     public Condition resolve(ObjectMetadata metadata, Set<AccessScope> scopes, RequestContext context) {
         if(context.isSupperAdmin()) return DSL.trueCondition();
+
         String objectName = ObjectAccessScopeResolver.resolveObjectAccessScope(metadata);
         ObjectMetadata objectMetadataResolved = ObjectMetadataFactory.getObjectMetadataByName(objectName);
+
+        if(!objectMetadataResolved.isSecurityEnabled()){
+            return DSL.trueCondition();
+        }
         return scopes.stream()
                 .map(scope -> resolve(objectMetadataResolved, scope, context))
                 .reduce(Condition::or)
@@ -68,6 +78,7 @@ public class DataScopeConditionResolver implements DataScopeResolver {
 
         String objectName = ObjectAccessScopeResolver.resolveObjectAccessScope(metadata);
         ObjectMetadata objectMetadataResolved = ObjectMetadataFactory.getObjectMetadataByName(objectName);
+
         return switch (scope) {
             case OWNER -> ownerCondition(objectMetadataResolved, context, dataContext);
             case TEAM -> teamCondition(objectMetadataResolved, context, dataContext);
@@ -151,6 +162,11 @@ public class DataScopeConditionResolver implements DataScopeResolver {
         if(context.isSupperAdmin()) return Boolean.TRUE;
         String objectName = ObjectAccessScopeResolver.resolveObjectAccessScope(metadata);
         ObjectMetadata objectMetadataResolved = ObjectMetadataFactory.getObjectMetadataByName(objectName);
+
+        if(!objectMetadataResolved.isSecurityEnabled()){
+            return true;
+        }
+
         return scopes.stream()
                 .anyMatch(scope -> resolve(objectMetadataResolved, scope, context, dataContext));
     }
