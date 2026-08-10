@@ -85,8 +85,12 @@ public final class NumberUtils {
         return zeroIfNull(num1).subtract(zeroIfNull(num2));
     }
 
-    public BigDecimal multiplyAndRound(BigDecimal multiplicand, BigDecimal multiplier) {
-        return multiplyAndRound(multiplicand, multiplier, 2, RoundingMode.HALF_UP);
+    public BigDecimal multiply(BigDecimal multiplicand, BigDecimal multiplier) {
+        return multiplyAndRound(multiplicand, multiplier, 0, RoundingMode.HALF_UP);
+    }
+
+    public BigDecimal multiply(BigDecimal multiplicand, BigDecimal multiplier, RoundingMode mode) {
+        return multiplyAndRound(multiplicand, multiplier, 0, mode);
     }
 
     public BigDecimal multiplyAndRound(BigDecimal multiplicand, BigDecimal multiplier, int scale) {
