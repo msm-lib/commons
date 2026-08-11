@@ -12,6 +12,7 @@ public final class Utils {
     public static final ArrayUtils ARRAYS = new ArrayUtils();
     public static final ObjectUtils O = new ObjectUtils();
     public static final RequestUtils REQ = new RequestUtils();
+    public static final CompositeKeys KEYS = new CompositeKeys();
 
     public static String toCodeGenerator(String prefix, int length) {
         if (length <= 0) {
