@@ -60,7 +60,7 @@ public final class NumberUtils {
     }
 
     public boolean isLessThan(BigDecimal num1, BigDecimal num2) {
-        return compare(num1, num2) < -1;
+        return compare(num1, num2) < 0;
     }
 
     public boolean isNullOrZero(BigDecimal num) {
@@ -103,7 +103,11 @@ public final class NumberUtils {
     }
 
     public BigDecimal divide(BigDecimal num1, BigDecimal num2) {
-        return divide(num1, num2, 2, RoundingMode.HALF_UP);
+        return divide(num1, num2, 0, RoundingMode.HALF_UP);
+    }
+
+    public BigDecimal divide(BigDecimal num1, BigDecimal num2, RoundingMode roundingMode) {
+        return divide(num1, num2, 0, roundingMode);
     }
 
     public BigDecimal divide(BigDecimal num1, BigDecimal num2, int scale) {
