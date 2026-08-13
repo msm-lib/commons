@@ -87,6 +87,11 @@ public final class DataRecord {
     public static DataRecord of(Map<String, Object> map) {
         return new DataRecord(map);
     }
+
+    public static DataRecord ofNullable(Map<String, Object> map) {
+        return new DataRecord(Utils.CL.emptyIfNull(map));
+    }
+
     public static DataRecord of() {
         return new DataRecord(new HashMap<>());
     }
