@@ -18,7 +18,7 @@ public final class DataRecord {
     }
 
     public <T> T get(TypedAttribute<T> field) {
-        return field.cast(values.get(field.getFieldName()));
+        return field.resolve(this);
     }
     public Object getRef(TypedAttribute<?> field) {
         return values.get(getRefName(field));
@@ -41,6 +41,9 @@ public final class DataRecord {
     }
 
     public <T> void set(TypedAttribute<T> field, T value) {
+        if (field.isComputed()) {
+            throw new IllegalArgumentException("Cannot set computed attribute: " + field.getFieldName());
+        }
         values.put(field.getFieldName(), value);
     }
 
