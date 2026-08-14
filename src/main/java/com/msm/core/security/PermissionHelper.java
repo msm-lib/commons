@@ -29,7 +29,7 @@ public final class PermissionHelper {
                 Set<AccessScope> scopeList = scopeCodes.stream().map(AccessScope::fromCode).collect(Collectors.toSet());
                 actionMap.put(action, scopeList);
             });
-            result.put(Utils.STR.lowCase(objectName), actionMap);
+            result.put(Utils.STR.lowerCase(objectName), actionMap);
         });
 
         return new DefaultAuthorizationContext(result);

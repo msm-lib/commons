@@ -142,19 +142,32 @@ public final class CollectionUtils {
         return null;
     }
 
-//    public Map<String, Map<String, Object>> toMap(List<Map<String, Object>> input) {
-//        if(Utils.CL.isNotEmpty(input)) {
-//            return newHashMap();
-//        }
-//        return input
-//                .stream()
-//                .collect(Collectors.toMap(data -> {
-//                    return data.get(objectMetadata.getIdAttribute().getFieldName());
-//                }, Function.identity()));
-//
-//    }
+    public <T> boolean hasDuplicate(Collection<T> all) {
+        if(Objects.nonNull(all)) {
+            Set<T> set = new HashSet<>();
+            for (T e: all) {
+                if (!set.add(e)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    public <T, V> boolean hasDuplicate(Collection<T> input, Function<T, V> operatorField) {
+        if(Objects.nonNull(operatorField)) {
+            Set<V> set = new HashSet<>();
+            for (T each: input) {
+                if (!set.add(operatorField.apply(each))) {
+                    return true;
+                }
+            }
+        }
+        return hasDuplicate(input);
+    }
 
-
+    public <X, Y> boolean equalSize(Collection<X> input0, Collection<Y> input1) {
+        return size(input0) == size(input1);
+    }
 
     CollectionUtils() {}
 }

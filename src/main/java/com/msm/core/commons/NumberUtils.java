@@ -1,6 +1,7 @@
 package com.msm.core.commons;
 
 import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -119,5 +120,35 @@ public final class NumberUtils {
             return BigDecimal.ZERO;
         }
         return num1.divide(num2, scale, roundingMode);
+    }
+
+
+    public BigDecimal toBigDecimal(Object value) {
+        switch (value) {
+            case null -> {
+                return BigDecimal.ZERO;
+            }
+            case BigDecimal bigDecimal -> {
+                return bigDecimal;
+            }
+            case String string -> {
+                try {
+                    return new BigDecimal(string);
+                } catch (NumberFormatException e) {
+                    throw new IllegalArgumentException("Invalid string value for BigDecimal conversion", e);
+                }
+            }
+            case BigInteger bigInteger -> {
+                return new BigDecimal(bigInteger);
+            }
+            case Number number -> {
+                if (value instanceof Double || value instanceof Float) {
+                    return new BigDecimal(value.toString());
+                } else {
+                    return BigDecimal.valueOf(number.longValue());
+                }
+            }
+            default -> throw new ClassCastException("Not possible to convert object of type " + value.getClass().getName() + " to BigDecimal");
+        }
     }
 }

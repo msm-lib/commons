@@ -30,7 +30,11 @@ public final class StringUtils {
         return input.replace(replacement, target);
     }
 
-    public String lowCase(final String input) {
+    public String replaceAllSpace(final String input) {
+        return isBlank(input) ? null : input.replaceAll("\\s+","");
+    }
+
+    public String lowerCase(final String input) {
         if (input == null) {
             return null;
         }
@@ -69,7 +73,7 @@ public final class StringUtils {
         if (length(value1) != length(value2)) {
             return false;
         }
-        return Objects.equals(lowCase(value1), lowCase(value2));
+        return Objects.equals(lowerCase(value1), lowerCase(value2));
     }
 
     public String toString(ByteBuffer buffer, int offset, int len) {
@@ -259,6 +263,46 @@ public final class StringUtils {
 
         int strStart = str.length() - suffix.length();
         return str.regionMatches(true, strStart, suffix, 0, suffix.length());
+    }
+
+    public String concat(final String... value) {
+        StringBuilder builder = new StringBuilder();
+        for (String s : value) {
+            if (isNotBlank(s)) {
+                builder.append(s);
+            }
+        }
+        return builder.toString();
+    }
+
+    public boolean containWhitespace(String str) {
+        int strLen;
+        if ((strLen = length(str)) == 0) {
+            return false;
+        }
+        for (int i = 0; i < strLen; i++) {
+            char ch = str.charAt(i);
+            boolean isWhitespace = Character.isWhitespace(ch);
+            if (isWhitespace) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean containSpecialCharacter(String str) {
+        int strLen;
+        if ((strLen = length(str)) == 0) {
+            return false;
+        }
+        for (int i = 0; i < strLen; i++) {
+            char ch = str.charAt(i);
+            boolean isWhitespace = Character.isWhitespace(ch);
+            if (!Character.isLetterOrDigit(ch) && !isWhitespace) {
+                return true;
+            }
+        }
+        return false;
     }
 
     StringUtils() {}

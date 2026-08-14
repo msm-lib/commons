@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.type.MapType;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.jooq.JSONB;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -35,6 +36,10 @@ public final class ObjectUtils {
     }
 
     public <T> T read(InputStream src, TypeReference<T> valueTypeRef) throws IOException {
+        return MAPPER.readValue(src, valueTypeRef);
+    }
+
+    public <T> T read(BufferedReader src, TypeReference<T> valueTypeRef) throws IOException {
         return MAPPER.readValue(src, valueTypeRef);
     }
 
