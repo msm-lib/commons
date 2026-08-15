@@ -60,8 +60,17 @@ public final class NumberUtils {
         return compare(num1, num2) > 0;
     }
 
+    public boolean isGreaterThanOrEqual(BigDecimal num1, BigDecimal num2) {
+        return compare(num1, num2) >= 0;
+    }
+
+
     public boolean isLessThan(BigDecimal num1, BigDecimal num2) {
         return compare(num1, num2) < 0;
+    }
+
+    public boolean isLessThanOrEqual(BigDecimal num1, BigDecimal num2) {
+        return compare(num1, num2) <= 0;
     }
 
     public boolean isNullOrZero(BigDecimal num) {

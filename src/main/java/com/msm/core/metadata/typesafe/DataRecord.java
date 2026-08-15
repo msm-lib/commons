@@ -40,6 +40,10 @@ public final class DataRecord {
         return Optional.ofNullable(get(field));
     }
 
+    public <T> T getOrDefault(TypedAttribute<T> field, T defaultValue) {
+        return Optional.ofNullable(get(field)).orElse(defaultValue);
+    }
+
     public <T> void set(TypedAttribute<T> field, T value) {
         if (field.isComputed()) {
             throw new IllegalArgumentException("Cannot set computed attribute: " + field.getFieldName());
@@ -117,8 +121,16 @@ public final class DataRecord {
         return Optional.ofNullable(get(name, clazz));
     }
 
+    public <T> T getOrDefault(String name, Class<T> clazz, T defaultValue) {
+        return Optional.ofNullable(get(name, clazz)).orElse(defaultValue);
+    }
+
     public <T> Optional<T> getOptional(String name, TypeReference<T> clazz) {
         return Optional.ofNullable(get(name, clazz));
+    }
+
+    public <T> T getOrDefault(String name, TypeReference<T> clazz, T defaultValue) {
+        return Optional.ofNullable(get(name, clazz)).orElse(defaultValue);
     }
 
     public boolean contains(String name) {
