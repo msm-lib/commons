@@ -533,7 +533,7 @@ public class DateUtils {
     // =========================================================
 
 
-    private static DateTimeFormatter createFormatter(String pattern) {
+    private DateTimeFormatter createFormatter(String pattern) {
         return new DateTimeFormatterBuilder()
                 .appendPattern(pattern)
                 .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
@@ -544,9 +544,9 @@ public class DateUtils {
                 .toFormatter();
     }
 
-    private static DateTimeFormatter getFormatter(String pattern, ZoneId zoneId) {
+    private DateTimeFormatter getFormatter(String pattern, ZoneId zoneId) {
         return FORMATTERS
-                .computeIfAbsent(pattern, DateUtils::createFormatter)
+                .computeIfAbsent(pattern, this::createFormatter)
                 .withZone(zoneId);
     }
 
