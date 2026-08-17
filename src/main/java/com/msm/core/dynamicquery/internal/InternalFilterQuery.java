@@ -181,6 +181,7 @@ public class InternalFilterQuery implements FilterQuery {
                 .from(meta.getTable())
                 .where(condition)
                 .and(isDeleteCondition(meta))
+                .limit(1)
                 .fetchOneMap();
     }
 }

@@ -189,6 +189,7 @@ public class DefaultFilterQuery implements FilterQuery {
                 .where(condition)
                 .and(securityCondition)
                 .and(isDeleteCondition(meta))
+                .limit(1)
                 .fetchOneMap();
     }
 }
