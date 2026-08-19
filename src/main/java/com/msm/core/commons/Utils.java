@@ -10,6 +10,7 @@ public final class Utils {
     public static final ObjectUtils O = new ObjectUtils();
     public static final RequestUtils REQ = new RequestUtils();
     public static final CompositeKeys KEYS = new CompositeKeys();
+    public static final EnumUtils E = new EnumUtils();
 
     public static Integer getStartIndex(int page, int size) {
         return (page - 1) * size + 1;
