@@ -27,7 +27,7 @@ public class DefaultAttributeValidator implements AttributeValidator {
         for(Attribute attr : attributes){
             if(!attributeNameErrors.contains(attr.getFieldName())) {
                 boolean requireValidate = requireValidate(attr, payload);
-                if(!requireValidate){
+                if(!requireValidate) {
                     MessageError messageError = MessageError
                             .builder()
                             .attribute(attr.getFieldName())
