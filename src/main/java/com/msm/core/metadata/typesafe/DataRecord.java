@@ -6,8 +6,10 @@ import com.msm.core.commons.Utils;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class DataRecord {
 
@@ -91,24 +93,12 @@ public final class DataRecord {
         return values;
     }
 
-    public static DataRecord of(Map<String, Object> map) {
-        return new DataRecord(map);
-    }
-
-    public static DataRecord ofNullable(Map<String, Object> map) {
-        return new DataRecord(Utils.CL.emptyIfNull(map));
-    }
-
-    public static DataRecord of() {
-        return new DataRecord(new HashMap<>());
-    }
-
     private String getRefName(TypedAttribute<?> field) {
         return Utils.STR.format(Constants.ATTRIBUTE_REF_TEMPLATE, field.getFieldName());
     }
 
 
-    //static helper method
+    // helper method
     public <T> T get(String name, Class<T> clazz) {
         return Utils.O.convertToType(values.get(name), clazz);
     }
@@ -142,5 +132,26 @@ public final class DataRecord {
     }
 
 
+
+    //static helper method
+    public static DataRecord of(Map<String, Object> map) {
+        return new DataRecord(map);
+    }
+
+    public static DataRecord ofNullable(Map<String, Object> map) {
+        return new DataRecord(Utils.CL.emptyIfNull(map));
+    }
+
+    public static DataRecord of() {
+        return new DataRecord(new HashMap<>());
+    }
+
+    public static List<DataRecord> of(List<Map<String, Object>> maps) {
+        return Utils.CL.emptyIfNull(maps).stream().map(DataRecord::ofNullable).collect(Collectors.toList());
+    }
+
+    public static List<Map<String, Object>> toMapList(List<DataRecord> dataRecords) {
+        return Utils.D.toMapList(dataRecords, DataRecord::getValues);
+    }
 
 }
