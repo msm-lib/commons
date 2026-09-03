@@ -50,8 +50,11 @@ public final class CollectionUtils {
     }
 
     public <T> Collection<T> defaultIfEmpty(final Collection<T> input, final Supplier<Collection<T>> defaultSupplier) {
-        Objects.requireNonNull(defaultSupplier);
-        return isEmpty(input) ? defaultSupplier.get() : input;
+        return isEmpty(input) ? Utils.O.getSupplierValue(defaultSupplier) : input;
+    }
+
+    public <T> Collection<T> defaultIfEmpty(final Collection<T> input, final Collection<T> defaultCollection) {
+        return isEmpty(input) ? defaultCollection : input;
     }
 
     public <T> Collection<T> emptyIfNull(final Collection<T> input) {

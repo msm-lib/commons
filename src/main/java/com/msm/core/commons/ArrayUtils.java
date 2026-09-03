@@ -4,6 +4,7 @@ import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 public final class ArrayUtils {
@@ -151,5 +152,22 @@ public final class ArrayUtils {
         return array == null
                 ? Stream.empty()
                 : Arrays.stream(array);
+    }
+
+    public <T> T[] defaultIfNull(T[] array, Supplier<T[]> defaultArraySupplier) {
+
+        return array == null ? Utils.O.getSupplierValue(defaultArraySupplier) : array;
+    }
+
+    public <T> T[] defaultIfEmpty(T[] array, Supplier<T[]> defaultArraySupplier) {
+        return isEmpty(array) ? Utils.O.getSupplierValue(defaultArraySupplier) : array;
+    }
+
+    public <T> T[] defaultIfNull(T[] array, T[] defaultArray) {
+        return array == null ? defaultArray : array;
+    }
+
+    public <T> T[] defaultIfEmpty(T[] array, T[] defaultArray) {
+        return isEmpty(array) ? defaultArray : array;
     }
 }

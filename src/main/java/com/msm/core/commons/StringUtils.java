@@ -56,11 +56,19 @@ public final class StringUtils {
     }
 
     public String defaultIfEmpty(final String value, final Supplier<String> defaultSupplier) {
-        return isEmpty(value) ? Utils.O.getSupplier(defaultSupplier) : value;
+        return isEmpty(value) ? Utils.O.getSupplierValue(defaultSupplier) : value;
     }
 
     public String defaultIfBlank(final String value, final Supplier<String> defaultSupplier) {
-        return isBlank(value) ? Utils.O.getSupplier(defaultSupplier) : value;
+        return isBlank(value) ? Utils.O.getSupplierValue(defaultSupplier) : value;
+    }
+
+    public String defaultIfEmpty(final String value, final String defaultValue) {
+        return isEmpty(value) ? defaultValue : value;
+    }
+
+    public String defaultIfBlank(final String value, final String defaultValue) {
+        return isBlank(value) ? defaultValue : value;
     }
 
     public boolean equalIgnoreCase(final String value1, final String value2) {

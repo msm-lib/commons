@@ -7,6 +7,7 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public final class NumberUtils {
 
@@ -75,6 +76,10 @@ public final class NumberUtils {
 
     public boolean isNullOrZero(BigDecimal num) {
         return num == null || num.compareTo(BigDecimal.ZERO) == 0;
+    }
+
+    public BigDecimal defaultIfNull(BigDecimal num, Supplier<BigDecimal> bigDecimalSupplier) {
+        return num == null ? Utils.O.getSupplierValue(bigDecimalSupplier) : num;
     }
 
     public BigDecimal defaultIfNull(BigDecimal num, BigDecimal defaultValue) {

@@ -1,7 +1,9 @@
 package com.msm.core.exceptions;
 
 import com.msm.core.exceptions.common.ErrorCode;
+import lombok.Getter;
 
+@Getter
 public enum ErrorCodeEnum implements ErrorCode {
     UNSUPPORTED("UNSUPPORTED"),
     INVALID_ARGUMENT("INVALID_ARGUMENT"),
@@ -25,7 +27,4 @@ public enum ErrorCodeEnum implements ErrorCode {
         this.code = code;
     }
 
-    public String getCode() {
-        return code;
-    }
 }

@@ -114,13 +114,20 @@ public final class ObjectUtils {
         return MAPPER.writeValueAsString(list);
     }
 
-    public <T> T getSupplier(final Supplier<T> supplier) {
+    public <T> T getSupplierValue(final Supplier<T> supplier) {
         return Objects.isNull(supplier) ? null : supplier.get();
     }
 
     public <T> T defaultIfNull(T value, Supplier<T> defaultSupplier) {
         if (Objects.isNull(value)) {
-            return getSupplier(defaultSupplier);
+            return getSupplierValue(defaultSupplier);
+        }
+        return value;
+    }
+
+    public <T> T defaultIfNull(T value, T defaultValue) {
+        if (Objects.isNull(value)) {
+            return defaultValue;
         }
         return value;
     }
