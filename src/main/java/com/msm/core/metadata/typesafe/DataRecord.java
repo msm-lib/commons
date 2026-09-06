@@ -22,6 +22,40 @@ public final class DataRecord {
     public <T> T get(TypedAttribute<T> field) {
         return field.resolve(this);
     }
+
+    public <T> Optional<T> getOptional(TypedAttribute<T> field) {
+        return Optional.ofNullable(get(field));
+    }
+
+    public <T> T getOrDefault(TypedAttribute<T> field, T defaultValue) {
+        return Optional.ofNullable(get(field)).orElse(defaultValue);
+    }
+
+    public <T> T get(String name, Class<T> clazz) {
+        return Utils.O.convertToType(values.get(name), clazz);
+    }
+
+    public <T> T get(String name, TypeReference<T> clazz) {
+        return Utils.O.convertToType(values.get(name), clazz);
+    }
+
+    public <T> Optional<T> getOptional(String name, Class<T> clazz) {
+        return Optional.ofNullable(get(name, clazz));
+    }
+
+    public <T> T getOrDefault(String name, Class<T> clazz, T defaultValue) {
+        return Optional.ofNullable(get(name, clazz)).orElse(defaultValue);
+    }
+
+    public <T> Optional<T> getOptional(String name, TypeReference<T> clazz) {
+        return Optional.ofNullable(get(name, clazz));
+    }
+
+    public <T> T getOrDefault(String name, TypeReference<T> clazz, T defaultValue) {
+        return Optional.ofNullable(get(name, clazz)).orElse(defaultValue);
+    }
+
+
     public Object getRef(TypedAttribute<?> field) {
         return values.get(getRefName(field));
     }
@@ -38,12 +72,26 @@ public final class DataRecord {
         return Utils.O.convertToMap(values.get(getRefName(field)), String.class, Object.class);
     }
 
-    public <T> Optional<T> getOptional(TypedAttribute<T> field) {
-        return Optional.ofNullable(get(field));
+    public Optional<Object> getRefOptional(TypedAttribute<?> field) {
+        return Optional.ofNullable(getRef(field));
     }
 
-    public <T> T getOrDefault(TypedAttribute<T> field, T defaultValue) {
-        return Optional.ofNullable(get(field)).orElse(defaultValue);
+    public <X> Optional<X> getRefOptional(TypedAttribute<?> field, Class<X> type) {
+        return Optional.ofNullable(getRef(field, type));
+    }
+
+    public <X> Optional<X> getRefOptional(TypedAttribute<?> field, TypeReference<X> typeReference) {
+        return Optional.ofNullable(getRef(field, typeReference));
+    }
+
+    public DataRecord with(String name, Object value) {
+        values.put(name, value);
+        return this;
+    }
+
+    public <T> DataRecord with(TypedAttribute<T> field, T value) {
+        set(field, value);
+        return this;
     }
 
     public <T> void set(TypedAttribute<T> field, T value) {
@@ -73,6 +121,10 @@ public final class DataRecord {
         return values.containsKey(field.getFieldName());
     }
 
+    public boolean contains(String name) {
+        return values.containsKey(name);
+    }
+
     public boolean isEmpty() {
         return Utils.CL.isEmpty(values);
     }
@@ -81,11 +133,19 @@ public final class DataRecord {
         return !isEmpty();
     }
 
-    public void remove(TypedAttribute<?> field) {
-        values.remove(field.getFieldName());
+    public Object remove(String name) {
+        return values.remove(name);
     }
 
-    public Map<String, Object> toMap() {
+    public Object remove(TypedAttribute<?> field) {
+        return values.remove(field.getFieldName());
+    }
+
+    public void clear() {
+        values.clear();
+    }
+
+    public Map<String, Object> asMap() {
         return Collections.unmodifiableMap(values);
     }
 
@@ -97,45 +157,25 @@ public final class DataRecord {
         return Utils.STR.format(Constants.ATTRIBUTE_REF_TEMPLATE, field.getFieldName());
     }
 
-
-    // helper method
-    public <T> T get(String name, Class<T> clazz) {
-        return Utils.O.convertToType(values.get(name), clazz);
+    public void putAll(DataRecord record) {
+        this.values.putAll(record.values);
     }
 
-    public <T> T get(String name, TypeReference<T> clazz) {
-        return Utils.O.convertToType(values.get(name), clazz);
+    public void putAll(Map<String, Object> records) {
+        this.values.putAll(records);
     }
-
-    public <T> Optional<T> getOptional(String name, Class<T> clazz) {
-        return Optional.ofNullable(get(name, clazz));
-    }
-
-    public <T> T getOrDefault(String name, Class<T> clazz, T defaultValue) {
-        return Optional.ofNullable(get(name, clazz)).orElse(defaultValue);
-    }
-
-    public <T> Optional<T> getOptional(String name, TypeReference<T> clazz) {
-        return Optional.ofNullable(get(name, clazz));
-    }
-
-    public <T> T getOrDefault(String name, TypeReference<T> clazz, T defaultValue) {
-        return Optional.ofNullable(get(name, clazz)).orElse(defaultValue);
-    }
-
-    public boolean contains(String name) {
-        return values.containsKey(name);
-    }
-
-    public void remove(String name) {
-        values.remove(name);
-    }
-
-
 
     //static helper method
     public static DataRecord of(Map<String, Object> map) {
         return new DataRecord(map);
+    }
+
+    public DataRecord copy() {
+        return new DataRecord(new HashMap<>(values));
+    }
+
+    public static DataRecord copyOf(Map<String, Object> map) {
+        return new DataRecord(new HashMap<>(map));
     }
 
     public static DataRecord ofNullable(Map<String, Object> map) {
@@ -152,6 +192,32 @@ public final class DataRecord {
 
     public static List<Map<String, Object>> toMapList(List<DataRecord> dataRecords) {
         return Utils.D.toMapList(dataRecords, DataRecord::getValues);
+    }
+
+
+    public boolean hasValue(TypedAttribute<?> field) {
+        return hasValue(field.getFieldName());
+    }
+
+    public boolean hasValue(String name) {
+        Object value = Utils.CL.emptyIfNull(values).get(name);
+        return value != null;
+    }
+
+    public boolean isNull(TypedAttribute<?> field) {
+        return isNull(field.getFieldName());
+    }
+
+    public boolean isNull(String name) {
+        return !hasValue(name);
+    }
+
+    public boolean isNotNull(TypedAttribute<?> field) {
+        return isNotNull(field.getFieldName());
+    }
+
+    public boolean isNotNull(String name) {
+        return !isNull(name);
     }
 
 }

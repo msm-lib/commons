@@ -2,26 +2,36 @@ package com.msm.core.strategy;
 
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
-public abstract class AbstractStrategyRegistry<O> implements StrategyResolver<String, O> {
+public abstract class AbstractStrategyRegistry<T, O extends TypedStrategy<T>> implements StrategyResolver<T, O> {
 
-    protected final Map<String, O> cache = new ConcurrentHashMap<>();
+    protected final Map<T, O> strategies;
     protected final O defaultStrategy;
 
     protected AbstractStrategyRegistry(List<O> strategies, O defaultStrategy) {
         this.defaultStrategy = defaultStrategy;
-        strategies.forEach(this::register);
+        this.strategies = strategies
+                .stream()
+                .collect(Collectors.toUnmodifiableMap(
+                        TypedStrategy::support,
+                        Function.identity()
+                ));
     }
 
-    protected abstract String supportObjectType(O strategy);
-
-    private void register(O strategy) {
-        cache.put(supportObjectType(strategy), strategy);
+    protected AbstractStrategyRegistry(List<O> strategies) {
+        this(strategies, null);
     }
 
     @Override
-    public O resolve(String objectName) {
-        return cache.getOrDefault(objectName, defaultStrategy);
+    public O resolve(T type) {
+
+        O strategy = strategies.getOrDefault(type, defaultStrategy);
+        if (strategy == null) {
+            throw new IllegalArgumentException("No strategy found for: " + type);
+        }
+
+        return strategy;
     }
 }
