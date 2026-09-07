@@ -13,6 +13,6 @@ public interface ServiceError {
     }
 
     default ErrorMessageType getType() {
-        return ErrorMessageTypeEnum.MODEL_DETAILS;
+        return ErrorMessageTypeEnum.TOAST;
     }
 }
