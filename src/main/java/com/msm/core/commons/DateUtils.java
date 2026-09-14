@@ -619,6 +619,36 @@ public class DateUtils {
         return parse(value, targetType, DEFAULT_ZONE_ID);
     }
 
+    private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+    private static final DateTimeFormatter FLEXIBLE_FORMATTER = new DateTimeFormatterBuilder()
+            .append(DateTimeFormatter.ofPattern("[dd/MM/yyyy][dd-MM-yyyy]"))
+            .optionalStart()
+            .appendLiteral(" ")
+            .append(DateTimeFormatter.ofPattern("[HH:mm:ss][HH:mm]"))
+            .optionalEnd()
+            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
+            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
+            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
+            .toFormatter();
+
+    public Instant toInstant(String dateStr) {
+        return toInstant(dateStr, DEFAULT_ZONE);
+    }
+
+    public Instant toInstant(String dateStr, ZoneId zoneId) {
+        if (dateStr == null || dateStr.trim().isEmpty()) {
+            return null;
+        }
+
+        try {
+            return FLEXIBLE_FORMATTER.parse(dateStr.trim())
+                    .query(LocalDateTime::from)
+                    .atZone(zoneId)
+                    .toInstant();
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Cannot parse date: " + dateStr, e);
+        }
+    }
 
     DateUtils() {}
 }

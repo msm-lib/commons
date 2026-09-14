@@ -13,4 +13,5 @@ public @interface AttributeDefinitionRef {
     String objectRef() default "";
     String usageType() default "Reference";
     RefData refData() default @RefData();
+    String refProfile() default "";
 }

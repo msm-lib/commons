@@ -2,11 +2,14 @@ package com.msm.core.metadata;
 
 import lombok.Data;
 
+import java.util.Set;
+
 @Data
 public class AttributeRef {
     private String fieldName;
     private String objectRef;
     private String usageType = "Reference";
+    private Set<String> attributeRefs;
 
     public AttributeRef(String fieldName, String objectRef) {
         this.fieldName = fieldName;
@@ -19,11 +22,22 @@ public class AttributeRef {
         this.usageType = usageType;
     }
 
+    public AttributeRef(String fieldName, String objectRef, String usageType, Set<String> attributeRefs) {
+        this.fieldName = fieldName;
+        this.objectRef = objectRef;
+        this.usageType = usageType;
+        this.attributeRefs = attributeRefs;
+    }
+
     public static AttributeRef of(String fieldName, String objectRef) {
         return new AttributeRef(fieldName, objectRef);
     }
 
     public static AttributeRef of(String fieldName, String objectRef, String usageType) {
         return new AttributeRef(fieldName, objectRef, usageType);
+    }
+
+    public static AttributeRef of(String fieldName, String objectRef, String usageType, Set<String> attributeRefs) {
+        return new AttributeRef(fieldName, objectRef, usageType, attributeRefs);
     }
 }

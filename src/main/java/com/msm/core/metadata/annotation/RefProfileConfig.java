@@ -1,14 +1,14 @@
 package com.msm.core.metadata.annotation;
 
+import com.msm.core.metadata.ref.DefaultReference;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.Map;
 
-@Target(ElementType.FIELD)
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RefData {
-    String[] fields() default {};
-    Class<?> targetType() default Map.class;
+public @interface RefProfileConfig {
+    Class<? extends Enum<?>> refDataType() default DefaultReference.class;
 }

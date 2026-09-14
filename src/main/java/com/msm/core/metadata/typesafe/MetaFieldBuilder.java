@@ -41,6 +41,22 @@ public final class MetaFieldBuilder {
         );
     }
 
+
+    public static <T> TypedAttribute<T> attr(Table<?> table, String fieldName, String columnName, JavaType javaType) {
+        DataType<T> dataType = (DataType<T>) SQLDataType.JSONB.asConvertedDataType(
+                JavaTypeMappingFactory.createConverter(javaType)
+        );
+        Field<T> field = DSL.field(DSL.name(table.getName(), columnName), dataType);
+        Class<T> rawType = (Class<T>) javaType.getRawClass();
+
+        return new TypedAttribute<>(
+                fieldName,
+                rawType,
+                field
+        );
+    }
+
+
     public static <T> TypedAttribute<T> attrRef(Table<?> table, String referenceName, Class<T> type) {
 
         Field<T> field = (Field<T>) DSL.field(

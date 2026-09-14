@@ -6,6 +6,7 @@ import com.msm.core.dynamicquery.command.DynamicUpdate;
 import com.msm.core.dynamicquery.query.FilterQuery;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
+import com.msm.core.filter.domain.pageable.Sort;
 import com.msm.core.metadata.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.jooq.Condition;
@@ -84,6 +85,17 @@ public class DefaultQueryService implements ObjectQuery {
     @Override
     public List<Map<String, Object>> findByCondition(ObjectMetadata meta, Condition condition, List<String> returnFields) {
         return query.findByCondition(meta, condition, returnFields);
+    }
+
+    @Override
+    public List<Map<String, Object>> findByCondition(
+            ObjectMetadata meta,
+            Condition condition,
+            int limit,
+            List<Sort> sortFields,
+            List<String> returnFields
+    ) {
+        return query.findByCondition(meta, condition, limit, sortFields, returnFields);
     }
 
     @Override
@@ -254,6 +266,11 @@ public class DefaultQueryService implements ObjectQuery {
     @Override
     public int update(ObjectMetadata meta, Map<String, Object> values, Condition where) {
         return update.update(meta, values, where);
+    }
+
+    @Override
+    public int updateWithExpressions(ObjectMetadata meta, Map<String, Object> values, Condition where) {
+        return update.updateWithExpressions(meta, values, where);
     }
 
     @Override

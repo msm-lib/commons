@@ -11,6 +11,7 @@ import com.msm.core.filter.domain.FilterOperator;
 import com.msm.core.filter.domain.LogicalOperator;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
+import com.msm.core.filter.domain.pageable.Sort;
 import com.msm.core.metadata.ObjectMetadata;
 import com.msm.core.security.SecurityConditionProvider;
 import lombok.RequiredArgsConstructor;
@@ -174,6 +175,22 @@ public class DefaultFilterQuery implements FilterQuery {
                 .and(securityCondition)
                 .and(isDeleteCondition(meta))
                 .fetchMaps();
+    }
+
+    @Override
+    public List<Map<String, Object>> findByCondition(
+            ObjectMetadata meta,
+            Condition condition,
+            int limit,
+            List<Sort> sortFields,
+            List<String> returnFields
+    ) {
+
+        SelectConditionStep<Record> query = dsl
+                .select(SelectBuilder.buildFields(meta, returnFields))
+                .from(meta.getTable())
+                .where(condition);
+        return internalFindByCondition(query, meta, limit, sortFields);
     }
 
     public Map<String, Object> findOneByCondition(ObjectMetadata meta, Condition condition) {

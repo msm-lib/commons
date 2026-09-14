@@ -12,4 +12,8 @@ import lombok.NoArgsConstructor;
 public class Sort {
     private String attribute;
     private SortDirection direction;
+
+    public static Sort of(String attribute, SortDirection direction) {
+        return new Sort(attribute, direction);
+    }
 }

@@ -162,6 +162,19 @@ public class DefaultDynamicUpdate implements DynamicUpdate{
         return affected;
     }
 
+    @Override
+    public int updateWithExpressions(ObjectMetadata meta, Map<String, Object> values, Condition where) {
+        ConditionUtils.requireWhereCondition(where);
+        Map<Field<?>, Object> map = DynamicQueryFieldValueMapper.toUpdateMapWithExpressions(meta, values);
+        Condition versionCondition = OptimisticLocks.apply(meta, map);
+        int affected = dsl.update(meta.getTable()).set(map).where(where).and(versionCondition).execute();
+        if (affected == 0) {
+            throw CommonErrors.optimisticLockingFailureException(meta.getName(), "Version conflict or record not found");
+        } else {
+            return affected;
+        }
+    }
+
     public int[] batchUpdate(ObjectMetadata meta, List<Map<String, Object>> items) {
         if (Utils.CL.isEmpty(items)) {
             return new int[]{};

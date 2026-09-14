@@ -5,6 +5,9 @@ import com.msm.core.dynamicquery.ObjectMetadataFactory;
 import com.msm.core.metadata.annotation.AttributeDefinition;
 import com.msm.core.metadata.annotation.AttributeDefinitionRef;
 import com.msm.core.metadata.annotation.ObjectDefinitionRef;
+import com.msm.core.metadata.annotation.RefProfileConfig;
+import com.msm.core.metadata.ref.RefDataDefinition;
+import com.msm.core.metadata.ref.RefDataResolver;
 import com.msm.core.security.annotations.IgnorePermission;
 import com.msm.core.security.annotations.SecuredField;
 import com.msm.core.security.enums.SecurityDataScopeType;
@@ -120,8 +123,17 @@ public class ObjectMetadataBuilder {
                 result.setDefaultValue(ann.defaultValue());
             }
 
+            RefProfileConfig config = field.getDeclaringClass().getAnnotation(RefProfileConfig.class);
             AttributeDefinitionRef attributeDefinitionRef = ann.attributeRef();
-            result.setAttributeRef(AttributeRef.of(attributeDefinitionRef.fieldName(), attributeDefinitionRef.objectRef(), attributeDefinitionRef.usageType()));
+            RefDataDefinition refDataDefinition0 = RefDataResolver.resolve(config, attributeDefinitionRef);
+            result.setAttributeRef(
+                    AttributeRef.of(
+                            attributeDefinitionRef.fieldName(),
+                            attributeDefinitionRef.objectRef(),
+                            attributeDefinitionRef.usageType(),
+                            Utils.CL.newHashSet(refDataDefinition0.fields())
+                    )
+            );
         }
 
         if (field.isAnnotationPresent(SecuredField.class)) {

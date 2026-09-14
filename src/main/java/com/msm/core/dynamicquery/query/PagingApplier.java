@@ -7,9 +7,8 @@ import org.jooq.SelectConditionStep;
 import java.util.Objects;
 
 public class PagingApplier {
-    public static void apply(SelectConditionStep<Record> query,
-                             ObjectFilterRequest request) {
 
+    public static void apply(SelectConditionStep<Record> query, ObjectFilterRequest request) {
         if (Objects.isNull(request.getPageRequest())) return;
         int size = request.getPageRequest().getSize();
         int offset = request.getPageRequest().getOffset();

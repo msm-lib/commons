@@ -78,6 +78,11 @@ public class ObjectMetadata {
         return attributeMap.get(fieldName);
     }
 
+    @JsonIgnore
+    public boolean containsAttribute(String fieldName) {
+        return Objects.nonNull(getAttributeByName(fieldName));
+    }
+
     private void fetchAttributesToMap() {
         Utils.CL.emptyIfNull(attributes).forEach(attribute -> {
             attributeMap.put(attribute.getFieldName(), attribute);

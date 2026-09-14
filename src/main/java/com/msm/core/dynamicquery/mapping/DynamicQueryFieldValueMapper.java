@@ -4,6 +4,7 @@ import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Field;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,9 +26,7 @@ public class DynamicQueryFieldValueMapper {
         return fieldValues;
     }
 
-    public static Map<Field<?>, Object> toUpdateMap(
-            ObjectMetadata meta,
-            Map<String,Object> values) {
+    public static Map<Field<?>, Object> toUpdateMap(ObjectMetadata meta, Map<String,Object> values) {
 
         Map<Field<?>, Object> map = new LinkedHashMap<>();
         values.forEach((k, v) -> {
@@ -40,4 +39,26 @@ public class DynamicQueryFieldValueMapper {
 
         return map;
     }
+
+
+    public static Map<Field<?>, Object> toUpdateMapWithExpressions(ObjectMetadata meta, Map<String, Object> values) {
+        Map<String, Object> staticValues = new HashMap<>();
+        Map<Field<?>, Object> expressionFields = new HashMap<>();
+        for (Map.Entry<String, Object> entry : values.entrySet()) {
+            if (entry.getValue() instanceof org.jooq.Field) {
+                Attribute attr = meta.getAttributeByName(entry.getKey());
+                if (attr != null) {
+                    expressionFields.put(attr.getField(), entry.getValue());
+                }
+            } else {
+                staticValues.put(entry.getKey(), entry.getValue());
+            }
+        }
+
+        Map<Field<?>, Object> targetMap = DynamicQueryFieldValueMapper.toUpdateMap(meta, staticValues);
+        targetMap.putAll(expressionFields);
+
+        return targetMap;
+    }
+
 }

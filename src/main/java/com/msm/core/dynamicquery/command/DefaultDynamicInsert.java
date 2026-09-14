@@ -9,7 +9,6 @@ import com.msm.core.metadata.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
 import org.jooq.DSLContext;
 import org.jooq.Field;
-import org.jooq.UpdatableRecord;
 import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
@@ -35,8 +34,18 @@ public class DefaultDynamicInsert implements DynamicInsert{
                 .stream()
                 .map(objectMap -> DynamicQueryFieldValueMapper.toInsertMap(objectMetadata, objectMap))
                 .collect(Collectors.toList());
-        List<UpdatableRecord<?>> records = RecordBuilder.build(dsl, objectMetadata, fieldValues);
-        return dsl.batchInsert(records).execute();
+//        List<TableRecord<?>> records = RecordBuilder.build(dsl, objectMetadata, fieldValues);
+//        return dsl.batchInsert(records).execute();
+        List<Field<?>> fields = new ArrayList<>(fieldValues.getFirst().keySet());
+
+        var insertQuery = dsl.insertInto(objectMetadata.getTable()).columns(fields).values((Object[]) new Field<?>[fields.size()]);
+        var batch = dsl.batch(insertQuery);
+
+        for (Map<Field<?>, Object> row : fieldValues) {
+            Object[] rowValues = fields.stream().map(row::get).toArray();
+            batch.bind(rowValues);
+        }
+        return batch.execute();
     }
 
     public int[] insert(ObjectMetadata objectMetadata, List<Map<String, Object>> values) {

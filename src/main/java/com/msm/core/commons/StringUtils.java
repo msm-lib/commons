@@ -1,7 +1,9 @@
 package com.msm.core.commons;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
@@ -84,28 +86,85 @@ public final class StringUtils {
         return Objects.equals(lowerCase(value1), lowerCase(value2));
     }
 
-    public String toString(ByteBuffer buffer, int offset, int len) {
-        StringBuilder stringBuilder = new StringBuilder();
-        int end = offset + len;
-        for (int i = offset; i < end; ++i) {
-            stringBuilder.append((char) buffer.get(i));
+    public String valueOf(Object o) {
+        switch (o) {
+            case null -> {
+                return "";
+            }
+            case String string -> {
+                return string.trim();
+            }
+            case byte[] bytes -> {
+                return toString(bytes);
+            }
+            case ByteBuffer byteBuffer -> {
+                return toString(byteBuffer);
+            }
+            default -> {
+            }
         }
-        return stringBuilder.toString();
+
+        if (o.getClass().isArray()) {
+            switch (o) {
+                case Object[] objects -> {
+                    return Arrays.deepToString(objects);
+                }
+                case int[] ints -> {
+                    return Arrays.toString(ints);
+                }
+                case long[] longs -> {
+                    return Arrays.toString(longs);
+                }
+                case double[] doubles -> {
+                    return Arrays.toString(doubles);
+                }
+                case float[] floats -> {
+                    return Arrays.toString(floats);
+                }
+                case boolean[] booleans -> {
+                    return Arrays.toString(booleans);
+                }
+                case char[] chars -> {
+                    return Arrays.toString(chars);
+                }
+                case short[] shorts -> {
+                    return Arrays.toString(shorts);
+                }
+                default -> {
+                }
+            }
+        }
+
+        String result = o.toString();
+        return result != null ? result.trim() : "";
+    }
+
+    public String toString(ByteBuffer buffer, int offset, int len) {
+        if (buffer == null || len <= 0) return "";
+
+        if (buffer.hasArray()) {
+            return new String(buffer.array(), buffer.arrayOffset() + offset, len, StandardCharsets.UTF_8);
+        }
+
+        byte[] bytes = new byte[len];
+        int originalPosition = buffer.position();
+        try {
+            buffer.position(offset);
+            buffer.get(bytes, 0, len);
+        } finally {
+            buffer.position(originalPosition);
+        }
+        return new String(bytes, StandardCharsets.UTF_8);
     }
 
     public String toString(ByteBuffer buffer) {
-        return toString(buffer, 0, buffer.limit());
+        if (buffer == null) return "";
+        return toString(buffer, buffer.position(), buffer.remaining());
     }
 
     public String toString(byte[] a) {
-        if (a == null) {
-            return "";
-        }
-        StringBuilder b = new StringBuilder();
-        for (byte value : a) {
-            b.append((char) value);
-        }
-        return b.toString();
+        if (a == null || a.length == 0) return "";
+        return new String(a, StandardCharsets.UTF_8);
     }
 
     public String format(String message, Object... msgArgs) {

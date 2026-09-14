@@ -1,12 +1,17 @@
 package com.msm.core.dynamicquery.query;
 
 import com.msm.core.commons.Constants;
+import com.msm.core.commons.Utils;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
+import com.msm.core.filter.domain.pageable.Sort;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import org.jooq.Condition;
 import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
+import org.jooq.SortField;
 import org.jooq.impl.DSL;
 
 import java.util.List;
@@ -124,6 +129,29 @@ public interface FilterQuery {
             List<String> returnFields);
 
     /**
+     * Retrieves a list of dynamic records based on the specified filtering criteria, pagination limit, and sorting configuration.
+     * <p>
+     * This method constructs and executes a dynamic database query using the provided structural metadata.
+     * It filters the dataset based on the given abstraction condition, projects only the requested return fields,
+     * and limits the result set boundary accordingly.
+     * </p>
+     *
+     * @param meta         the object metadata containing table mappings and structural attributes configuration
+     * @param condition    the abstract query condition framework to be evaluated within the database filter clause
+     * @param limit        the maximum number of records to retrieve from the database
+     * @param sortFields   the list of sorting parameters specifying target fields and order directions
+     * @param returnFields the list of field names to be projected in the select statement; if null or empty, all attributes defined in the metadata are selected
+     * @return a {@link List} of {@link Map} objects, where each map represents a query record mapped by its field name and corresponding value
+     * @throws RuntimeException or a generic persistence exception if any structural database error or execution failure occurs
+     */
+    List<Map<String, Object>> findByCondition(
+            ObjectMetadata meta,
+            Condition condition,
+            int limit,
+            List<Sort> sortFields,
+            List<String> returnFields);
+
+    /**
      * Finds the first record matching the specified condition.
      *
      * @param meta entity metadata
@@ -161,5 +189,18 @@ public interface FilterQuery {
                 isDeleteField.isNull(),
                 isDeleteField.isFalse()
         );
+    }
+
+    default List<Map<String, Object>> internalFindByCondition(
+            SelectConditionStep<Record> query,
+            ObjectMetadata meta,
+            int limit,
+            List<Sort> sortFields) {
+        List<SortField<?>> sortFieldList = SortingApplier.getSortField(meta, sortFields);
+        if(Utils.CL.isNotEmpty(sortFieldList)) {
+            query.orderBy(sortFieldList);
+        }
+
+        return query.limit(limit).fetchMaps();
     }
 }

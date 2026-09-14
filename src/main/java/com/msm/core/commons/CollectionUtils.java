@@ -83,6 +83,13 @@ public final class CollectionUtils {
         return returnSet;
     }
 
+    public <T> Set<T> newHashSet(final List<T> elements) {
+        if (Objects.isNull(elements)) {
+            return new HashSet<>();
+        }
+        return new HashSet<>(elements);
+    }
+
     public <T> boolean isEmpty(Collection<T> input) {
         return Objects.isNull(input) || input.isEmpty();
     }

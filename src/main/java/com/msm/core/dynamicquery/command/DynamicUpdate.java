@@ -129,6 +129,21 @@ public interface DynamicUpdate {
             Condition where);
 
     /**
+     * Maps a dynamic input map of string keys and values into a database-compatible update map.
+     * <p>
+     * This method extends the core mapping logic to support both static values and dynamic
+     * computational expressions (such as field self-accumulation). If a value in the input map
+     * is detected as an expression object, it preserves the expression logic instead of
+     * casting it to a static data type.
+     * </p>
+     *
+     * @param meta   the object metadata containing attributes and field definitions
+     * @param values the input map where keys are string attribute names and values can be static objects or computational expressions
+     * @return a mapped structure containing target fields associated with their new static values or expressions
+     */
+    int updateWithExpressions(ObjectMetadata meta, Map<String, Object> values, Condition where);
+
+    /**
      * Batch update by primary key.
      *
      * @param meta entity metadata
