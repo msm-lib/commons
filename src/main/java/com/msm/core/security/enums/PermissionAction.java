@@ -42,6 +42,7 @@ public enum PermissionAction implements IdentifiableCode {
     CLOSED("CL"),
     INACTIVE("IA"),
     DIGITAL_SIGNATURE("DS"),
+    INTEGRATION("IN")
     ;
 
     private final String code;
