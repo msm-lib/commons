@@ -1,6 +1,7 @@
 package com.msm.core.dynamicquery.command;
 
 import com.msm.core.metadata.ObjectMetadata;
+import org.jooq.Condition;
 
 import java.util.List;
 import java.util.Map;
@@ -116,6 +117,13 @@ public interface DynamicInsert {
             String conflictOnConstraintName);
 
     int upsert(ObjectMetadata meta, Map<String, Object> values, String conflictOnConstraintName);
+
+    int upsert(
+            ObjectMetadata meta,
+            Map<String, Object> values,
+            List<String> conflictOnConstraintNames,
+            Condition condition
+    );
 
     List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName);
 

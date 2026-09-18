@@ -7,8 +7,10 @@ import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
+import org.jooq.InsertValuesStepN;
 import org.jooq.impl.DSL;
 
 import java.util.ArrayList;
@@ -16,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -149,6 +152,112 @@ public class DefaultDynamicInsert implements DynamicInsert{
                 .doUpdate()
                 .set(updateSetMap)
                 .execute();
+    }
+
+    public int upsert(ObjectMetadata meta, Map<String, Object> values, List<String> conflictOnConstraintNames, Condition condition) {
+        if (values == null || values.isEmpty()) {
+            return 0;
+        }
+
+        if(Utils.CL.isEmpty(conflictOnConstraintNames)) {
+            throw CommonErrors.required("conflictOnConstraintName", "conflictOnConstraintName must not be null or empty");
+        }
+
+        Map<Field<?>, Object> fieldValues = DynamicQueryFieldValueMapper.toInsertMap(meta, values);
+        Map<Field<?>, Object> updateSetMap = new LinkedHashMap<>();
+        for (Field<?> field : fieldValues.keySet()) {
+            updateSetMap.put(field, DSL.excluded(field));
+        }
+
+        List<Field<Object>> conflictFields = conflictOnConstraintNames.stream().map(DSL::field).toList();
+        Condition conflictFieldsCondition = Objects.nonNull(condition) ? condition : DSL.noCondition();
+
+
+        return dsl.insertInto(meta.getTable())
+                .set(fieldValues)
+                .onConflict(conflictFields)
+                .where(conflictFieldsCondition)
+                .doUpdate()
+                .set(updateSetMap)
+                .execute();
+    }
+
+    public int upsertBatch(
+            ObjectMetadata meta,
+            List<Map<String, Object>> values,
+            List<String> conflictOnConstraintNames
+    ) {
+        if (values == null || values.isEmpty()) {
+            return 0;
+        }
+
+        if (conflictOnConstraintNames == null
+                || conflictOnConstraintNames.isEmpty()) {
+            throw CommonErrors.required("conflictOnConstraintNames", "conflictOnConstraintNames must not be null or empty");
+        }
+
+        List<Map<Field<?>, Object>> fieldValuesList =
+                values.stream()
+                        .map(value ->
+                                DynamicQueryFieldValueMapper
+                                        .toInsertMap(meta, value)
+                        )
+                        .filter(Utils.CL::isNotEmpty)
+                        .toList();
+
+        if (fieldValuesList.isEmpty()) {
+            return 0;
+        }
+
+        validateSameFields(fieldValuesList);
+
+        List<Field<?>> fields = new ArrayList<>(fieldValuesList.getFirst().keySet());
+
+        InsertValuesStepN<?> insert = dsl.insertInto(meta.getTable(), fields);
+
+        for (Map<Field<?>, Object> fieldValues : fieldValuesList) {
+            Object[] rowValues = fields.stream()
+                    .map(fieldValues::get)
+                    .toArray();
+
+            insert = insert.values(rowValues);
+        }
+
+        Map<Field<?>, Object> updateSetMap =
+                new LinkedHashMap<>();
+
+        for (Field<?> field : fields) {
+            updateSetMap.put(
+                    field,
+                    DSL.excluded(field)
+            );
+        }
+
+        String conflictConstraint =
+                conflictOnConstraintNames.getFirst();
+
+        return insert
+                .onConflictOnConstraint(
+                        DSL.name(conflictConstraint)
+                )
+                .doUpdate()
+                .set(updateSetMap)
+                .execute();
+    }
+
+    private void validateSameFields(List<Map<Field<?>, Object>> fieldValuesList) {
+        Set<Field<?>> expected = fieldValuesList.getFirst().keySet();
+
+        for (int i = 1; i < fieldValuesList.size(); i++) {
+            Set<Field<?>> actual = fieldValuesList.get(i).keySet();
+            if (!expected.equals(actual)) {
+                throw new IllegalArgumentException(
+                        "Inconsistent fields in batch at index " + i +
+                                ". Expected fields: " + expected +
+                                ", actual fields: " + actual
+                );
+            }
+        }
     }
 
     public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName) {

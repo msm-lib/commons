@@ -185,6 +185,11 @@ public class InternalQueryService implements ObjectQuery {
     }
 
     @Override
+    public int upsert(ObjectMetadata meta, Map<String, Object> values, List<String> conflictOnConstraintNames, Condition condition) {
+        return insert.upsert(meta, values, conflictOnConstraintNames, condition);
+    }
+
+    @Override
     public List<Map<String, Object>> upsertReturning(ObjectMetadata meta, List<Map<String, Object>> items, String conflictOnConstraintName) {
         return insert.upsertReturning(meta, items, conflictOnConstraintName);
     }

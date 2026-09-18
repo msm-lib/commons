@@ -5,9 +5,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.type.ArrayType;
 import com.fasterxml.jackson.databind.type.CollectionType;
 import com.fasterxml.jackson.databind.type.MapType;
@@ -18,6 +21,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -288,6 +294,92 @@ public final class ObjectUtils {
             throw new RuntimeException(e);
         }
     }
+
+
+    public <T, R> R reMappingKeys(T input, Map<String, String> keyMapping, Class<R> responseType) {
+        try {
+            if (input == null || keyMapping == null || keyMapping.isEmpty()) {
+                return convertResult(MAPPER.valueToTree(input), responseType);
+            }
+            JsonNode rootNode = (input instanceof String)
+                    ? MAPPER.readTree((String) input)
+                    : MAPPER.valueToTree(input);
+            reMappingKeysRecursive(rootNode, keyMapping);
+
+            return convertResult(rootNode, responseType);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while mapping key JSON: " + e.getMessage(), e);
+        }
+    }
+
+    private void reMappingKeysRecursive(JsonNode node, Map<String, String> keyMapping) {
+        if (node.isObject()) {
+            ObjectNode objectNode = (ObjectNode) node;
+            ObjectNode tempNode = MAPPER.createObjectNode();
+            Iterator<Map.Entry<String, JsonNode>> fields = objectNode.fields();
+
+            while (fields.hasNext()) {
+                Map.Entry<String, JsonNode> field = fields.next();
+                String currentKey = field.getKey();
+                JsonNode value = field.getValue();
+                reMappingKeysRecursive(value, keyMapping);
+                String newKey = keyMapping.getOrDefault(currentKey, currentKey);
+                tempNode.set(newKey, value);
+            }
+            objectNode.removeAll();
+            objectNode.setAll(tempNode);
+
+        } else if (node.isArray()) {
+            ArrayNode arrayNode = (ArrayNode) node;
+            for (JsonNode element : arrayNode) {
+                reMappingKeysRecursive(element, keyMapping);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private <R> R convertResult(JsonNode node, Class<R> responseType) throws Exception {
+        if (responseType == String.class) {
+            return (R) MAPPER.writeValueAsString(node);
+        }
+        return MAPPER.treeToValue(node, responseType);
+    }
+
+
+    @SuppressWarnings("unchecked")
+    public <T> T reMappingKeys(Object obj, Map<String, String> keyMapping) {
+        if (obj == null || keyMapping == null || keyMapping.isEmpty()) {
+            return (T) obj;
+        }
+
+        if (obj instanceof Map) {
+            Map<?, ?> map = (Map<?, ?>) obj;
+            Map<Object, Object> newMap = new LinkedHashMap<>();
+
+            for (Map.Entry<?, ?> entry : map.entrySet()) {
+                Object oldKey = entry.getKey();
+                Object value = entry.getValue();
+
+                Object newKey = (oldKey instanceof String && keyMapping.containsKey(oldKey))
+                        ? keyMapping.get(oldKey)
+                        : oldKey;
+
+                newMap.put(newKey, reMappingKeys(value, keyMapping));
+            }
+            return (T) newMap;
+
+        } else if (obj instanceof List) {
+            List<?> list = (List<?>) obj;
+            List<Object> newList = new ArrayList<>();
+            for (Object item : list) {
+                newList.add(reMappingKeys(item, keyMapping));
+            }
+            return (T) newList;
+        }
+
+        return (T) obj;
+    }
+
 
     ObjectUtils() {}
 }
