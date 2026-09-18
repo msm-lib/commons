@@ -3,6 +3,7 @@ package com.msm.core.security;
 import com.msm.core.security.context.AuthorizationContext;
 import com.msm.core.security.context.DataScopeContext;
 import com.msm.core.security.context.RequestContext;
+import com.msm.core.security.model.Team;
 import com.msm.core.security.provider.RequestContextProvider;
 import lombok.Setter;
 
@@ -26,6 +27,11 @@ public class RequestContextHolder {
         @Override
         public String getUsername() {
             return "SYSTEM";
+        }
+
+        @Override
+        public Team getTeam() {
+            return null;
         }
 
         @Override
