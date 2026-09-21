@@ -16,6 +16,8 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
 
+import java.util.Objects;
+
 /**
  * {
  *       "fieldType": "UUID",
@@ -141,5 +143,9 @@ public class Attribute {
             return DSL.field(DSL.name(attributeRef.getFieldName()));
         }
         return null;
+    }
+
+    public boolean hasRef() {
+        return Objects.nonNull(getAttributeRef()) && Utils.STR.isNotBlank(getAttributeRef().getFieldName());
     }
 }

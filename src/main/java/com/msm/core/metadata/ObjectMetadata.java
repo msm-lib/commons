@@ -115,4 +115,19 @@ public class ObjectMetadata {
     public Attribute getSecuredAttribute(SecurityDataScopeType type) {
         return securedAttributes.get(type);
     }
+
+    public boolean hasRef(String attributeName) {
+        Attribute attribute = getAttributeByName(attributeName);
+        if(Objects.isNull(attribute)) {
+            return false;
+        }
+        return Objects.nonNull(attribute.getAttributeRef()) && Utils.STR.isNotBlank(attribute.getAttributeRef().getFieldName());
+    }
+
+    public boolean hasRef(Attribute attribute) {
+        if(Objects.isNull(attribute)) {
+            return false;
+        }
+        return Objects.nonNull(attribute.getAttributeRef()) && Utils.STR.isNotBlank(attribute.getAttributeRef().getFieldName());
+    }
 }

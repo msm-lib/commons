@@ -1,5 +1,6 @@
 package com.msm.core.dynamicquery.query;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
 import com.msm.core.filter.domain.ObjectFilterRequest;
@@ -17,6 +18,8 @@ import org.jooq.impl.DSL;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Dynamic query operations for metadata-driven entities.
@@ -46,7 +49,38 @@ public interface FilterQuery {
      */
     PageResponse<Map<String, Object>> filter(
             ObjectMetadata objectMetadata,
-            ObjectFilterRequest request);
+            ObjectFilterRequest request
+    );
+
+
+    Stream<Map<String, Object>> filterStream(
+            ObjectMetadata objectMetadata,
+            ObjectFilterRequest request,
+            int fetchSize
+    );
+
+    <T> void filterStream(
+            ObjectMetadata meta,
+            ObjectFilterRequest request,
+            int fetchSize,
+            Class<T> targetClass,
+            Consumer<T> consumer
+    );
+
+    <T> void filterStream(
+            ObjectMetadata meta,
+            ObjectFilterRequest request,
+            int fetchSize,
+            TypeReference<T> targetType,
+            Consumer<T> consumer
+    );
+
+    void filterStream(
+            ObjectMetadata meta,
+            ObjectFilterRequest request,
+            int fetchSize,
+            Consumer<Map<String, Object>> consumer
+    );
 
     /**
      * @see #filter(ObjectMetadata, ObjectFilterRequest)

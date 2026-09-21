@@ -1,5 +1,6 @@
 package com.msm.core.dynamicquery.internal;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.msm.core.commons.Constants;
 import com.msm.core.commons.Utils;
 import com.msm.core.dynamicquery.ConditionUtils;
@@ -28,6 +29,8 @@ import org.jooq.Table;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class InternalFilterQuery implements FilterQuery {
@@ -93,6 +96,107 @@ public class InternalFilterQuery implements FilterQuery {
         }
 
         return PageResponse.of(result);
+    }
+
+    @Override
+    public Stream<Map<String, Object>> filterStream(ObjectMetadata meta, ObjectFilterRequest request, int fetchSize) {
+        SearchOrDefaultFilter.resolveSearchFilter(request);
+        SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
+        Table<?> table = meta.getTable();
+        Condition condition = FilterBuilder.build(request.getFilters(), meta);
+
+        SelectConditionStep<Record> query = dsl
+                .select(SelectBuilder.buildFields(meta, request))
+                .from(table)
+                .where(condition);
+
+        SortingApplier.apply(query, request, meta);
+        return query.fetchSize(fetchSize)
+                .fetchStream()
+                .map(Record::intoMap);
+    }
+
+    @Override
+    public <T> void filterStream(
+            ObjectMetadata meta,
+            ObjectFilterRequest request,
+            int fetchSize,
+            Class<T> targetClass,
+            Consumer<T> consumer) {
+
+        SearchOrDefaultFilter.resolveSearchFilter(request);
+        SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
+        Table<?> table = meta.getTable();
+        Condition condition = FilterBuilder.build(request.getFilters(), meta);
+
+        SelectConditionStep<Record> query = dsl
+                .select(SelectBuilder.buildFields(meta, request))
+                .from(table)
+                .where(condition);
+
+        SortingApplier.apply(query, request, meta);
+
+        try (Stream<T> stream = query.fetchSize(fetchSize).fetchStream().map(r -> r.into(targetClass))) {
+            stream.forEach(consumer);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while streaming data", e);
+        }
+    }
+
+    @Override
+    public <T> void filterStream(
+            ObjectMetadata meta,
+            ObjectFilterRequest request,
+            int fetchSize,
+            TypeReference<T> targetType,
+            Consumer<T> consumer) {
+
+        SearchOrDefaultFilter.resolveSearchFilter(request);
+        SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
+        Table<?> table = meta.getTable();
+        Condition condition = FilterBuilder.build(request.getFilters(), meta);
+
+        SelectConditionStep<Record> query = dsl
+                .select(SelectBuilder.buildFields(meta, request))
+                .from(table)
+                .where(condition);
+
+        SortingApplier.apply(query, request, meta);
+
+        try (Stream<Record> recordStream = query.fetchSize(fetchSize).fetchStream()) {
+            recordStream
+                    .map(Record::intoMap)
+                    .map(map -> Utils.O.convertObject(map, targetType))
+                    .forEach(consumer);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while streaming or convert data to typeReference", e);
+        }
+    }
+
+    @Override
+    public void filterStream(
+            ObjectMetadata meta,
+            ObjectFilterRequest request,
+            int fetchSize,
+            Consumer<Map<String, Object>> consumer) {
+
+        SearchOrDefaultFilter.resolveSearchFilter(request);
+        SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
+        Table<?> table = meta.getTable();
+        Condition condition = FilterBuilder.build(request.getFilters(), meta);
+
+        SelectConditionStep<Record> query = dsl
+                .select(SelectBuilder.buildFields(meta, request))
+                .from(table)
+                .where(condition);
+
+        SortingApplier.apply(query, request, meta);
+
+        try (Stream<Map<String, Object>> stream = query.fetchSize(fetchSize).fetchStream().map(Record::intoMap)) {
+            stream.forEach(consumer);
+        } catch (Exception e) {
+            throw new RuntimeException("Error while streaming data", e);
+        }
     }
 
     public Map<String, Object> findById(ObjectMetadata meta, Object id, List<String> returnFields) {

@@ -1,5 +1,6 @@
 package com.msm.core.dynamicquery.internal;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.msm.core.dynamicquery.ObjectQuery;
 import com.msm.core.dynamicquery.command.DynamicDelete;
 import com.msm.core.dynamicquery.command.DynamicInsert;
@@ -14,6 +15,8 @@ import org.jooq.Condition;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @RequiredArgsConstructor
 public class InternalQueryService implements ObjectQuery {
@@ -31,6 +34,26 @@ public class InternalQueryService implements ObjectQuery {
     @Override
     public PageResponse<Map<String, Object>> filter(ObjectMetadata objectMetadata, ObjectFilterRequest request) {
         return query.filter(objectMetadata, request);
+    }
+
+    @Override
+    public Stream<Map<String, Object>> filterStream(ObjectMetadata objectMetadata, ObjectFilterRequest request, int fetchSize) {
+        return query.filterStream(objectMetadata, request, fetchSize);
+    }
+
+    @Override
+    public <T> void filterStream(ObjectMetadata meta, ObjectFilterRequest request, int fetchSize, Class<T> targetClass, Consumer<T> consumer) {
+        query.filterStream(meta, request, fetchSize, targetClass, consumer);
+    }
+
+    @Override
+    public <T> void filterStream(ObjectMetadata meta, ObjectFilterRequest request, int fetchSize, TypeReference<T> targetType, Consumer<T> consumer) {
+        query.filterStream(meta, request, fetchSize, targetType, consumer);
+    }
+
+    @Override
+    public void filterStream(ObjectMetadata meta, ObjectFilterRequest request, int fetchSize, Consumer<Map<String, Object>> consumer) {
+        query.filterStream(meta, request, fetchSize, consumer);
     }
 
     @Override
