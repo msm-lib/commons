@@ -10,10 +10,12 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjusters;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -619,36 +621,226 @@ public class DateUtils {
         return parse(value, targetType, DEFAULT_ZONE_ID);
     }
 
-    private static final ZoneId DEFAULT_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
-    private static final DateTimeFormatter FLEXIBLE_FORMATTER = new DateTimeFormatterBuilder()
-            .append(DateTimeFormatter.ofPattern("[dd/MM/yyyy][dd-MM-yyyy]"))
-            .optionalStart()
-            .appendLiteral(" ")
-            .append(DateTimeFormatter.ofPattern("[HH:mm:ss][HH:mm]"))
-            .optionalEnd()
-            .parseDefaulting(ChronoField.HOUR_OF_DAY, 0)
-            .parseDefaulting(ChronoField.MINUTE_OF_HOUR, 0)
-            .parseDefaulting(ChronoField.SECOND_OF_MINUTE, 0)
-            .toFormatter();
+
+    private static final ZoneId DEFAULT_ZONE =
+            ZoneId.of("Asia/Ho_Chi_Minh");
+
+    // =========================================================
+    // Date only
+    // =========================================================
+
+    private static final List<DateTimeFormatter> LOCAL_DATE_FORMATTERS = List.of(
+            DateTimeFormatter.ofPattern("yyyy-MM-dd"),
+            DateTimeFormatter.ofPattern("dd/MM/yyyy"),
+            DateTimeFormatter.ofPattern("dd-MM-yyyy")
+    );
+
+    // =========================================================
+    // Local DateTime
+    // =========================================================
+
+    private static final List<DateTimeFormatter> LOCAL_DATE_TIME_FORMATTERS = List.of(
+            createDateTimeFormatter("yyyy-MM-dd HH:mm"),
+            createDateTimeFormatter("yyyy-MM-dd HH:mm:ss"),
+
+            createDateTimeFormatter("dd/MM/yyyy HH:mm"),
+            createDateTimeFormatter("dd/MM/yyyy HH:mm:ss"),
+
+            createDateTimeFormatter("dd-MM-yyyy HH:mm"),
+            createDateTimeFormatter("dd-MM-yyyy HH:mm:ss"),
+
+            createDateTimeFormatter("yyyy-MM-dd'T'HH:mm"),
+            createDateTimeFormatter("yyyy-MM-dd'T'HH:mm:ss")
+    );
+
+    // =========================================================
+    // Offset DateTime
+    // =========================================================
+
+    private static final List<DateTimeFormatter> OFFSET_DATE_TIME_FORMATTERS = List.of(
+            createOffsetDateTimeFormatter("yyyy-MM-dd HH:mm:ss"),
+            createOffsetDateTimeFormatter("dd/MM/yyyy HH:mm:ss"),
+            createOffsetDateTimeFormatter("dd-MM-yyyy HH:mm:ss"),
+            createOffsetDateTimeFormatter("yyyy-MM-dd'T'HH:mm:ss")
+    );
+
+
+    // =========================================================
+    // LocalDateTime formatter
+    // =========================================================
+
+    private static DateTimeFormatter createDateTimeFormatter(
+            String pattern
+    ) {
+        return new DateTimeFormatterBuilder()
+                .appendPattern(pattern)
+                .optionalStart()
+                .appendFraction(
+                        ChronoField.NANO_OF_SECOND,
+                        0,
+                        9,
+                        true
+                )
+                .optionalEnd()
+                .toFormatter();
+    }
+
+
+    // =========================================================
+    // OffsetDateTime formatter
+    // =========================================================
+
+    private static DateTimeFormatter createOffsetDateTimeFormatter(
+            String pattern
+    ) {
+        return new DateTimeFormatterBuilder()
+                .appendPattern(pattern)
+                .optionalStart()
+                .appendFraction(
+                        ChronoField.NANO_OF_SECOND,
+                        0,
+                        9,
+                        true
+                )
+                .optionalEnd()
+                .appendOffset("+HH:MM", "Z")
+                .toFormatter();
+    }
+
+
+    // =========================================================
+    // Normalize timezone offset
+    // =========================================================
+
+    private static String normalizeOffset(String value) {
+
+        // +0700 -> +07:00
+        if (value.matches(".*[+-]\\d{4}$")) {
+            return value.substring(0, value.length() - 5)
+                    + value.substring(value.length() - 5, value.length() - 2)
+                    + ":"
+                    + value.substring(value.length() - 2);
+        }
+
+        // +07 -> +07:00
+        if (value.matches(".*[+-]\\d{2}$")) {
+            return value + ":00";
+        }
+
+        return value;
+    }
+
+
+    // =========================================================
+    // Main parser
+    // =========================================================
 
     public Instant toInstant(String dateStr) {
         return toInstant(dateStr, DEFAULT_ZONE);
     }
 
+
     public Instant toInstant(String dateStr, ZoneId zoneId) {
-        if (dateStr == null || dateStr.trim().isEmpty()) {
+
+        if (dateStr == null || dateStr.isBlank()) {
             return null;
         }
 
-        try {
-            return FLEXIBLE_FORMATTER.parse(dateStr.trim())
-                    .query(LocalDateTime::from)
-                    .atZone(zoneId)
-                    .toInstant();
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Cannot parse date: " + dateStr, e);
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE;
         }
+
+        String value = dateStr.trim();
+
+        // =========================================================
+        // 1. Date only
+        //
+        // IMPORTANT:
+        // Parse this first.
+        //
+        // 2001-01-05
+        // 20/01/2026
+        // 20-01-2026
+        // =========================================================
+
+        for (DateTimeFormatter formatter : LOCAL_DATE_FORMATTERS) {
+            try {
+                LocalDate localDate =
+                        LocalDate.parse(value, formatter);
+
+                return localDate
+                        .atStartOfDay(zoneId)
+                        .toInstant();
+
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        // =========================================================
+        // 2. Normalize offset
+        // =========================================================
+
+        String normalizedValue = normalizeOffset(value);
+
+        // =========================================================
+        // 3. OffsetDateTime
+        //
+        // 2026-09-16 13:33:56.53848+07
+        // 2026-09-16 13:33:56.53848+07:00
+        // 2026-09-16 13:33:56.53848+0700
+        //
+        // 2026-09-16T13:33:56.53848Z
+        // 2026-09-16T13:33:56.53848+07
+        // =========================================================
+
+        for (DateTimeFormatter formatter : OFFSET_DATE_TIME_FORMATTERS) {
+            try {
+                return OffsetDateTime
+                        .parse(normalizedValue, formatter)
+                        .toInstant();
+
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        // ISO_OFFSET_DATE_TIME
+        try {
+            return OffsetDateTime
+                    .parse(
+                            normalizedValue,
+                            DateTimeFormatter.ISO_OFFSET_DATE_TIME
+                    )
+                    .toInstant();
+
+        } catch (DateTimeParseException ignored) {
+        }
+
+        // =========================================================
+        // 4. LocalDateTime
+        //
+        // No timezone -> DEFAULT_ZONE
+        // =========================================================
+
+        for (DateTimeFormatter formatter : LOCAL_DATE_TIME_FORMATTERS) {
+            try {
+                LocalDateTime localDateTime =
+                        LocalDateTime.parse(value, formatter);
+
+                return localDateTime
+                        .atZone(zoneId)
+                        .toInstant();
+
+            } catch (DateTimeParseException ignored) {
+            }
+        }
+
+        throw new IllegalArgumentException(
+                "Unsupported date/time format: '" + dateStr + "'"
+        );
     }
+
+
+
 
     DateUtils() {}
 }
