@@ -18,6 +18,9 @@ public class AttributeTypeValidator implements AttributeValidator {
 
     private boolean isDataTypeValid(Attribute attr, Object data) {
         try {
+            if(attr.getEnumType() != null){
+               return Utils.E.isValid(attr.getEnumType(), String.valueOf(data));
+            }
             attr.cast(data);
             return true;
         } catch (Exception ignored) {

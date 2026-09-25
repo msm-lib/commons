@@ -11,12 +11,11 @@ public final class EnumUtils {
 
     private static final Map<Class<?>, Map<String, Enum<?>>> ENUM_CACHE = new ConcurrentHashMap<>();
 
-    EnumUtils() {
-    }
+    EnumUtils() {}
 
     @SuppressWarnings("unchecked")
-    public <T extends Enum<T>> Optional<T> fromString(Class<T> enumClass, String value) {
-        if (enumClass == null || value == null || value.trim().isEmpty()) {
+    public <T extends Enum<T>> Optional<T> fromString(Class<?> enumClass, String value) {
+        if (enumClass == null || !enumClass.isEnum() || value == null || value.trim().isEmpty()) {
             return Optional.empty();
         }
 
@@ -35,11 +34,11 @@ public final class EnumUtils {
         return Optional.ofNullable((T) enumConstant);
     }
 
-    public <T extends Enum<T>> T fromStringOrDefault(Class<T> enumClass, String value, T defaultValue) {
-        return fromString(enumClass, value).orElse(defaultValue);
+    public <T extends Enum<T>> T fromStringOrDefault(Class<?> enumClass, String value, T defaultValue) {
+        return this.<T>fromString(enumClass, value).orElse(defaultValue);
     }
 
-    public <T extends Enum<T>> boolean isValid(Class<T> enumClass, String value) {
+    public boolean isValid(Class<?> enumClass, String value) {
         return fromString(enumClass, value).isPresent();
     }
 

@@ -57,6 +57,7 @@ public class Attribute {
     private String formula;
     private Boolean isSystem;
     private String objectType;
+    private Class<? extends Enum<?>> enumType;
 
     /**
      * Constructs a field representation for a database column with its associated metadata.
@@ -148,4 +149,9 @@ public class Attribute {
     public boolean hasRef() {
         return Objects.nonNull(getAttributeRef()) && Utils.STR.isNotBlank(getAttributeRef().getFieldName());
     }
+
+    public boolean isEnumField() {
+        return Objects.nonNull(enumType);
+    }
+
 }

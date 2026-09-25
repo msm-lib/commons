@@ -123,6 +123,11 @@ public class ObjectMetadataBuilder {
                 result.setDefaultValue(ann.defaultValue());
             }
 
+            Class<? extends Enum<?>> enumClass = ann.enumType();
+            if (enumClass != AttributeDefinition.NoEnum.class) {
+                result.setEnumType(enumClass);
+            }
+
             RefProfileConfig config = field.getDeclaringClass().getAnnotation(RefProfileConfig.class);
             AttributeDefinitionRef attributeDefinitionRef = ann.attributeRef();
             RefDataDefinition refDataDefinition0 = RefDataResolver.resolve(config, attributeDefinitionRef);
