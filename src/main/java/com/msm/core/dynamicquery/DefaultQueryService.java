@@ -257,6 +257,11 @@ public class DefaultQueryService implements ObjectQuery {
     }
 
     @Override
+    public int[] insertBatchIgnoreDuplicate(ObjectMetadata objectMetadata, List<Map<String, Object>> values) {
+        return insert.insertBatchIgnoreDuplicate(objectMetadata, values);
+    }
+
+    @Override
     public List<Map<String, Object>> updateReturning(ObjectMetadata meta, List<Map<String, Object>> items) {
         return update.updateReturning(meta, items);
     }

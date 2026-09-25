@@ -139,4 +139,9 @@ public interface DynamicInsert {
             List<Map<String, Object>> items,
             List<String> conflictFields,
             List<String> returnFields);
+
+    int[] insertBatchIgnoreDuplicate(
+            ObjectMetadata objectMetadata,
+            List<Map<String, Object>> values
+    );
 }

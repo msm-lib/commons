@@ -7,6 +7,7 @@ import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
 import lombok.RequiredArgsConstructor;
+import org.jooq.BatchBindStep;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -353,6 +354,38 @@ public class DefaultDynamicInsert implements DynamicInsert{
                 .set(updateSetMap)
                 .returning(SelectBuilder.buildFields(meta, returnFields))
                 .fetchMaps();
+    }
+
+    @Override
+    public int[] insertBatchIgnoreDuplicate(ObjectMetadata objectMetadata, List<Map<String, Object>> values) {
+        if (values.isEmpty()) {
+            return new int[0];
+        }
+
+        List<Map<Field<?>, Object>> fieldValues = values
+                .stream()
+                .map(objectMap ->
+                        DynamicQueryFieldValueMapper.toInsertMap(objectMetadata, objectMap)
+                ).collect(Collectors.toList());
+
+        List<Field<?>> fields = new ArrayList<>(fieldValues.getFirst().keySet());
+
+        var insertQuery = this.dsl
+                .insertInto(objectMetadata.getTable())
+                .columns(fields)
+                .values((Object[]) new Field[fields.size()])
+                .onConflictDoNothing();
+
+        BatchBindStep batch = this.dsl.batch(insertQuery);
+
+        for (Map<Field<?>, Object> row : fieldValues) {
+            Object[] rowValues = fields.stream()
+                    .map(row::get)
+                    .toArray();
+            batch.bind(rowValues);
+        }
+
+        return batch.execute();
     }
 
 }

@@ -17,10 +17,14 @@ public class MinValueSimpleRule implements AttributeSimpleRule {
         switch (type){
             case "Integer", "Long", "Double" -> {
                 Integer val = attribute.cast(value);
+                if(Objects.isNull(val)) return true;
                 return val >= attribute.getMinValue();
             }
             case "BigDecimal" -> {
                 BigDecimal bigDecimal = attribute.cast(value);
+                if(bigDecimal == null) {
+                    return true;
+                }
                 return bigDecimal.compareTo(BigDecimal.valueOf(attribute.getMinValue())) >= 0;
             }
         }

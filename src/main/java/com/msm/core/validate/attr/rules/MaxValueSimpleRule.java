@@ -17,15 +17,18 @@ public class MaxValueSimpleRule implements AttributeSimpleRule {
         switch (type){
             case "Integer", "Long" -> {
                 Integer val = attribute.cast(value);
+                if(val == null) return true;
                 return val <= attribute.getMaxValue();
             }
             case "Double" -> {
                 Double val = attribute.cast(value);
+                if(val == null) return true;
                 double max = attribute.getMaxValue().doubleValue();
                 return Double.compare(val, max) <=0;
             }
             case "BigDecimal" -> {
                 BigDecimal val = attribute.cast(value);
+                if(val == null) return true;
                 return val.compareTo(BigDecimal.valueOf(attribute.getMaxValue())) <= 0;
             }
         }
