@@ -300,7 +300,7 @@ public class DataUtils {
         return toList(dataRecords, mapExtractor);
     }
 
-    public <K, V> List<V> toList(Collection<Map<K, V>> mapList, K key) {
+    public <K, V> List<V> toListByKey(Collection<Map<K, V>> mapList, K key) {
 
         return Utils.CL.emptyIfNull(mapList)
                 .stream()
@@ -310,14 +310,14 @@ public class DataUtils {
                 .collect(Collectors.toList());
     }
 
-    public <V> List<V> toList(Collection<DataRecord> mapList, TypedAttribute<V> key) {
+    public <V> List<V> toListByKey(Collection<DataRecord> mapList, TypedAttribute<V> key) {
         return toList(
                 mapList,
                 dataRecord -> dataRecord.get(key)
         );
     }
 
-    public List<Object> toObjectList(Collection<DataRecord> mapList, TypedAttribute<?> key) {
+    public List<Object> toObjectByKey(Collection<DataRecord> mapList, TypedAttribute<?> key) {
         return toList(
                 mapList,
                 dataRecord -> dataRecord.get(key)
