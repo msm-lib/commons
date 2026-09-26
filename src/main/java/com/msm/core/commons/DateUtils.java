@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.DateTimeParseException;
@@ -15,7 +16,9 @@ import java.time.temporal.ChronoField;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.Temporal;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -665,13 +668,18 @@ public class DateUtils {
     );
 
 
+    private static final DateTimeFormatter JAVA_DATE_TO_STRING_FORMATTER = DateTimeFormatter.ofPattern(
+            "EEE MMM dd HH:mm:ss z yyyy",
+                    Locale.ENGLISH
+    );
+
+
     // =========================================================
     // LocalDateTime formatter
     // =========================================================
 
-    private static DateTimeFormatter createDateTimeFormatter(
-            String pattern
-    ) {
+    private static DateTimeFormatter createDateTimeFormatter(String pattern) {
+
         return new DateTimeFormatterBuilder()
                 .appendPattern(pattern)
                 .optionalStart()
@@ -690,9 +698,8 @@ public class DateUtils {
     // OffsetDateTime formatter
     // =========================================================
 
-    private static DateTimeFormatter createOffsetDateTimeFormatter(
-            String pattern
-    ) {
+    private static DateTimeFormatter createOffsetDateTimeFormatter(String pattern) {
+
         return new DateTimeFormatterBuilder()
                 .appendPattern(pattern)
                 .optionalStart()
@@ -731,9 +738,9 @@ public class DateUtils {
     }
 
 
-    // =========================================================
-    // Main parser
-    // =========================================================
+    public Instant toInstant(Date date) {
+        return date != null ? date.toInstant() : null;
+    }
 
     public Instant toInstant(String dateStr) {
         return toInstant(dateStr, DEFAULT_ZONE);
@@ -771,9 +778,7 @@ public class DateUtils {
                 return localDate
                         .atStartOfDay(zoneId)
                         .toInstant();
-
-            } catch (DateTimeParseException ignored) {
-            }
+            } catch (DateTimeParseException ignored) {}
         }
 
         // =========================================================
@@ -798,22 +803,15 @@ public class DateUtils {
                 return OffsetDateTime
                         .parse(normalizedValue, formatter)
                         .toInstant();
-
-            } catch (DateTimeParseException ignored) {
-            }
+            } catch (DateTimeParseException ignored) {}
         }
 
         // ISO_OFFSET_DATE_TIME
         try {
             return OffsetDateTime
-                    .parse(
-                            normalizedValue,
-                            DateTimeFormatter.ISO_OFFSET_DATE_TIME
-                    )
+                    .parse(normalizedValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                     .toInstant();
-
-        } catch (DateTimeParseException ignored) {
-        }
+        } catch (DateTimeParseException ignored) {}
 
         // =========================================================
         // 4. LocalDateTime
@@ -829,10 +827,106 @@ public class DateUtils {
                 return localDateTime
                         .atZone(zoneId)
                         .toInstant();
-
-            } catch (DateTimeParseException ignored) {
-            }
+            } catch (DateTimeParseException ignored) {}
         }
+
+        throw new IllegalArgumentException("Unsupported date/time format: '" + dateStr + "'");
+    }
+
+
+    public LocalDate toLocalDate(Date date) {
+        if (date == null) {
+            return null;
+        }
+
+        return date.toInstant()
+                .atZone(DEFAULT_ZONE)
+                .toLocalDate();
+    }
+
+    public LocalDate toLocalDate(String dateStr) {
+        return toLocalDate(dateStr, DEFAULT_ZONE);
+    }
+
+    public LocalDate toLocalDate(String dateStr, ZoneId zoneId) {
+        if (dateStr == null || dateStr.isBlank()) {
+            return null;
+        }
+
+        if (zoneId == null) {
+            zoneId = DEFAULT_ZONE;
+        }
+
+        String value = Utils.STR.clean(dateStr);
+
+        // 1. LocalDate
+        // Exp:
+        // 2001-01-05
+        // 05/01/2001
+        // 2001/01/05
+        for (DateTimeFormatter formatter : LOCAL_DATE_FORMATTERS) {
+            try {
+                return LocalDate.parse(value, formatter);
+            } catch (DateTimeParseException ignored) {}
+        }
+
+        // 2. OffsetDateTime
+        // Exp:
+        // 2001-01-05T10:20:30+07:00
+        // 2001-01-05T10:20:30Z
+        // 2001-01-05T10:20:30+0700
+        // 2001-01-05T10:20:30+07
+        String normalizedValue = normalizeOffset(value);
+
+        for (DateTimeFormatter formatter : OFFSET_DATE_TIME_FORMATTERS) {
+            try {
+                return OffsetDateTime.parse(normalizedValue, formatter)
+                        .toLocalDate();
+            } catch (DateTimeParseException ignored) {}
+        }
+
+        // 3. ISO OffsetDateTime
+        try {
+            return OffsetDateTime
+                    .parse(normalizedValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                    .toLocalDate();
+        } catch (DateTimeParseException ignored) {}
+
+        // 4. LocalDateTime
+        // Exp:
+        // 2001-01-05T10:20:30
+        // 2001-01-05 10:20:30
+        // 2001-01-05T10:20:30.123
+        for (DateTimeFormatter formatter : LOCAL_DATE_TIME_FORMATTERS) {
+            try {
+                return LocalDateTime
+                        .parse(value, formatter)
+                        .toLocalDate();
+            } catch (DateTimeParseException ignored) {}
+        }
+
+        try {
+            return ZonedDateTime
+                    .parse(value, JAVA_DATE_TO_STRING_FORMATTER)
+                    .toLocalDate();
+        } catch (DateTimeParseException ignored) {}
+
+        // 5. ISO LocalDateTime
+        try {
+            return LocalDateTime.parse(
+                    value,
+                    DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            ).toLocalDate();
+        } catch (DateTimeParseException ignored) {}
+
+        // 6. Instant / timestamp
+        // Exp:
+        // 2001-01-05T10:20:30Z
+        try {
+            return Instant.parse(value)
+                    .atZone(zoneId)
+                    .toLocalDate();
+        } catch (DateTimeParseException ignored) {}
 
         throw new IllegalArgumentException(
                 "Unsupported date/time format: '" + dateStr + "'"

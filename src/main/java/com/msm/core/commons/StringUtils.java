@@ -372,5 +372,32 @@ public final class StringUtils {
         return false;
     }
 
+    public String clean(String value) {
+        if (value == null) {
+            return null;
+        }
+
+        return value
+                // BOM
+                .replace("\uFEFF", "")
+
+                // Zero-width space / zero-width non-joiner / zero-width joiner
+                .replace("\u200B", "")
+                .replace("\u200C", "")
+                .replace("\u200D", "")
+
+                // Non-breaking space
+                .replace('\u00A0', ' ')
+
+                // With whitespace
+                .replace("\r", "")
+                .replace("\n", "")
+                .replace("\t", " ")
+
+                // multiple space
+                .replaceAll("\\s+", " ")
+                .trim();
+    }
+
     StringUtils() {}
 }
