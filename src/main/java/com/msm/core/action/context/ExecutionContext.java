@@ -1,6 +1,8 @@
 package com.msm.core.action.context;
 
 import com.msm.core.commons.Constants;
+import com.msm.core.security.RequestContextHolder;
+import com.msm.core.security.context.RequestContext;
 
 import java.util.Map;
 import java.util.Optional;
@@ -20,5 +22,9 @@ public interface ExecutionContext<I> {
 
     default  <T> Optional<T> getOptional(ContextKey<T> key) {
         return Optional.ofNullable(getContextKey(key));
+    }
+
+    default RequestContext getRequestContext() {
+        return RequestContextHolder.getRequestContext();
     }
 }
