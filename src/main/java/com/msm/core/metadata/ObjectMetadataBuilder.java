@@ -78,15 +78,8 @@ public class ObjectMetadataBuilder {
     }
 
     private static List<Attribute> getAllAttributes(EntityType<?> entityType, Map<SecurityDataScopeType, Attribute> securedAttributeMap) {
-
-        List<String> fieldOrder = Arrays.stream(entityType.getJavaType().getDeclaredFields())
-                .map(Field::getName)
-                .collect(Collectors.toList());
-
         return entityType.getAttributes().stream()
                 .filter(a -> a.getJavaMember() instanceof Field)
-                .filter(a -> fieldOrder.contains(a.getName()))
-                .sorted(Comparator.comparingInt(a -> fieldOrder.indexOf(a.getName())))
                 .map(attribute -> buildFromJpaAttribute(attribute, securedAttributeMap))
                 .collect(Collectors.toList());
     }
