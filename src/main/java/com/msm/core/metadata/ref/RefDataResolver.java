@@ -6,6 +6,7 @@ import com.msm.core.metadata.annotation.RefProfileConfig;
 
 import java.util.Locale;
 
+@Deprecated
 public final class RefDataResolver {
 
     private RefDataResolver() {}

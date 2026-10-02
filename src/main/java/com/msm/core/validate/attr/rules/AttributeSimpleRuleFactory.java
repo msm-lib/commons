@@ -8,6 +8,7 @@ import java.util.List;
 public class AttributeSimpleRuleFactory {
     private final static List<AttributeSimpleRule> RULES = new ArrayList<>();
     static {
+        register(new MinLengthSimpleRule());
         register(new MaxLengthSimpleRule());
         register(new MinValueSimpleRule());
         register(new MaxValueSimpleRule());

@@ -1,15 +1,17 @@
 package com.msm.core.metadata.annotation;
 
-import com.msm.core.metadata.ref.DefaultReference;
 
 import java.lang.annotation.ElementType;
+import java.lang.annotation.Repeatable;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Deprecated
+@Repeatable(AttributeOverrides.class)
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface RefProfileConfig {
-    Class<? extends Enum<?>> refDataType() default DefaultReference.class;
+public @interface AttributeOverride {
+    String attributeName();
+    Property[] properties();
 }
+

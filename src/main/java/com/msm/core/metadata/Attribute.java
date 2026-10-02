@@ -44,9 +44,11 @@ public class Attribute {
     private String columnType;
     private AttributeRef attributeRef;
     private Boolean isRequired;
+    private Long minLength;
     private Long maxLength;
     private Long maxValue;
     private Long minValue;
+    private Long minSize;
     private Long maxSize;
     private Boolean isJson = false;
     private Boolean isFreeText;
