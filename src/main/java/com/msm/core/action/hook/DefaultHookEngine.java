@@ -8,6 +8,7 @@ import com.msm.core.commons.Utils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -50,28 +51,58 @@ public final class DefaultHookEngine implements HookEngine {
 
     private final AsyncExecutor asyncExecutor;
 
+//    @Override
+//    public <X> void execute(ActionContext<X> ctx, HookPhase phase) {
+//        String key = KeyDimensionResolver.resolveHookKey(ctx, phase);
+//        List<HookDefinitionExecutor> hooks = HookDefinitionHandlerFactory.get(key);
+//        if(Utils.CL.isEmpty(hooks)) {
+//            key = KeyDimensionResolver.resolveHookDefaultKey(ctx, phase);
+//            hooks = HookDefinitionHandlerFactory.get(key);
+//        }
+//
+//        //Force load hook system run for any object
+//        //No override by any resource
+//        String systemKey = KeyDimensionResolver.resolveSystemKey(ctx, phase);
+//        List<HookDefinitionExecutor> systemHooks = HookDefinitionHandlerFactory.get(systemKey);
+//        if(Utils.CL.isNotEmpty(systemHooks)) {
+//            hooks.addAll(systemHooks);
+//        }
+//
+//        if (HookPhase.AFTER_COMMIT_EVENT.equals(phase)) {
+//            List<HookDefinitionExecutor> finalHooks = hooks;
+//            TransactionUtils.runAfterCommit(() -> asyncExecutor.executeAsync(finalHooks, ctx));
+//        } else {
+//            for (HookDefinitionExecutor h : hooks) {
+//                h.execute(ctx);
+//            }
+//        }
+//    }
+
     @Override
     public <X> void execute(ActionContext<X> ctx, HookPhase phase) {
         String key = KeyDimensionResolver.resolveHookKey(ctx, phase);
         List<HookDefinitionExecutor> hooks = HookDefinitionHandlerFactory.get(key);
-        if(Utils.CL.isEmpty(hooks)) {
-            key = KeyDimensionResolver.resolveHookDefaultKey(ctx, phase);
-            hooks = HookDefinitionHandlerFactory.get(key);
+        if (Utils.CL.isEmpty(hooks)) {
+            hooks = HookDefinitionHandlerFactory.get(
+                    KeyDimensionResolver.resolveHookDefaultKey(ctx, phase)
+            );
         }
 
-        //Force load hook system run for any object
-        //No override by any resource
-        String systemKey = KeyDimensionResolver.resolveSystemKey(ctx, phase);
-        List<HookDefinitionExecutor> systemHooks = HookDefinitionHandlerFactory.get(systemKey);
-        if(Utils.CL.isNotEmpty(systemHooks)) {
-            hooks.addAll(systemHooks);
-        }
+        List<HookDefinitionExecutor> systemHooks = HookDefinitionHandlerFactory.get(
+                KeyDimensionResolver.resolveSystemKey(ctx, phase)
+        );
+
+        List<HookDefinitionExecutor> allHook = new ArrayList<>(hooks.size() + systemHooks.size());
+        allHook.addAll(hooks);
+        allHook.addAll(systemHooks);
+        List<HookDefinitionExecutor> snapshot = List.copyOf(allHook);
 
         if (HookPhase.AFTER_COMMIT_EVENT.equals(phase)) {
-            List<HookDefinitionExecutor> finalHooks = hooks;
-            TransactionUtils.runAfterCommit(() -> asyncExecutor.executeAsync(finalHooks, ctx));
+            if (!snapshot.isEmpty()) {
+                TransactionUtils.runAfterCommit(() -> asyncExecutor.executeAsync(snapshot, ctx));
+            }
         } else {
-            for (HookDefinitionExecutor h : hooks) {
+            for (HookDefinitionExecutor h : snapshot) {
                 h.execute(ctx);
             }
         }

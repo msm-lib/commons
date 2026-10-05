@@ -34,7 +34,7 @@ public class DefaultActionExecutor implements ActionExecutor {
         T returnObject = handler.execute(request);
         request.setResult(returnObject);
         hookEngine.execute(request, HookPhase.AFTER_EVENT);
-        hookEngine.execute(request,  HookPhase.AFTER_COMMIT_EVENT);
+        hookEngine.execute(request, HookPhase.AFTER_COMMIT_EVENT);
         return returnObject;
     }
 
