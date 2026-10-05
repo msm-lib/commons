@@ -1,7 +1,5 @@
 jdk:
   - openjdk21
 
-gradle: 8.14.3
-
 install:
-  - gradle clean publishToMavenLocal -x test
+  - ./gradlew clean publishToMavenLocal -x test
