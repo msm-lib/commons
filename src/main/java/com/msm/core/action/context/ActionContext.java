@@ -30,6 +30,8 @@ public class ActionContext<I> implements ExecutionContext<I> {
     private boolean disableHookEvent = false;
     @Builder.Default
     private Map<ContextKey<?>, Object> contextKey = new HashMap<>();
+    @Builder.Default
+    private PersistenceContext persistenceContext = PersistenceContext.of();
 
     @Override
     public boolean isInternalExecution() {
