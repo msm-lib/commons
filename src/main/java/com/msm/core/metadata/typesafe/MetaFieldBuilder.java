@@ -41,6 +41,13 @@ public final class MetaFieldBuilder {
         );
     }
 
+    public static <T> TypedAttribute<T> attr(String fieldName, JavaType javaType) {
+        return new TypedAttribute<>(
+                fieldName,
+                javaType
+        );
+    }
+
 
     public static <T> TypedAttribute<T> attr(Table<?> table, String fieldName, String columnName, JavaType javaType) {
         DataType<T> dataType = (DataType<T>) SQLDataType.JSONB.asConvertedDataType(
