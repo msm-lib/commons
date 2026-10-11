@@ -180,6 +180,7 @@ record.set(OrderMeta.ORDER_CODE, "SO001");
 - `page` **bắt đầu từ 1**. Tổng số bản ghi chỉ được tính khi có `pageRequest`.
 - Chỉ filter, sort hoặc select được các field **có trong metadata**. Field lạ ném `FieldNotFoundException`.
 - Field JSON dùng được đường dẫn `a.b.c`. Giá trị lấy ra là **text**, nên `GREATER_THAN`/`LESS_THAN` so sánh theo chuỗi; chỉ `BETWEEN` có ép kiểu.
+- `filter`, `lookup`, `filterStream` và `findByCondition` của `DefaultFilterQuery` đều áp điều kiện data scope của user. Cần lấy dữ liệu không lọc quyền (job chạy nền…) thì dùng `InternalQueryService`.
 - `filter` và `lookup` tự động:
   - thêm `(isDeleted = false OR isDeleted IS NULL)` nếu object có `isDeleted` và request chưa filter field này;
   - thêm điều kiện data scope của user.
@@ -258,8 +259,5 @@ public void beforeCreate(ActionContext<Map<String, Object>> ctx) { ... }
 
 ## Hạn chế đã biết
 
-- `DefaultFilterQuery.filterStream(..., Consumer)` và `findByCondition(..., limit, ...)` **không áp điều kiện security**.
-- `ErrorCodeEnum.FIELD_NOT_FOUND` đang mang mã `"OBJECT_CAST_ERROR"`.
-- `PageRequest.addSort` ném NPE khi `sorts` đang `null`.
 - `attrRef(table, ref, Class)` luôn dùng converter `Map`, nên giá trị scalar trong `custom_values` có thể đọc lỗi.
 - Chưa có test tự động.
