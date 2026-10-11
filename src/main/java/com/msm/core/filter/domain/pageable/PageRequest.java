@@ -39,6 +39,9 @@ public class PageRequest {
 
     public void addSort(Sort sort) {
         if (Objects.isNull(sort)) {
+            return;
+        }
+        if (Objects.isNull(this.sorts)) {
             this.sorts = new ArrayList<>();
         }
         this.sorts.add(sort);

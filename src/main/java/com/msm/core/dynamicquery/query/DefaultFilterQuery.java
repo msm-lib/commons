@@ -133,12 +133,14 @@ public class DefaultFilterQuery implements FilterQuery {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
         Table<?> table = meta.getTable();
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
         Condition condition = FilterBuilder.build(request.getFilters(), meta);
 
         SelectConditionStep<Record> query = dsl
                 .select(SelectBuilder.buildFields(meta, request))
                 .from(table)
-                .where(condition);
+                .where(condition)
+                .and(securityCondition);
 
         SortingApplier.apply(query, request, meta);
 
@@ -158,12 +160,14 @@ public class DefaultFilterQuery implements FilterQuery {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
         Table<?> table = meta.getTable();
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
         Condition condition = FilterBuilder.build(request.getFilters(), meta);
 
         SelectConditionStep<Record> query = dsl
                 .select(SelectBuilder.buildFields(meta, request))
                 .from(table)
-                .where(condition);
+                .where(condition)
+                .and(securityCondition);
 
         SortingApplier.apply(query, request, meta);
 
@@ -187,12 +191,14 @@ public class DefaultFilterQuery implements FilterQuery {
         SearchOrDefaultFilter.resolveSearchFilter(request);
         SearchOrDefaultFilter.addIsDeletedFilter(meta, request);
         Table<?> table = meta.getTable();
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
         Condition condition = FilterBuilder.build(request.getFilters(), meta);
 
         SelectConditionStep<Record> query = dsl
                 .select(SelectBuilder.buildFields(meta, request))
                 .from(table)
-                .where(condition);
+                .where(condition)
+                .and(securityCondition);
 
         SortingApplier.apply(query, request, meta);
 
@@ -288,11 +294,13 @@ public class DefaultFilterQuery implements FilterQuery {
             List<Sort> sortFields,
             List<String> returnFields
     ) {
+        Condition securityCondition = securityConditionProvider.buildViewDataScopeCondition(meta);
 
         SelectConditionStep<Record> query = dsl
                 .select(SelectBuilder.buildFields(meta, returnFields))
                 .from(meta.getTable())
-                .where(condition);
+                .where(condition)
+                .and(securityCondition);
         return internalFindByCondition(query, meta, limit, sortFields);
     }
 
