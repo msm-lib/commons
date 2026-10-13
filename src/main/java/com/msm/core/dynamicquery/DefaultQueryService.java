@@ -192,8 +192,8 @@ public class DefaultQueryService implements ObjectQuery {
     }
 
     @Override
-    public int[] insert(ObjectMetadata meta, List<Map<String, Object>> values) {
-        return insert.insert(meta, values);
+    public int[] batchInsert(ObjectMetadata meta, List<Map<String, Object>> values) {
+        return insert.batchInsert(meta, values);
     }
 
     @Override
@@ -294,6 +294,11 @@ public class DefaultQueryService implements ObjectQuery {
     @Override
     public Map<String, Object> updateReturning(ObjectMetadata meta, Map<String, Object> values, Condition where, List<String> returnFields) {
         return update.updateReturning(meta, values, where, returnFields);
+    }
+
+    @Override
+    public List<Map<String, Object>> updateAllReturning(ObjectMetadata meta, Map<String, Object> values, Condition where, List<String> returnFields) {
+        return update.updateAllReturning(meta, values, where, returnFields);
     }
 
     @Override

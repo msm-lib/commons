@@ -26,6 +26,21 @@ public class DynamicQueryFieldValueMapper {
         return fieldValues;
     }
 
+    /**
+     * Like {@link #toInsertMap} but keeps the keys whose value is null, so an upsert can clear a value on conflict,
+     * as an update does. A null is also inserted as is for a new row (the column default does not apply).
+     */
+    public static Map<Field<?>, Object> toUpsertMap(ObjectMetadata meta, Map<String, Object> values) {
+        Map<Field<?>, Object> fieldValues = new LinkedHashMap<>();
+        for (Attribute attr : meta.getAttributes()) {
+            if (values.containsKey(attr.getFieldName())) {
+                Object rawValue = values.get(attr.getFieldName());
+                fieldValues.put(attr.getField(), rawValue == null ? null : attr.cast(rawValue));
+            }
+        }
+        return fieldValues;
+    }
+
     public static Map<Field<?>, Object> toUpdateMap(ObjectMetadata meta, Map<String,Object> values) {
 
         Map<Field<?>, Object> map = new LinkedHashMap<>();

@@ -17,6 +17,15 @@ import java.util.Map;
  *     <li>Update with RETURNING clause</li>
  *     <li>Optimistic locking support</li>
  * </ul>
+ *
+ * <p>The primary key is never updated. On an object with a {@code version} field, an update by id requires the
+ * current version and fails with {@code OptimisticLockingFailureException} on conflict; an update by condition does
+ * not check the version and increments it on every matched row. No row updated otherwise is an
+ * {@code ObjectNotFoundException}.
+ *
+ * <p>Batch updates ({@code batchUpdate}, {@code update(List)}, {@code updateReturning(List)}) run every row, then
+ * fail once listing all the rows not updated. The other rows are already written at that point: call them in a
+ * transaction to get all or nothing.
  */
 public interface DynamicUpdate {
 
@@ -86,8 +95,11 @@ public interface DynamicUpdate {
             List<String> returnFields);
 
     /**
-     * Updates the first record matching the condition
-     * and returns all fields.
+     * Updates the one record matching the condition and returns all fields.
+     *
+     * <p>The condition must match exactly one row: none is an {@code ObjectNotFoundException}, several is a
+     * {@code FieldValueInvalidException} raised after the rows were updated, so call it in a transaction.
+     * Use {@link #updateAllReturning} to update several rows.
      *
      * @param meta entity metadata
      * @param values updated values
@@ -100,8 +112,8 @@ public interface DynamicUpdate {
             Condition where);
 
     /**
-     * Updates the first record matching the condition
-     * and returns selected fields.
+     * Updates the one record matching the condition and returns selected fields.
+     * Same contract as {@link #updateReturning(ObjectMetadata, Map, Condition)}.
      *
      * @param meta entity metadata
      * @param values updated values
@@ -114,6 +126,30 @@ public interface DynamicUpdate {
             Map<String, Object> values,
             Condition where,
             List<String> returnFields);
+
+    /**
+     * Updates every record matching the condition and returns selected fields of each.
+     *
+     * @param meta entity metadata
+     * @param values updated values
+     * @param where update condition
+     * @param returnFields fields to return
+     * @return updated rows, at least one ({@code ObjectNotFoundException} when none matches)
+     */
+    List<Map<String, Object>> updateAllReturning(
+            ObjectMetadata meta,
+            Map<String, Object> values,
+            Condition where,
+            List<String> returnFields);
+
+    /**
+     * Updates every record matching the condition and returns all fields of each.
+     *
+     * @see #updateAllReturning(ObjectMetadata, Map, Condition, List)
+     */
+    default List<Map<String, Object>> updateAllReturning(ObjectMetadata meta, Map<String, Object> values, Condition where) {
+        return updateAllReturning(meta, values, where, meta.getFieldNames());
+    }
 
     /**
      * Updates records matching the condition.

@@ -201,9 +201,20 @@ record.set(OrderMeta.ORDER_CODE, "SO001");
 ### Ghi dữ liệu
 
 - `update*` và `delete*` **bắt buộc có điều kiện where**.
-- **Khóa lạc quan:** nếu object có field `version`, payload update **phải có `version` dạng số**. Thư viện ghi `version + 1` với điều kiện `WHERE version = <cũ>`. Không có dòng nào bị ảnh hưởng thì ném `OptimisticLockingFailureException`.
+- **Khóa lạc quan** (object có field `version`):
+  - **Update theo id** (`updateById*`, `batchUpdate`, `update(List)`, `updateReturning(List)`): payload **phải có `version` dạng số**. Thư viện ghi `version + 1` với điều kiện `WHERE version = <cũ>`. Không có dòng nào bị ảnh hưởng thì ném `OptimisticLockingFailureException`.
+  - **Update theo điều kiện** (`update`, `updateReturning`, `updateWithExpressions` với `Condition`, kể cả xóa mềm theo điều kiện): **không** kiểm tra version, `version` trong payload bị bỏ qua, mỗi dòng khớp được `version = version + 1` của chính nó.
+- **Không có dòng nào được update:** ném `OptimisticLockingFailureException` nếu là update theo id trên object có `version`; các trường hợp khác ném `ObjectNotFoundException`.
+- **Khóa chính** không bao giờ bị update: `id` trong payload bị bỏ qua (update theo id dùng nó để tìm dòng). Item của batch update thiếu `id` thì ném `FieldValueRequiredException` trước khi chạy SQL.
+- **Batch update** (`batchUpdate`, `update(List)`, `updateReturning(List)`): chạy hết mọi dòng (mọi lô 1000), rồi ném **một** lỗi liệt kê tất cả dòng không được update (tối đa 20 chỉ số, tính trên toàn danh sách). Lúc đó các dòng khác **đã được ghi**: gọi trong transaction nếu cần "tất cả hoặc không".
+- **`updateReturning(meta, values, where)`** chỉ dành cho **đúng một dòng**: không khớp thì `ObjectNotFoundException`; khớp nhiều dòng thì `FieldValueInvalidException`, ném **sau khi** các dòng đã được update (cần transaction để rollback). Muốn update nhiều dòng và lấy kết quả thì dùng `updateAllReturning`.
+- **Payload không có gì để ghi** (mọi key đều lạ, hoặc chỉ có `id`): ném `FieldValueRequiredException`, message liệt kê các key lạ.
 - **Xóa:** `delete*` là **xóa mềm** (thực chất là update), nên bạn phải tự truyền `isDeleted`, `deletedAt`… Muốn xóa thật thì dùng `forceDelete*`.
-- **Insert:** bỏ qua các giá trị `null`. Insert/update hàng loạt được chia lô 1000 bản ghi.
+- **Insert:** bỏ qua các giá trị `null` (cột lấy DEFAULT của DB). Insert/update hàng loạt được chia lô 1000 bản ghi.
+- **Insert/upsert nhiều dòng:** các dòng được phép có tập field khác nhau. Thư viện gom các dòng có cùng tập cột và chạy một câu lệnh cho mỗi nhóm; nếu mọi dòng cùng tập cột thì vẫn chỉ một câu. Field mà một dòng không có sẽ không xuất hiện trong câu của dòng đó: insert thì lấy DEFAULT, upsert thì giữ giá trị cũ. Dòng không có gì để ghi (mọi key đều lạ, hoặc insert mà mọi field đều `null`) thì ném `FieldValueRequiredException` trước khi chạy SQL, message liệt kê các key lạ; áp dụng cho mọi hàm insert/upsert, kể cả `upsertBatch` (trước đây bỏ qua dòng đó).
+- **Upsert:** không bao giờ cập nhật khóa chính `id` và `createdAt/By/ById` của bản ghi đã có. Field có giá trị `null` trong payload **được ghi** (xóa giá trị cũ, giống `update`); field không có trong payload thì giữ giá trị cũ. Với bản ghi mới, `null` được insert nguyên như vậy (không lấy DEFAULT).
+- **Upsert và cột NOT NULL:** PostgreSQL kiểm tra NOT NULL trên dòng dự định insert **trước khi** xét conflict, nên payload upsert phải có đủ các cột NOT NULL không có DEFAULT, kể cả khi bản ghi đã tồn tại.
+- **Upsert theo cột** (`upsert(meta, values, conflictFieldNames, condition)`): `conflictFieldNames` là tên field (hoặc tên cột); field lạ ném `FieldNotFoundException`. `condition` là predicate của **partial unique index** (`ON CONFLICT (...) WHERE ...`), phải khớp index đó; nó không lọc bản ghi được update.
 - **Payload:** key không có trong metadata bị **bỏ qua mà không báo lỗi**.
 - **Không tự động:** thao tác ghi **không** kiểm tra data scope (tự gọi `SecurityCheckProvider.checkDataScope`) và **không** tự điền field audit.
 
@@ -260,4 +271,6 @@ public void beforeCreate(ActionContext<Map<String, Object>> ctx) { ... }
 ## Hạn chế đã biết
 
 - `attrRef(table, ref, Class)` luôn dùng converter `Map`, nên giá trị scalar trong `custom_values` có thể đọc lỗi.
-- Chưa có test tự động.
+- Test tự động mới chỉ có cho `DefaultDynamicInsert` và `DefaultDynamicUpdate`:
+  - `./gradlew test`: unit test (SQL sinh ra, qua jOOQ `MockConnection`); integration test tự bỏ qua.
+  - `MSM_TEST_DB_URL="jdbc:postgresql://localhost:5432/<db>?user=<user>" ./gradlew test`: chạy thêm `DynamicCommandsPostgresIT` trên PostgreSQL thật. Test **xóa và tạo lại** các bảng `product`, `tag`, `item`, `marker`, nên chỉ dùng database rỗng dành riêng cho test.

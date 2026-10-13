@@ -9,6 +9,10 @@ import java.util.Map;
 /**
  * Dynamic insert operations for metadata-driven entities.
  *
+ * <p>Keys unknown to the metadata are not written. An insert skips null values (the column default applies); an
+ * upsert writes them, so a null clears the value of an existing row. Rows of a multi-row call may carry different
+ * fields. Upserts never update the primary key nor the creation audit fields of an existing row.
+ *
  * <p>Supports:
  * <ul>
  *     <li>Single row insert</li>
@@ -29,13 +33,21 @@ public interface DynamicInsert {
     int insert(ObjectMetadata meta, Map<String, Object> values);
 
     /**
-     * Inserts multiple records.
+     * Inserts multiple records with JDBC batches.
      *
      * @param meta entity metadata
      * @param values list of field-value maps
-     * @return affected rows for each insert statement
+     * @return affected rows of each record, in input order
      */
-    int[] insert(ObjectMetadata meta, List<Map<String, Object>> values);
+    int[] batchInsert(ObjectMetadata meta, List<Map<String, Object>> values);
+
+    /**
+     * @deprecated renamed to {@link #batchInsert}
+     */
+    @Deprecated
+    default int[] insert(ObjectMetadata meta, List<Map<String, Object>> values) {
+        return batchInsert(meta, values);
+    }
 
     /**
      * Inserts a record and returns all fields of the inserted row.
@@ -118,10 +130,20 @@ public interface DynamicInsert {
 
     int upsert(ObjectMetadata meta, Map<String, Object> values, String conflictOnConstraintName);
 
+    /**
+     * Inserts a record, or updates it on conflict over the given columns.
+     *
+     * @param meta entity metadata
+     * @param values record values
+     * @param conflictFieldNames conflict target: field names (or column names) of a unique index
+     * @param condition predicate of a partial unique index ({@code ON CONFLICT (...) WHERE ...});
+     *                  it must match that index, it does not filter which row is updated. {@code null}: none
+     * @return number of affected rows
+     */
     int upsert(
             ObjectMetadata meta,
             Map<String, Object> values,
-            List<String> conflictOnConstraintNames,
+            List<String> conflictFieldNames,
             Condition condition
     );
 

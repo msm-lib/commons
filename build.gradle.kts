@@ -90,6 +90,12 @@ dependencies {
 
 
     implementation("org.jooq:jooq:${jooqVersion}")
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.12.2")
+    testImplementation("org.assertj:assertj-core:3.27.7")
+    // integration tests against a real PostgreSQL, run only when MSM_TEST_DB_URL is set
+    testImplementation("org.postgresql:postgresql:42.7.11")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher:1.12.2")
 }
 
 tasks.withType<Test> {
