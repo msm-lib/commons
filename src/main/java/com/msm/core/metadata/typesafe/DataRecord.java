@@ -57,19 +57,19 @@ public final class DataRecord {
 
 
     public Object getRef(TypedAttribute<?> field) {
-        return values.get(getRefName(field));
+        return values.get(referenceNameOf(field));
     }
 
     public <X> X getRef(TypedAttribute<?> field, Class<X> type) {
-        return Utils.O.convertToType(values.get(getRefName(field)), type);
+        return Utils.O.convertToType(values.get(referenceNameOf(field)), type);
     }
 
     public <X> X getRef(TypedAttribute<?> field, TypeReference<X> typeReference) {
-        return Utils.O.convertToType(values.get(getRefName(field)), typeReference);
+        return Utils.O.convertToType(values.get(referenceNameOf(field)), typeReference);
     }
 
     public Map<String, Object> getRefAsMap(TypedAttribute<?> field) {
-        return Utils.O.convertToMap(values.get(getRefName(field)), String.class, Object.class);
+        return Utils.O.convertToMap(values.get(referenceNameOf(field)), String.class, Object.class);
     }
 
     public Optional<Object> getRefOptional(TypedAttribute<?> field) {
@@ -102,7 +102,7 @@ public final class DataRecord {
     }
 
     public void setRef(TypedAttribute<?> field, Object value) {
-        values.put(getRefName(field), value);
+        values.put(referenceNameOf(field), value);
     }
 
     public void put(String fieldName, Object value) {
@@ -153,7 +153,8 @@ public final class DataRecord {
         return values;
     }
 
-    private String getRefName(TypedAttribute<?> field) {
+
+    public static String referenceNameOf(TypedAttribute<?> field) {
         return Utils.STR.format(Constants.ATTRIBUTE_REF_TEMPLATE, field.getFieldName());
     }
 
