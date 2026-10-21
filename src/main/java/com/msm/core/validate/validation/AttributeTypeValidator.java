@@ -8,10 +8,13 @@ import com.msm.core.metadata.ObjectMetadata;
 import com.msm.core.validate.domain.MessageError;
 import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.stream.IntStream;
 
 @Slf4j
 public class AttributeTypeValidator implements AttributeValidator {
@@ -19,13 +22,34 @@ public class AttributeTypeValidator implements AttributeValidator {
     private boolean isDataTypeValid(Attribute attr, Object data) {
         try {
             if(attr.getEnumType() != null){
-               return Utils.E.isValid(attr.getEnumType(), String.valueOf(data));
+               return isEnumValueValid(attr.getEnumType(), data);
             }
             attr.cast(data);
             return true;
         } catch (Exception ignored) {
             return false;
         }
+    }
+
+    /**
+     * A single value, or every element of a collection / array, must be exactly the {@code name()}
+     * of a constant of the enum (case-sensitive). An empty collection is valid: whether a value
+     * is required is checked by the required validator.
+     */
+    private boolean isEnumValueValid(Class<? extends Enum<?>> enumType, Object data) {
+        if (data instanceof Collection<?> values) {
+            return values.stream().allMatch(value -> isEnumConstant(enumType, value));
+        }
+        if (data.getClass().isArray()) {
+            return IntStream.range(0, Array.getLength(data))
+                    .mapToObj(i -> Array.get(data, i))
+                    .allMatch(value -> isEnumConstant(enumType, value));
+        }
+        return isEnumConstant(enumType, data);
+    }
+
+    private boolean isEnumConstant(Class<? extends Enum<?>> enumType, Object value) {
+        return value != null && Utils.E.isValid(enumType, String.valueOf(value));
     }
 
     @Override

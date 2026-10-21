@@ -13,9 +13,12 @@ public final class EnumUtils {
 
     EnumUtils() {}
 
+    /**
+     * The constant whose {@code name()} is exactly the value: case-sensitive and not trimmed.
+     */
     @SuppressWarnings("unchecked")
     public <T extends Enum<T>> Optional<T> fromString(Class<?> enumClass, String value) {
-        if (enumClass == null || !enumClass.isEnum() || value == null || value.trim().isEmpty()) {
+        if (enumClass == null || !enumClass.isEnum() || value == null) {
             return Optional.empty();
         }
 
@@ -23,14 +26,14 @@ public final class EnumUtils {
                 Arrays.stream(clazz.getEnumConstants())
                         .map(e -> (Enum<?>) e)
                         .collect(Collectors.toMap(
-                                e -> e.name().toUpperCase(),
+                                Enum::name,
                                 Function.identity(),
                                 (existing, replacement) -> existing,
                                 ConcurrentHashMap::new
                         ))
         );
 
-        Enum<?> enumConstant = classMap.get(value.trim().toUpperCase());
+        Enum<?> enumConstant = classMap.get(value);
         return Optional.ofNullable((T) enumConstant);
     }
 

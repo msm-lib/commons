@@ -130,6 +130,9 @@ public @interface AttributeDefinition {
     /**
      * The Enum class defining the set of acceptable values for this attribute.
      * Defaults to {@link NoEnum} indicating that no enum validation is applied.
+     * <p>
+     * Values must be exactly the constant's {@code name()} (case-sensitive). For a collection or
+     * array field every element must be a constant of the enum.
      *
      * @return the associated Enum class type
      */
