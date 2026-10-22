@@ -24,18 +24,15 @@ public class BetweenOperatorHandler implements OperatorHandler {
 
     @Override
     public Condition handle(ObjectMetadata objectMetadata, FilterCondition condition) {
-        String fieldName = FieldResolver.pathAsFieldName(condition.getField());
-        Attribute attribute = objectMetadata.getAttributeByName(fieldName);
-        if(attribute == null) {
-            throw CommonErrors.fieldNotFoundException(fieldName, fieldName + " not found");
-        }
+        FieldResolver.ResolvedField target = FieldResolver.resolveTarget(objectMetadata, condition.getField());
+        Attribute attribute = target.attribute();
         Object value = condition.getValue();
         if (!(value instanceof List<?> values) || values.size() != 2) {
             throw CommonErrors.unsupported("BETWEEN", "BETWEEN requires exactly 2 values");
         }
 
-        if(attribute.isJsonField()) {
-            Field<Object> field = (Field<Object>) FieldResolver.resolve(objectMetadata, condition.getField());
+        if(target.json()) {
+            Field<Object> field = (Field<Object>) target.field();
             return buildJsonbBetween(field, values.getFirst(), values.getLast());
         }
 

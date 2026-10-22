@@ -13,10 +13,10 @@ public class ContainsOneOfOperatorHandler implements OperatorHandler {
 
     @Override
     public Condition handle(ObjectMetadata objectMetadata, FilterCondition condition) {
-        String fieldName = FieldResolver.pathAsFieldName(condition.getField());
-        Attribute attribute = objectMetadata.getAttributeByName(fieldName);
-        if(attribute == null) {
-            throw CommonErrors.fieldNotFoundException(fieldName, fieldName + " not found");
+        FieldResolver.ResolvedField target = FieldResolver.resolveTarget(objectMetadata, condition.getField());
+        Attribute attribute = target.attribute();
+        if (target.path()) {
+            throw CommonErrors.unsupported(condition.getOperator().name(), "The " + condition.getOperator() + " operator is not supported for the JSON path " + condition.getField());
         }
         return ConditionUtils.buildArrayOverlapCondition(attribute, condition.getValue());
     }

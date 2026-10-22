@@ -16,14 +16,15 @@ public class ContainsOperatorHandler implements OperatorHandler {
 
     @Override
     public Condition handle(ObjectMetadata objectMetadata, FilterCondition condition) {
-        String fieldName = FieldResolver.pathAsFieldName(condition.getField());
-        Attribute attribute = objectMetadata.getAttributeByName(fieldName);
-        if(attribute == null) {
-            throw CommonErrors.fieldNotFoundException(fieldName, fieldName + " not found");
-        }
+        FieldResolver.ResolvedField target = FieldResolver.resolveTarget(objectMetadata, condition.getField());
+        Attribute attribute = target.attribute();
         Object value = condition.getValue();
         if(!(value instanceof Collection<?>)) {
-            return ConditionUtils.unaccentLike((Field<String>) attribute.getField(), value == null ? "" : value.toString());
+            // A JSON path is matched on its own text, not on the whole JSON column
+            return ConditionUtils.unaccentLike((Field<String>) target.field(), value == null ? "" : value.toString());
+        }
+        if (target.path()) {
+            throw CommonErrors.unsupported(condition.getOperator().name(), "The " + condition.getOperator() + " operator with a list of values is not supported for the JSON path " + condition.getField());
         }
         return ConditionUtils.buildArrayContainsCondition(attribute, value);
     }

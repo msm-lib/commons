@@ -3,7 +3,6 @@ package com.msm.core.dynamicquery.operator.impl;
 import com.msm.core.dynamicquery.ConditionUtils;
 import com.msm.core.dynamicquery.FieldResolver;
 import com.msm.core.dynamicquery.operator.OperatorHandler;
-import com.msm.core.exceptions.CommonErrors;
 import com.msm.core.filter.domain.FilterCondition;
 import com.msm.core.metadata.Attribute;
 import com.msm.core.metadata.ObjectMetadata;
@@ -15,18 +14,15 @@ public class LikeOperatorHandler implements OperatorHandler {
 
     @Override
     public Condition handle(ObjectMetadata objectMetadata, FilterCondition condition) {
-        String fieldName = FieldResolver.pathAsFieldName(condition.getField());
-        Attribute attribute = objectMetadata.getAttributeByName(fieldName);
-        if(attribute == null) {
-            throw CommonErrors.fieldNotFoundException(fieldName, fieldName + " not found");
-        }
+        FieldResolver.ResolvedField target = FieldResolver.resolveTarget(objectMetadata, condition.getField());
+        Attribute attribute = target.attribute();
         Object value = condition.getValue();
         if (value == null) {
             return DSL.noCondition();
         }
 
-        if(attribute.isJsonField()) {
-            Field<String> field = (Field<String>) FieldResolver.resolve(objectMetadata, condition.getField());
+        if(target.json()) {
+            Field<String> field = (Field<String>) target.field();
             return ConditionUtils.unaccentLike(field, value.toString());
         }
 

@@ -7,7 +7,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.impl.DSL;
+import org.jooq.impl.SQLDataType;
 
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -88,6 +92,42 @@ public class ConditionUtils {
             Field<Object> field = (Field<Object>) attribute.getField();
             return field.eq(normalizedValue);
         }
+    }
+
+    /**
+     * Value compared for (in)equality with a JSON path: {@code ->>} returns text, so anything but a string (UUID,
+     * number, boolean, enum) is compared as its text.
+     */
+    public static Object jsonText(Object value) {
+        return value == null || value instanceof String ? value : value.toString();
+    }
+
+    /** {@link #jsonText} of each value of a collection. */
+    public static List<Object> jsonTexts(Collection<?> values) {
+        return values.stream().map(ConditionUtils::jsonText).toList();
+    }
+
+    /**
+     * A JSON path compared with an order operator ({@code > >= < <=}): cast to numeric for a number, to timestamptz
+     * for an instant / offset date time, as BETWEEN does; compared as text otherwise.
+     */
+    @SuppressWarnings("unchecked")
+    public static Field<Object> jsonComparable(Field<?> extracted, Object value) {
+        if (value instanceof Number) {
+            return (Field<Object>) (Field<?>) extracted.cast(SQLDataType.NUMERIC);
+        }
+        if (value instanceof Instant) {
+            return (Field<Object>) (Field<?>) extracted.cast(SQLDataType.INSTANT);
+        }
+        if (value instanceof OffsetDateTime) {
+            return (Field<Object>) (Field<?>) extracted.cast(SQLDataType.OFFSETDATETIME);
+        }
+        return (Field<Object>) extracted;
+    }
+
+    /** Value compared with {@link #jsonComparable}: numbers and date times as they are, anything else as text. */
+    public static Object jsonOrderValue(Object value) {
+        return value instanceof Number || value instanceof Instant || value instanceof OffsetDateTime ? value : jsonText(value);
     }
 
     public static Condition unaccentLike(Field<String> field, String keyword) {
