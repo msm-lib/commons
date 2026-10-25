@@ -5,6 +5,7 @@ import com.msm.core.dynamicquery.ObjectQuery;
 import com.msm.core.dynamicquery.command.DynamicDelete;
 import com.msm.core.dynamicquery.command.DynamicInsert;
 import com.msm.core.dynamicquery.command.DynamicUpdate;
+import com.msm.core.dynamicquery.command.ExpressionUpdate;
 import com.msm.core.dynamicquery.query.FilterQuery;
 import com.msm.core.filter.domain.ObjectFilterRequest;
 import com.msm.core.filter.domain.PageResponse;
@@ -285,6 +286,11 @@ public class InternalQueryService implements ObjectQuery {
     @Override
     public int updateWithExpressions(ObjectMetadata meta, Map<String, Object> values, Condition where) {
         return update.updateWithExpressions(meta, values, where);
+    }
+
+    @Override
+    public int[] batchUpdateWithExpressions(ObjectMetadata meta, List<ExpressionUpdate> updates) {
+        return update.batchUpdateWithExpressions(meta, updates);
     }
 
     @Override

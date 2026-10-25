@@ -430,6 +430,23 @@ class DynamicCommandsPostgresIT {
 
             assertThat(dsl.fetchValue("select hits from tag where code = 'T'")).isEqualTo(7L);
         }
+
+        @Test
+        void batchUpdateWithExpressionsAppliesEachRowsOwnExpressionAndGuard() {
+            Field<String> note = DSL.field(DSL.name("note"), String.class);
+            Field<String> code = DSL.field(DSL.name("code"), String.class);
+
+            int[] affected = update.batchUpdateWithExpressions(PRODUCT, List.of(
+                    ExpressionUpdate.of(a, row("note", DSL.concat(code, DSL.inline("-1")))),
+                    new ExpressionUpdate(b, row("note", "blocked"), code.eq("not B")),
+                    ExpressionUpdate.of(UUID.randomUUID(), row("note", "nobody")),
+                    ExpressionUpdate.of(a, row("note", DSL.concat(note, DSL.inline("-2"))))));
+
+            assertThat(affected).containsExactly(1, 0, 0, 1);
+            // same id twice: the second runs on the result of the first; each update moves the version
+            assertThat(product("A")).containsEntry("note", "A-1-2").containsEntry("version", 5L);
+            assertThat(product("B")).containsEntry("note", null).containsEntry("version", 7L);
+        }
     }
 
     // ------------------------------------------------------------------ helpers

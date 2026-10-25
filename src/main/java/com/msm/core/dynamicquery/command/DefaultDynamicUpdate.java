@@ -183,6 +183,38 @@ public class DefaultDynamicUpdate implements DynamicUpdate{
         return affected;
     }
 
+    @Override
+    public int[] batchUpdateWithExpressions(ObjectMetadata meta, List<ExpressionUpdate> updates) {
+        if (Utils.CL.isEmpty(updates)) {
+            return new int[]{};
+        }
+        int[] affected = new int[updates.size()];
+        List<List<ExpressionUpdate>> chunks = Lists.partition(updates, BATCH_SIZE);
+        for (int chunk = 0; chunk < chunks.size(); chunk++) {
+            int firstRowIndex = chunk * BATCH_SIZE;
+            List<Query> queries = new ArrayList<>();
+            for (int i = 0; i < chunks.get(chunk).size(); i++) {
+                queries.add(expressionUpdateQuery(meta, chunks.get(chunk).get(i), firstRowIndex + i));
+            }
+            int[] chunkAffected = dsl.batch(queries).execute();
+            System.arraycopy(chunkAffected, 0, affected, firstRowIndex, chunkAffected.length);
+        }
+        return affected;
+    }
+
+    private Query expressionUpdateQuery(ObjectMetadata meta, ExpressionUpdate update, int rowIndex) {
+        Object id = castId(meta, update.id());
+        Map<Field<?>, Object> map = DynamicQueryFieldValueMapper.toUpdateMapWithExpressions(meta, Utils.CL.emptyIfNull(update.values()));
+        removePrimaryKey(meta, map);
+        WriteRows.requireColumns(meta, update.values(), map, rowIndex);
+        incrementVersion(meta, map);
+        Condition where = idCondition(meta, id);
+        if (update.guard() != null) {
+            where = where.and(update.guard());
+        }
+        return dsl.update(meta.getTable()).set(map).where(where);
+    }
+
     public int[] batchUpdate(ObjectMetadata meta, List<Map<String, Object>> items) {
         if (Utils.CL.isEmpty(items)) {
             return new int[]{};

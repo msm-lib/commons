@@ -180,6 +180,19 @@ public interface DynamicUpdate {
     int updateWithExpressions(ObjectMetadata meta, Map<String, Object> values, Condition where);
 
     /**
+     * Updates many rows by id in one JDBC batch, each with its own values and expressions (see
+     * {@link #updateWithExpressions}) and optional guard; every updated row gets {@code version + 1}.
+     *
+     * <p>Unlike {@link #updateWithExpressions}, a row that is not updated (unknown id, guard not met) is not an error:
+     * its count is 0 and the caller decides. Updates of the same id run in order, each on the result of the previous.
+     *
+     * @param meta    entity metadata
+     * @param updates one update per row, in order
+     * @return rows updated by each update (0 or 1), in the order of {@code updates}
+     */
+    int[] batchUpdateWithExpressions(ObjectMetadata meta, List<ExpressionUpdate> updates);
+
+    /**
      * Batch update by primary key.
      *
      * @param meta entity metadata

@@ -183,6 +183,37 @@ class DefaultDynamicUpdateTest {
     }
 
     @Test
+    void batchUpdateWithExpressionsSetsVersionAndGuardPerRow() {
+        batchAffectedRows = new int[]{1, 0};
+        Field<Object> code = DSL.field(DSL.name("code"));
+
+        int[] affected = update.batchUpdateWithExpressions(VERSIONED, List.of(
+                ExpressionUpdate.of(X, row("code", DSL.concat(code, DSL.inline("!")), "id", Y, "version", 9)),
+                new ExpressionUpdate(Y, row("code", "plain"), code.ne("locked"))));
+
+        assertThat(affected).containsExactly(1, 0);
+        assertThat(executed).hasSize(2);
+        // the id and version in the values are ignored: the row is chosen by its id, the version moves by one
+        assertThat(executed.get(0)).contains("\"code\" = (cast(\"code\" as varchar) || '!')")
+                .contains("\"version\" = (\"version\" + 1)")
+                .contains("where \"id\" = cast('00000000-0000-0000-0000-00000000000a' as uuid)")
+                .doesNotContain("00000000-0000-0000-0000-00000000000b");
+        assertThat(executed.get(1)).contains("\"code\" <> 'locked'");
+    }
+
+    @Test
+    void batchUpdateWithExpressionsOfNoRowRunsNothing() {
+        assertThat(update.batchUpdateWithExpressions(VERSIONED, List.of())).isEmpty();
+        assertThat(executed).isEmpty();
+    }
+
+    @Test
+    void batchUpdateWithExpressionsNeedsAnId() {
+        assertThatThrownBy(() -> update.batchUpdateWithExpressions(VERSIONED, List.of(ExpressionUpdate.of(null, row("code", "x")))))
+                .hasMessageContaining("requires an id");
+    }
+
+    @Test
     void batchReportsEveryRowNotUpdated() {
         batchAffectedRows = new int[]{1, 0, 1, 0};
         List<Map<String, Object>> items = IntStream.range(0, 4).mapToObj(i -> row("id", UUID.randomUUID(), "code", "C" + i)).toList();
